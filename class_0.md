@@ -36,7 +36,7 @@ A >= 80, ...., F< 50 อิงเกณฑ์
 
 | กิจกรรม | วันเวลา |
 |----------------|:------------:|
-| นำเสนองานที่น่าจะเป็นงาน Research Project | 30 Jun |
+| นำเสนองานที่น่าจะเป็นงาน Research Project & AI Ethics| 30 Jun |
 | เลือกและแนะนำการอ่าน Title-Abstract | 2 July |
 | นำเสนอ Title-Abstract และแนะนำการอ่าน Discussion-Conclusion | 14 july |
 | นำเสนอ Discussion-Conclusion | 16 july |
