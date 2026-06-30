@@ -4,19 +4,6 @@
 
 A>=80, ....,F<50 อิงเกณฑ์
 
-25 Jun - 19 July ศึกษาและรายงานความคืบหน้าการศึกษา Research Paper
-
-
-นำเสนองานที่น่าจะเป็น Researrch Project 30 June 
-ดู Journal ที่นำเสนอ มันอยู่ใน ranking อะไร 
-
-เลือกและแนะนำการอ่าน Title-Abstract 2 July
-
-นำเสนอ Title-Abstract แนะนำการอ่าน Discussion - Conclusion 14 July 
-
-นำเสนอ  Discussion - Conclusion 16 July
-
-
 # ตกลงสัดส่วนของคะแนนในรายวิชา
 
 | ส่วนประกอบ | สัดส่วนคะแนน |
