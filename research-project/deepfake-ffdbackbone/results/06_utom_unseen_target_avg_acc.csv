@@ -1,0 +1,4 @@
+model,tau_0.5,tau_ot,tau_UTOM,note
+author_checkpoint,84.10,74.84,83.12,average over all source->target pairs with source != target (original balance)
+ours_cfb_full,77.25,68.81,74.15,
+fb_edu,80.52,71.24,76.86,

@@ -1,0 +1,1320 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Tree — บทเรียนการคำนวณทีละขั้น</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5f1; --surface:#ffffff; --surface-2:#f2efe9;
+  --ink:#1b1917; --muted:#6b635a; --faint:#8e857b;
+  --line:#e2dcd3; --line-strong:#cfc7bb;
+  --accent:#1a56c4; --accent-soft:#e8efff;
+  --amber:#a8631a; --amber-soft:#fdf1e1;
+  --green:#15803d; --green-soft:#e6f4ea;
+  --red:#b3261e; --red-soft:#fbe9e7;
+  --purple:#6d3ec7; --purple-soft:#f0eaff;
+  --shadow:0 1px 2px rgba(28,25,23,.05), 0 8px 24px -12px rgba(28,25,23,.18);
+  --radius:14px;
+  --sans:"Sarabun","Leelawadee UI","Noto Sans Thai",Tahoma,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","SF Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14131a; --surface:#1c1b23; --surface-2:#23222c;
+    --ink:#ece9e4; --muted:#a8a29a; --faint:#8b857d;
+    --line:#2f2d38; --line-strong:#413e4c;
+    --accent:#7aa6ff; --accent-soft:#1b2440;
+    --amber:#e0a458; --amber-soft:#33271a;
+    --green:#5dd48a; --green-soft:#16301f;
+    --red:#f28a80; --red-soft:#38201e;
+    --purple:#b69aff; --purple-soft:#261f3d;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14131a; --surface:#1c1b23; --surface-2:#23222c;
+  --ink:#ece9e4; --muted:#a8a29a; --faint:#8b857d;
+  --line:#2f2d38; --line-strong:#413e4c;
+  --accent:#7aa6ff; --accent-soft:#1b2440;
+  --amber:#e0a458; --amber-soft:#33271a;
+  --green:#5dd48a; --green-soft:#16301f;
+  --red:#f28a80; --red-soft:#38201e;
+  --purple:#b69aff; --purple-soft:#261f3d;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:78px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:17.5px; line-height:1.8;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+/* ---------- header ---------- */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:1080px; margin:0 auto; padding:10px 20px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{font-weight:700; font-size:15px; letter-spacing:-.01em; white-space:nowrap}
+.brand span{color:var(--accent)}
+.navlinks{display:flex; gap:2px; flex-wrap:wrap; margin-left:auto}
+.navlinks a{
+  font-size:12.5px; color:var(--muted); text-decoration:none;
+  padding:5px 9px; border-radius:8px; white-space:nowrap;
+}
+.navlinks a:hover{background:var(--surface-2); color:var(--ink)}
+.themebtn{
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--muted);
+  border-radius:8px; width:32px; height:30px; cursor:pointer; font-size:14px; line-height:1;
+}
+.themebtn:hover{color:var(--ink)}
+.progress{height:2px; background:var(--accent); width:0%; transition:width .15s linear}
+@media(max-width:720px){
+  .topbar-inner{padding:8px 14px; gap:8px}
+  .brand{font-size:14px}
+  .themebtn{margin-left:auto}
+  .navlinks{order:3; width:100%; margin-left:0; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none}
+  .navlinks::-webkit-scrollbar{display:none}
+  html{scroll-padding-top:106px}
+}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1080px; margin:0 auto; padding-inline:20px; padding-block:0}
+.hero{padding-block:52px 34px; border-bottom:1px solid var(--line)}
+.kicker{
+  font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--amber); margin:0 0 12px;
+}
+h1{font-size:clamp(28px,5vw,42px); line-height:1.22; margin:0 0 14px; letter-spacing:-.02em; font-weight:700}
+.lede{font-size:18px; color:var(--muted); margin:0; max-width:62ch}
+.meta{margin-top:20px; font-size:13px; color:var(--faint); display:flex; gap:8px; flex-wrap:wrap}
+.meta b{color:var(--muted); font-weight:500}
+
+section{padding-block:44px; border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{
+  font-size:clamp(21px,3vw,27px); margin:0 0 6px; letter-spacing:-.015em; font-weight:700;
+  display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+}
+h2 .num{
+  font-family:var(--mono); font-size:13px; font-weight:600; color:var(--accent);
+  background:var(--accent-soft); padding:3px 9px; border-radius:999px; letter-spacing:0;
+}
+h3{font-size:18px; margin:30px 0 8px; font-weight:600; letter-spacing:-.01em}
+h4{font-size:15px; margin:20px 0 6px; font-weight:600; color:var(--muted)}
+p{margin:0 0 14px; max-width:72ch}
+.sub{color:var(--muted); margin:0 0 22px; max-width:70ch}
+ul,ol{margin:0 0 14px; padding-left:22px; max-width:72ch}
+li{margin-bottom:7px}
+code{font-family:var(--mono); font-size:.88em; background:var(--surface-2); padding:1.5px 5px; border-radius:5px}
+em.term{font-style:normal; font-weight:600; color:var(--accent)}
+strong{font-weight:600}
+
+/* ---------- cards & callouts ---------- */
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px 22px; box-shadow:var(--shadow); margin:18px 0;
+}
+.card > :last-child{margin-bottom:0}
+.note{
+  border-left:3px solid var(--amber); background:var(--amber-soft);
+  border-radius:0 10px 10px 0; padding:14px 18px; margin:18px 0; font-size:15px;
+}
+.note.blue{border-left-color:var(--accent); background:var(--accent-soft)}
+.note.green{border-left-color:var(--green); background:var(--green-soft)}
+.note.purple{border-left-color:var(--purple); background:var(--purple-soft)}
+.note b.lbl{display:block; font-size:12px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:5px; opacity:.85}
+.note > :last-child{margin-bottom:0}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ---------- math ---------- */
+.math{
+  font-family:var(--mono); background:var(--surface-2); border:1px solid var(--line);
+  border-radius:10px; padding:16px 18px; margin:16px 0; overflow-x:auto;
+  font-size:15px; line-height:2.1; text-align:center; color:var(--ink);
+}
+.math .hl{color:var(--accent); font-weight:600}
+.math .hl2{color:var(--amber); font-weight:600}
+.math small{display:block; font-family:var(--sans); font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.6}
+.frac{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 3px; line-height:1.25}
+.frac > span:first-child{border-bottom:1.4px solid currentColor; padding:0 4px}
+.frac > span:last-child{padding:0 4px}
+.sum{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; font-size:.72em; line-height:1.1; margin:0 2px}
+.sum .big{font-size:2.1em; line-height:.8; font-weight:400}
+
+/* ---------- steps ---------- */
+.steps{counter-reset:s; margin:24px 0 0; padding:0; list-style:none; max-width:none}
+.steps > li{
+  position:relative; padding-left:46px; margin-bottom:26px; counter-increment:s;
+}
+.steps > li::before{
+  content:counter(s); position:absolute; left:0; top:1px;
+  width:30px; height:30px; border-radius:50%; background:var(--accent); color:#fff;
+  display:grid; place-items:center; font-family:var(--mono); font-size:13px; font-weight:600;
+}
+.steps > li::after{
+  content:""; position:absolute; left:14.5px; top:36px; bottom:-22px; width:1.5px; background:var(--line-strong);
+}
+.steps > li:last-child::after{display:none}
+.steps h3{margin-top:0}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto; margin:16px 0; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14px}
+th,td{padding:8px 12px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap}
+thead th{
+  background:var(--surface-2); font-weight:600; font-size:12.5px; color:var(--muted);
+  letter-spacing:.03em; position:sticky; top:0;
+}
+tbody tr:last-child td{border-bottom:0}
+tbody tr{transition:background .18s}
+td.mono,th.mono{font-family:var(--mono); font-size:13px}
+.idx{color:var(--faint); font-family:var(--mono); font-size:12px; width:34px}
+.pill{
+  display:inline-block; padding:1px 9px; border-radius:999px; font-size:12.5px; font-weight:600;
+}
+.pill.yes{background:var(--green-soft); color:var(--green)}
+.pill.no{background:var(--red-soft); color:var(--red)}
+tr.dim{opacity:.28}
+tr.mark{background:var(--accent-soft)}
+tr.mark td{border-bottom-color:color-mix(in srgb,var(--accent) 22%, transparent)}
+
+/* ---------- controls ---------- */
+.controls{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:16px 0 6px}
+.controls .lbl{font-size:13px; color:var(--muted); margin-right:2px}
+button.chip, .chip{
+  font-family:var(--sans); font-size:13.5px; font-weight:500;
+  background:var(--surface); color:var(--muted);
+  border:1px solid var(--line-strong); border-radius:999px; padding:5px 14px; cursor:pointer;
+  transition:all .15s;
+}
+button.chip:hover{border-color:var(--accent); color:var(--accent)}
+button.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#fff}
+select{
+  font-family:var(--sans); font-size:14px; padding:6px 10px; border-radius:9px;
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); cursor:pointer;
+}
+select:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---------- calc panels ---------- */
+.calcbox{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; box-shadow:var(--shadow)}
+.partition{
+  border:1px solid var(--line); border-radius:11px; padding:13px 15px; margin:10px 0;
+  background:var(--surface-2);
+}
+.partition .ptitle{font-weight:600; font-size:14.5px; margin-bottom:3px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.partition .pmath{font-family:var(--mono); font-size:13px; color:var(--muted); line-height:1.85; overflow-x:auto}
+.bar{height:7px; border-radius:99px; background:var(--red); overflow:hidden; display:flex; margin:7px 0 4px}
+.bar i{display:block; background:var(--green); height:100%}
+.result{
+  margin-top:14px; padding:14px 16px; border-radius:11px;
+  background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 30%, transparent);
+  font-family:var(--mono); font-size:14px; line-height:2;
+}
+.result .big{font-size:19px; font-weight:600; color:var(--accent)}
+
+/* ---------- gain ranking ---------- */
+.rank{display:flex; flex-direction:column; gap:9px; margin:18px 0}
+.rankrow{display:grid; grid-template-columns:158px 1fr 70px; gap:12px; align-items:center; font-size:14px}
+.rankrow .nm{font-family:var(--mono); font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.rankrow .track{height:20px; background:var(--surface-2); border-radius:6px; overflow:hidden; border:1px solid var(--line)}
+.rankrow .fill{height:100%; background:var(--line-strong); border-radius:5px 0 0 5px; transition:width .6s cubic-bezier(.2,.7,.3,1)}
+.rankrow.win .fill{background:var(--accent)}
+.rankrow.win .nm{color:var(--accent); font-weight:600}
+.rankrow .val{font-family:var(--mono); font-size:13.5px; text-align:right}
+@media(max-width:560px){.rankrow{grid-template-columns:132px 1fr 60px; gap:8px}.rankrow .nm{font-size:11.5px}}
+
+/* ---------- svg figures ---------- */
+figure{margin:20px 0; padding:0}
+figcaption{font-size:13px; color:var(--faint); margin-top:9px; text-align:center}
+.svgbox{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px; box-shadow:var(--shadow); overflow-x:auto;
+}
+.svgbox svg{display:block; margin:0 auto; max-width:100%; height:auto}
+.nodebox{fill:var(--surface-2); stroke:var(--line-strong)}
+.nodebox.internal{fill:var(--accent-soft); stroke:var(--accent)}
+.nodebox.leafyes{fill:var(--green-soft); stroke:var(--green)}
+.nodebox.leafno{fill:var(--red-soft); stroke:var(--red)}
+.nodetext{fill:var(--ink); font-family:var(--sans); font-size:14px; font-weight:600; text-anchor:middle}
+.edgelabel{fill:var(--muted); font-family:var(--mono); font-size:12px; text-anchor:middle}
+.edge{stroke:var(--line-strong); stroke-width:1.6; fill:none}
+.edge.lit{stroke:var(--amber); stroke-width:3.4}
+.lit-node{stroke-width:3; stroke:var(--amber)!important}
+#tree .axistext, #tree .edgelabel{
+  paint-order:stroke; stroke:var(--surface); stroke-width:5px; stroke-linejoin:round;
+}
+.axis{stroke:var(--line-strong); stroke-width:1}
+.gridline{stroke:var(--line); stroke-width:1}
+.axistext{fill:var(--faint); font-family:var(--mono); font-size:11px}
+.curve{fill:none; stroke:var(--accent); stroke-width:2.4}
+
+/* ---------- pseudocode ---------- */
+pre.code{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:12px;
+  padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.85;
+  margin:16px 0;
+}
+pre.code .kw{color:var(--purple); font-weight:600}
+pre.code .cm{color:var(--faint); font-style:italic}
+pre.code .st{color:var(--green)}
+
+footer{padding-block:36px 60px; color:var(--faint); font-size:13.5px}
+footer p{max-width:72ch}
+.kbd{font-family:var(--mono); font-size:12px; border:1px solid var(--line-strong); border-bottom-width:2px; border-radius:5px; padding:1px 6px; background:var(--surface)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Decision Tree <span>· Classification</span></div>
+    <nav class="navlinks">
+      <a href="#s1">ข้อมูล</a>
+      <a href="#s2">Entropy</a>
+      <a href="#s3">Info Gain</a>
+      <a href="#s4">เลือก Root</a>
+      <a href="#s5">Recursion</a>
+      <a href="#s6">ต้นไม้ + ทำนาย</a>
+      <a href="#s7">Algorithm</a>
+      <a href="#s8">ห้องทดลอง</a>
+    </nav>
+    <button class="themebtn" id="themebtn" title="สลับโหมดสว่าง/มืด" aria-label="สลับธีม">◐</button>
+  </div>
+  <div class="progress" id="progress"></div>
+</div>
+
+<div class="wrap">
+
+<header class="hero">
+  <p class="kicker">Machine Learning · Classification Model</p>
+  <h1>Decision Tree ทำงานอย่างไร<br>เริ่มจากศูนย์ จนได้ต้นไม้ตัดสินใจ</h1>
+  <p class="lede">
+    บทเรียนนี้จะพาเดินทีละขั้นตั้งแต่ <b>Construction</b> (การสร้างต้นไม้จากข้อมูล)
+    ไปจนถึง <b>Prediction</b> (การใช้ต้นไม้ทำนาย) โดยคำนวณเลขให้ดูครบทุกตัว
+    ด้วยชุดข้อมูลตัวอย่างคลาสสิก <i>“Who buys computer?”</i> จำนวน 14 ตัวอย่าง
+  </p>
+  <div class="meta">
+    <b>อัลกอริทึม:</b> ID3 / C4.5 (Information Gain) &nbsp;·&nbsp;
+    <b>ชุดข้อมูล:</b> adapted from “Playing Tennis” — R. Quinlan &nbsp;·&nbsp;
+    <b>วิธีอ่าน:</b> อ่านเรียงจากบนลงล่าง ทุกกล่องสีฟ้าคือจุดที่ต้องลองคิดตาม
+  </div>
+</header>
+
+<!-- ============ 0 ============ -->
+<section id="s0">
+  <h2><span class="num">00</span> ภาพรวม: ต้นไม้ตัดสินใจคืออะไร</h2>
+  <p class="sub">ก่อนจะลงมือคำนวณ เราต้องเห็นภาพก่อนว่า “ผลลัพธ์” ที่เรากำลังจะสร้างหน้าตาเป็นอย่างไร</p>
+
+  <p>
+    <em class="term">Decision Tree</em> คือโมเดลจำแนกประเภท (classification model) ที่มีรูปร่างเป็นผังคำถาม
+    แต่ละ <em class="term">internal node</em> คือคำถามเกี่ยวกับ attribute หนึ่งตัว
+    แต่ละ <em class="term">branch</em> คือคำตอบที่เป็นไปได้ของคำถามนั้น
+    และแต่ละ <em class="term">leaf node</em> คือคำตอบสุดท้าย (class label)
+  </p>
+
+  <div class="note blue">
+    <b class="lbl">หัวใจของบทเรียนนี้</b>
+    คำถามที่ยากที่สุดในการสร้างต้นไม้คือ <b>“ควรถามอะไรก่อน?”</b>
+    เพราะถ้าเลือกคำถามแรกผิด ต้นไม้จะใหญ่และแม่นน้อยลง
+    บทเรียนนี้จะตอบคำถามนี้ด้วยเครื่องมือทางคณิตศาสตร์ชื่อ <b>Entropy</b> และ <b>Information Gain</b>
+  </div>
+
+  <h3>วงจรชีวิตของโมเดล มี 2 เฟส</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin-top:0">เฟส 1 — Construction (Induction)</h4>
+      <p style="margin-bottom:0">
+        ป้อน <b>training data</b> ที่รู้คำตอบอยู่แล้ว แล้วให้อัลกอริทึม “งอก” ต้นไม้ขึ้นมาเอง
+        โดยเลือกว่าแต่ละ node ควรถาม attribute ไหน<br>
+        <span style="color:var(--muted);font-size:14px">นี่คือเฟสที่ต้องคำนวณเลข และเป็นเนื้อหาหลัก §01–§05</span>
+      </p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">เฟส 2 — Prediction</h4>
+      <p style="margin-bottom:0">
+        เอาข้อมูลใหม่ที่ <b>ยังไม่รู้คำตอบ</b> มาไหลลงจาก root ตามคำตอบของมัน
+        จนตกถึง leaf — ค่าที่ leaf คือคำทำนาย<br>
+        <span style="color:var(--muted);font-size:14px">เฟสนี้ไม่มีการคำนวณเลย เร็วมาก — §06</span>
+      </p>
+    </div>
+  </div>
+
+  <h3>คาถา 3 คำที่ต้องจำ</h3>
+  <div class="grid3">
+    <div class="card" style="text-align:center">
+      <div style="font-size:26px">↓</div>
+      <b>Top-down</b>
+      <p style="font-size:14px;color:var(--muted);margin:4px 0 0">เริ่มจาก root ที่มีข้อมูลทั้งหมด แล้วค่อยไล่ลงล่าง</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:26px">↻</div>
+      <b>Recursive</b>
+      <p style="font-size:14px;color:var(--muted);margin:4px 0 0">ทำขั้นตอนเดิมซ้ำกับทุกกิ่งที่แตกออกมา</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:26px">⑂</div>
+      <b>Divide &amp; Conquer</b>
+      <p style="font-size:14px;color:var(--muted);margin:4px 0 0">แบ่งปัญหาใหญ่เป็นก้อนเล็ก ๆ แล้วเอาชนะทีละก้อน</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+  <h2><span class="num">01</span> ชุดข้อมูลฝึกสอน: ใครจะซื้อคอมพิวเตอร์?</h2>
+  <p class="sub">ทุกเลขในบทเรียนนี้มาจากตารางเดียวนี้ทั้งหมด — ลองกดปุ่มด้านล่างเพื่อดูว่าแต่ละ attribute แบ่งข้อมูลออกเป็นกลุ่มอย่างไร</p>
+
+  <p>
+    ข้อมูลมี <b>14 tuples</b> (แถว) ประกอบด้วย <b>attribute</b> 4 ตัวที่ใช้ถาม
+    และ <b>class label</b> 1 ตัวคือ <code>buys_computer</code> ซึ่งมี 2 ค่า (yes / no)
+    จึงเรียกว่าปัญหา <em class="term">binary classification</em>
+  </p>
+
+  <div class="controls">
+    <span class="lbl">แบ่งกลุ่มตาม:</span>
+    <button class="chip" data-split="none" aria-pressed="true">ไม่แบ่ง (ทั้ง 14 แถว)</button>
+    <button class="chip" data-split="age" aria-pressed="false">age</button>
+    <button class="chip" data-split="income" aria-pressed="false">income</button>
+    <button class="chip" data-split="student" aria-pressed="false">student</button>
+    <button class="chip" data-split="credit_rating" aria-pressed="false">credit_rating</button>
+  </div>
+  <div class="controls" id="valuechips" hidden>
+    <span class="lbl">ไฮไลต์ค่า:</span>
+  </div>
+
+  <div class="tablewrap">
+    <table id="datatable">
+      <thead>
+        <tr>
+          <th class="idx">#</th>
+          <th>age</th><th>income</th><th>student</th><th>credit_rating</th>
+          <th style="text-align:center">buys_computer</th>
+        </tr>
+      </thead>
+      <tbody id="databody"></tbody>
+    </table>
+  </div>
+  <p id="tablesummary" style="font-size:14px;color:var(--muted)"></p>
+
+  <div class="note">
+    <b class="lbl">สังเกตให้ดี</b>
+    ทั้งชุดข้อมูลมี <b>yes 9 แถว</b> และ <b>no 5 แถว</b> — ยังปนกันอยู่มาก
+    ถ้าต้องเดาแบบไม่มีข้อมูลอะไรเลย เราจะเดาว่า “yes” และผิดประมาณ 5 ใน 14 ครั้ง
+    เป้าหมายของการสร้างต้นไม้คือ <b>แบ่งข้อมูลจนแต่ละกองเหลือคลาสเดียว</b> เพื่อไม่ต้องเดาอีกต่อไป
+  </div>
+</section>
+<!-- ============ 2 ============ -->
+<section id="s2">
+  <h2><span class="num">02</span> เครื่องมือที่ 1 — Entropy: วัด “ความไม่เป็นระเบียบ”</h2>
+  <p class="sub">ถ้าเราจะเลือกคำถามที่ดีที่สุด เราต้องมีไม้บรรทัดวัดก่อนว่า ข้อมูลกองหนึ่ง “มั่ว” แค่ไหน</p>
+
+  <h3>สัญชาตญาณก่อนสูตร</h3>
+  <p>
+    ลองนึกถึงกล่อง 3 ใบ แต่ละใบมีลูกบอลสีเขียว (yes) กับสีแดง (no) ปนกันคนละสัดส่วน
+    แล้วถามว่า “ถ้าหยิบมา 1 ลูกโดยไม่มอง คุณมั่นใจแค่ไหนว่าจะทายสีถูก?”
+  </p>
+
+  <div class="grid3">
+    <div class="card" style="text-align:center">
+      <div class="bar" style="margin:0 0 10px"><i style="width:100%"></i></div>
+      <b>เขียวล้วน 10:0</b>
+      <p style="font-size:14px;color:var(--muted);margin:6px 0 0">ทายถูก 100% ไม่ต้องลุ้นเลย<br><b style="color:var(--green)">Entropy = 0</b> (บริสุทธิ์ที่สุด)</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="bar" style="margin:0 0 10px"><i style="width:80%"></i></div>
+      <b>เขียว 8 : แดง 2</b>
+      <p style="font-size:14px;color:var(--muted);margin:6px 0 0">ค่อนข้างมั่นใจ แต่ยังมีพลาด<br><b style="color:var(--amber)">Entropy = 0.722</b></p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="bar" style="margin:0 0 10px"><i style="width:50%"></i></div>
+      <b>เขียว 5 : แดง 5</b>
+      <p style="font-size:14px;color:var(--muted);margin:6px 0 0">เท่ากับโยนเหรียญ มั่วที่สุด<br><b style="color:var(--red)">Entropy = 1</b> (สูงสุดเมื่อ 2 คลาส)</p>
+    </div>
+  </div>
+
+  <div class="note blue">
+    <b class="lbl">นิยามสั้นที่สุด</b>
+    <b>Entropy = ปริมาณความไม่แน่นอน (uncertainty) ของข้อมูลกองนั้น</b> —
+    หรือถ้าจะพูดแบบ information theory: <b>โดยเฉลี่ยต้องใช้กี่บิตในการบอกคำตอบของหนึ่งตัวอย่าง</b><br>
+    Entropy สูง → มั่ว เดายาก &nbsp;|&nbsp; Entropy ต่ำ → เป็นระเบียบ เดาง่าย
+  </div>
+
+  <h3>สูตรทางการ</h3>
+  <p>
+    สำหรับตัวแปรสุ่มไม่ต่อเนื่อง <span class="mono">Y</span> ที่มีค่าเป็นไปได้ <span class="mono">m</span> ค่า
+    คือ <span class="mono">{y<sub>1</sub>, y<sub>2</sub>, …, y<sub>m</sub>}</span>
+  </p>
+
+  <div class="math">
+    <span class="hl">H(Y)</span> &nbsp;=&nbsp; &minus;
+    <span class="sum"><span>m</span><span class="big">&Sigma;</span><span>i=1</span></span>
+    &nbsp; p<sub>i</sub> &middot; log<sub>2</sub>( p<sub>i</sub> )
+    &nbsp;&nbsp;&nbsp; โดย &nbsp; p<sub>i</sub> = P(Y = y<sub>i</sub>)
+    <small>
+      p<sub>i</sub> คือสัดส่วนของตัวอย่างที่อยู่ในคลาส i ·
+      ใช้ log ฐาน 2 หน่วยจึงเป็น “บิต” ·
+      กำหนดให้ 0·log₂0 = 0 (กองว่างไม่มีความไม่แน่นอน)
+    </small>
+  </div>
+
+  <h4>ทำไมต้องมีเครื่องหมายลบ?</h4>
+  <p>
+    เพราะ p อยู่ระหว่าง 0 ถึง 1 เสมอ ทำให้ log₂(p) ติดลบเสมอ เช่น log₂(0.5) = &minus;1
+    การใส่ลบข้างหน้าจึงทำให้ค่า entropy ออกมาเป็นบวก — ไม่มีความหมายลึกซึ้งไปกว่านั้น
+  </p>
+
+  <h3>รูปร่างของ entropy เมื่อมี 2 คลาส (m = 2)</h3>
+  <p>ลากแถบด้านล่างเพื่อเปลี่ยนสัดส่วนคลาส แล้วสังเกตว่า entropy พุ่งสูงสุดตอนสัดส่วน 50:50 และตกลงเป็นศูนย์ที่ปลายทั้งสองข้าง</p>
+
+  <figure>
+    <div class="svgbox">
+      <svg viewBox="0 0 560 320" role="img" aria-label="กราฟ binary entropy">
+        <g id="entgrid"></g>
+        <line class="axis" x1="70" y1="30" x2="70" y2="260"></line>
+        <line class="axis" x1="70" y1="260" x2="520" y2="260"></line>
+        <path id="entcurve" class="curve"></path>
+        <line id="entvline" x1="295" y1="30" x2="295" y2="260" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="4 4"></line>
+        <circle id="entdot" cx="295" cy="30" r="6" fill="var(--amber)"></circle>
+        <text class="axistext" x="64" y="264" text-anchor="end">0</text>
+        <text class="axistext" x="64" y="150" text-anchor="end">0.5</text>
+        <text class="axistext" x="64" y="38" text-anchor="end">1.0</text>
+        <text class="axistext" x="70" y="280" text-anchor="middle">0</text>
+        <text class="axistext" x="295" y="280" text-anchor="middle">0.5</text>
+        <text class="axistext" x="520" y="280" text-anchor="middle">1.0</text>
+        <text class="axistext" x="295" y="302" text-anchor="middle">p (สัดส่วนของคลาส “yes”)</text>
+        <text class="axistext" x="24" y="145" text-anchor="middle" transform="rotate(-90 24 145)">H(p) — บิต</text>
+      </svg>
+      <div class="controls" style="justify-content:center;margin-top:10px">
+        <input type="range" id="entslider" min="0" max="100" value="50" step="1" style="width:min(420px,80%)">
+      </div>
+      <div id="entreadout" class="result" style="text-align:center"></div>
+    </div>
+    <figcaption>กราฟ binary entropy — สมมาตรรอบ p = 0.5 และมีค่าสูงสุดเท่ากับ 1 บิตพอดี</figcaption>
+  </figure>
+
+  <h3>ลงมือคำนวณจริง: Info(D) ของข้อมูลทั้ง 14 แถว</h3>
+  <p>
+    ในบริบทของ decision tree เราเรียก entropy ของชุดข้อมูล D ว่า <em class="term">Info(D)</em>
+    หรือ “จำนวนข้อมูลที่ยังต้องการเพิ่มเพื่อจำแนก tuple หนึ่งตัวใน D ให้ได้”
+  </p>
+
+  <div class="math">
+    Info(D) = &minus;
+    <span class="sum"><span>m</span><span class="big">&Sigma;</span><span>i=1</span></span>
+    p<sub>i</sub> log<sub>2</sub>(p<sub>i</sub>)
+    &nbsp;&nbsp;&nbsp; โดย &nbsp; p<sub>i</sub> =
+    <span class="frac"><span>|C<sub>i,D</sub>|</span><span>|D|</span></span>
+    <small>|C<sub>i,D</sub>| = จำนวน tuple ใน D ที่อยู่คลาส C<sub>i</sub> &nbsp;·&nbsp; |D| = จำนวน tuple ทั้งหมดใน D</small>
+  </div>
+
+  <div class="card">
+    <h4 style="margin-top:0">แทนค่าทีละบรรทัด</h4>
+    <div class="math" style="text-align:left; background:transparent; border:0; padding:0">
+      p<sub>yes</sub> = <span class="frac"><span>9</span><span>14</span></span> = 0.6429
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      p<sub>no</sub> = <span class="frac"><span>5</span><span>14</span></span> = 0.3571<br><br>
+      Info(D) = I(9, 5)
+      = &minus; <span class="frac"><span>9</span><span>14</span></span> log<sub>2</sub><span class="frac"><span>9</span><span>14</span></span>
+      &nbsp;&minus;&nbsp; <span class="frac"><span>5</span><span>14</span></span> log<sub>2</sub><span class="frac"><span>5</span><span>14</span></span><br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      = &minus;(0.6429)(&minus;0.6374) &minus; (0.3571)(&minus;1.4854)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      = 0.4098 + 0.5305 = <span class="hl" style="font-size:18px">0.940 บิต</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <b class="lbl">อ่านค่านี้อย่างไร</b>
+    0.940 อยู่ใกล้ 1.0 มาก แปลว่าข้อมูลตั้งต้นของเรา <b>เกือบมั่วที่สุดเท่าที่ 2 คลาสจะมั่วได้</b>
+    นี่คือ “ระดับความไม่รู้เริ่มต้น” ที่เราจะพยายามลดให้ได้มากที่สุดในขั้นต่อไป
+  </div>
+
+  <h3>Conditional Entropy — entropy หลังจากที่เรารู้คำตอบของ X แล้ว</h3>
+  <p>
+    ถ้าเราได้รู้ค่าของ attribute <span class="mono">X</span> เพิ่ม ความไม่แน่นอนของ Y ควรจะลดลง
+    ค่าเฉลี่ยของ entropy ที่เหลือหลังรู้ X เรียกว่า <em class="term">conditional entropy</em>
+  </p>
+  <div class="math">
+    H(Y | X) = <span class="sum"><span>&nbsp;</span><span class="big">&Sigma;</span><span>x</span></span>
+    &nbsp; p(x) &middot; H(Y | X = x)
+    <small>แปลเป็นภาษาคน: แยกข้อมูลเป็นกองตามค่าของ X → หา entropy ของแต่ละกอง → ถัวเฉลี่ยโดยถ่วงน้ำหนักด้วยขนาดกอง</small>
+  </div>
+  <p>แนวคิดนี้เองที่กลายเป็น <code>Info<sub>A</sub>(D)</code> ในหัวข้อถัดไป</p>
+</section>
+<!-- ============ 3 ============ -->
+<section id="s3">
+  <h2><span class="num">03</span> เครื่องมือที่ 2 — Information Gain: วัดว่า “คำถามนี้คุ้มแค่ไหน”</h2>
+  <p class="sub">รู้แล้วว่าข้อมูลมั่วแค่ไหน ขั้นต่อไปคือวัดว่าถ้าถามคำถามหนึ่ง จะช่วยลดความมั่วลงได้เท่าไร</p>
+
+  <h3>ขั้นที่ 3.1 — ถ้าแบ่งด้วย A แล้ว ยังเหลือความไม่แน่นอนเท่าไร?</h3>
+  <p>
+    สมมติเราเลือก attribute <span class="mono">A</span> ที่มีค่าเป็นไปได้ <span class="mono">v</span> ค่า
+    การแบ่งจะได้ข้อมูล <span class="mono">v</span> กอง คือ D<sub>1</sub>, D<sub>2</sub>, …, D<sub>v</sub>
+    แต่ละกองมี entropy ของตัวเอง เรารวมเป็นค่าเดียวด้วยการ <b>ถัวเฉลี่ยแบบถ่วงน้ำหนัก</b>
+  </p>
+
+  <div class="math">
+    <span class="hl">Info<sub>A</sub>(D)</span> =
+    <span class="sum"><span>v</span><span class="big">&Sigma;</span><span>j=1</span></span>
+    &nbsp;<span class="frac"><span>|D<sub>j</sub>|</span><span>|D|</span></span>
+    &nbsp;&times;&nbsp; Info(D<sub>j</sub>)
+    <small>
+      <b>|D<sub>j</sub>| / |D|</b> = น้ำหนักตามขนาดกอง — กองใหญ่มีสิทธิ์ออกเสียงมากกว่า ·
+      <b>Info(D<sub>j</sub>)</b> = entropy ของกองนั้น ๆ คำนวณด้วยสูตรเดิมจาก §02
+    </small>
+  </div>
+
+  <div class="note">
+    <b class="lbl">ทำไมต้องถ่วงน้ำหนัก</b>
+    ถ้ากองหนึ่งมี 12 แถวและอีกกองมี 2 แถว การเอา entropy มาบวกกันเฉย ๆ แล้วหาร 2
+    จะทำให้กองเล็กมีอิทธิพลเท่ากองใหญ่ ซึ่งไม่ยุติธรรม — เราจึงชั่งด้วยสัดส่วนจำนวนตัวอย่างเสมอ
+  </div>
+
+  <h3>ขั้นที่ 3.2 — กำไรของข้อมูล (Information Gain)</h3>
+  <p>เอา “ความไม่แน่นอนก่อนถาม” ลบด้วย “ความไม่แน่นอนหลังถาม” ส่วนต่างคือกำไรที่ได้จากคำถามนั้น</p>
+
+  <div class="math">
+    <span class="hl">Gain(A)</span> &nbsp;=&nbsp;
+    <span class="hl2">Info(D)</span> &nbsp;&minus;&nbsp; Info<sub>A</sub>(D)
+    <small>
+      Info(D) = ความไม่รู้ก่อนแบ่ง &nbsp;·&nbsp;
+      Info<sub>A</sub>(D) = ความไม่รู้ที่ยังเหลือหลังแบ่งด้วย A &nbsp;·&nbsp;
+      Gain(A) = จำนวนบิตของข้อมูลที่ A “ซื้อ” ให้เรา
+    </small>
+  </div>
+
+  <div class="note green">
+    <b class="lbl">กฎการตัดสินใจของ ID3 / C4.5</b>
+    ที่ทุก node ให้คำนวณ Gain ของทุก attribute ที่ยังเหลือ แล้ว
+    <b>เลือกตัวที่ Gain สูงที่สุด</b> มาเป็นคำถามของ node นั้น
+    เพราะมันลดความไม่แน่นอนได้มากที่สุดต่อการถาม 1 ครั้ง — เป็นการเลือกแบบ <em class="term">greedy</em>
+  </div>
+
+  <h4>สมบัติที่ควรรู้ 3 ข้อ</h4>
+  <ul>
+    <li><b>Gain ≥ 0 เสมอ</b> — การรู้ข้อมูลเพิ่ม ไม่มีทางทำให้เรามั่วขึ้น (อย่างมากก็เท่าเดิม)</li>
+    <li><b>Gain = 0</b> หมายความว่า attribute นั้นแบ่งแล้วสัดส่วน yes:no ในทุกกองยังเหมือนเดิม → ถามไปก็ไม่ได้อะไร</li>
+    <li><b>Gain = Info(D)</b> คือกรณีสมบูรณ์แบบ — แบ่งครั้งเดียวแล้วทุกกองบริสุทธิ์ ไม่ต้องถามอะไรต่ออีก</li>
+  </ul>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+  <h2><span class="num">04</span> ลงมือจริง: หา Root Node ด้วยการคำนวณครบทั้ง 4 attribute</h2>
+  <p class="sub">ตอนนี้ D = ข้อมูลทั้ง 14 แถว และเรารู้แล้วว่า Info(D) = 0.940 — มาดูกันว่า attribute ไหนคุ้มที่สุด</p>
+
+  <div class="controls">
+    <span class="lbl">ดูการคำนวณของ:</span>
+    <button class="chip" data-rootattr="age" aria-pressed="true">age</button>
+    <button class="chip" data-rootattr="income" aria-pressed="false">income</button>
+    <button class="chip" data-rootattr="student" aria-pressed="false">student</button>
+    <button class="chip" data-rootattr="credit_rating" aria-pressed="false">credit_rating</button>
+  </div>
+
+  <div class="calcbox" id="rootcalc"></div>
+
+  <h3>เปรียบเทียบผลทั้ง 4 ตัว</h3>
+  <p>เมื่อคำนวณครบทุก attribute ด้วยวิธีเดียวกัน จะได้ผลดังนี้ (แถบยิ่งยาว = ยิ่งดี)</p>
+  <div class="rank" id="rootrank"></div>
+
+  <div class="note green">
+    <b class="lbl">สรุปผลการเลือก Root</b>
+    <b>age ชนะขาด</b> ด้วย Gain = 0.247 บิต สูงกว่าอันดับสอง (student, 0.152) อย่างชัดเจน
+    ดังนั้น <b>คำถามแรกสุดของต้นไม้คือ “age?”</b> และต้นไม้จะแตกออกเป็น 3 กิ่งตามค่าของ age
+    คือ <code>&lt;=30</code>, <code>31…40</code>, และ <code>&gt;40</code>
+  </div>
+
+  <div class="note purple">
+    <b class="lbl">หมายเหตุเรื่องการปัดเศษ — อย่าตกใจถ้าตัวเลขต่างจากสไลด์นิดเดียว</b>
+    หน้านี้คำนวณด้วยความละเอียดเต็มแล้วค่อยปัดตอนแสดงผล จึงได้ Gain(age) = <b>0.247</b> และ Gain(student) = <b>0.152</b>
+    ส่วนสไลด์/ตำราแสดง 0.246 และ 0.151 เพราะนำค่าที่ปัดแล้วมาลบกัน (0.940 − 0.694 = 0.246)
+    ทั้งสองแบบถูกต้องทั้งคู่และ<b>ไม่กระทบลำดับการเลือก</b> ซึ่งเป็นสิ่งเดียวที่อัลกอริทึมสนใจ
+    — เวลาสอบให้ยึดวิธีที่อาจารย์ผู้สอนกำหนด แต่ต้องแสดงวิธีทำให้ครบเสมอ
+  </div>
+
+  <div class="note">
+    <b class="lbl">เหตุผลเชิงสัญชาตญาณ ว่าทำไม age ถึงชนะ</b>
+    เพราะกลุ่ม <code>age = 31…40</code> มี 4 แถวและ <b>เป็น yes ทั้งหมด</b> — entropy = 0 ทันที
+    นั่นคือได้ “กองบริสุทธิ์” ฟรี ๆ หนึ่งกองจากการถามครั้งเดียว
+    ไม่มี attribute ตัวไหนทำแบบนี้ได้เลย
+  </div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+  <h2><span class="num">05</span> Recursion: ทำซ้ำกับทุกกิ่ง จนกว่าจะหยุดได้</h2>
+  <p class="sub">หัวใจของคำว่า recursive — ทุกกิ่งที่แตกออกมา คือปัญหาเดิมในขนาดที่เล็กลง</p>
+
+  <p>
+    หลังแบ่งด้วย age แล้ว เรามีข้อมูล 3 กอง เราจะ <b>ลืมข้อมูลนอกกองไปเลย</b>
+    แล้วทำกระบวนการ §02–§04 ซ้ำกับแต่ละกอง โดยมีข้อแม้สำคัญ:
+    <b>attribute ที่ใช้ไปแล้วบนเส้นทางนั้น จะไม่ถูกนำมาพิจารณาซ้ำ</b>
+    (ในที่นี้เหลือ income, student, credit_rating)
+  </p>
+
+  <ol class="steps" id="recursionsteps"></ol>
+</section>
+<!-- ============ 6 ============ -->
+<section id="s6">
+  <h2><span class="num">06</span> ต้นไม้ที่ได้ และการนำไปทำนาย (Prediction)</h2>
+  <p class="sub">จบเฟส Construction แล้ว — นี่คือผลลัพธ์ และวิธีใช้งานจริง</p>
+
+  <figure>
+    <div class="svgbox">
+      <svg id="tree" viewBox="0 0 900 386" role="img" aria-label="แผนภาพต้นไม้ตัดสินใจสุดท้าย">
+        <!-- edges -->
+        <path id="e-root-le30"  class="edge" d="M450 64 L170 160"></path>
+        <path id="e-root-mid"   class="edge" d="M450 64 L450 160"></path>
+        <path id="e-root-gt40"  class="edge" d="M450 64 L740 160"></path>
+        <path id="e-st-no"      class="edge" d="M170 200 L80 300"></path>
+        <path id="e-st-yes"     class="edge" d="M170 200 L270 300"></path>
+        <path id="e-cr-exc"     class="edge" d="M740 200 L650 300"></path>
+        <path id="e-cr-fair"    class="edge" d="M740 200 L845 300"></path>
+
+        <!-- edge labels -->
+        <text class="edgelabel" x="300" y="104">age &lt;= 30</text>
+        <text class="edgelabel" x="492" y="116">31…40</text>
+        <text class="edgelabel" x="608" y="104">age &gt; 40</text>
+        <text class="edgelabel" x="110" y="246">no</text>
+        <text class="edgelabel" x="238" y="246">yes</text>
+        <text class="edgelabel" x="668" y="246">excellent</text>
+        <text class="edgelabel" x="812" y="246">fair</text>
+
+        <!-- root -->
+        <g id="n-root">
+          <rect class="nodebox internal" x="393" y="24" width="114" height="40" rx="9"></rect>
+          <text class="nodetext" x="450" y="49">age ?</text>
+          <rect x="360" y="70" width="180" height="16" rx="4" fill="var(--surface)"></rect>
+          <text class="axistext" x="450" y="82" text-anchor="middle">14 tuples · 9 yes / 5 no</text>
+        </g>
+
+        <!-- level 2 -->
+        <g id="n-student">
+          <rect class="nodebox internal" x="108" y="160" width="124" height="40" rx="9"></rect>
+          <text class="nodetext" x="170" y="185">student ?</text>
+          <rect x="84" y="206" width="172" height="16" rx="4" fill="var(--surface)"></rect>
+          <text class="axistext" x="170" y="218" text-anchor="middle">5 tuples · 2 yes / 3 no</text>
+        </g>
+        <g id="n-mid">
+          <rect class="nodebox leafyes" x="405" y="160" width="90" height="40" rx="9"></rect>
+          <text class="nodetext" x="450" y="185">Buy</text>
+          <text class="axistext" x="450" y="218" text-anchor="middle">4 tuples · บริสุทธิ์</text>
+        </g>
+        <g id="n-credit">
+          <rect class="nodebox internal" x="663" y="160" width="154" height="40" rx="9"></rect>
+          <text class="nodetext" x="740" y="185">credit rating ?</text>
+          <rect x="654" y="206" width="172" height="16" rx="4" fill="var(--surface)"></rect>
+          <text class="axistext" x="740" y="218" text-anchor="middle">5 tuples · 3 yes / 2 no</text>
+        </g>
+
+        <!-- level 3 -->
+        <g id="n-st-no">
+          <rect class="nodebox leafno" x="25" y="300" width="110" height="40" rx="9"></rect>
+          <text class="nodetext" x="80" y="325">Not-buy</text>
+          <text class="axistext" x="80" y="358" text-anchor="middle">3 tuples</text>
+        </g>
+        <g id="n-st-yes">
+          <rect class="nodebox leafyes" x="225" y="300" width="90" height="40" rx="9"></rect>
+          <text class="nodetext" x="270" y="325">Buy</text>
+          <text class="axistext" x="270" y="358" text-anchor="middle">2 tuples</text>
+        </g>
+        <g id="n-cr-exc">
+          <rect class="nodebox leafno" x="595" y="300" width="110" height="40" rx="9"></rect>
+          <text class="nodetext" x="650" y="325">Not-buy</text>
+          <text class="axistext" x="650" y="358" text-anchor="middle">2 tuples</text>
+        </g>
+        <g id="n-cr-fair">
+          <rect class="nodebox leafyes" x="800" y="300" width="90" height="40" rx="9"></rect>
+          <text class="nodetext" x="845" y="325">Buy</text>
+          <text class="axistext" x="845" y="358" text-anchor="middle">3 tuples</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>ต้นไม้สุดท้ายใช้เพียง 3 attribute จาก 4 ตัว — <code>income</code> ไม่ถูกใช้เลย เพราะไม่เคยชนะที่ node ใด</figcaption>
+  </figure>
+
+  <div class="note blue">
+    <b class="lbl">อ่านต้นไม้เป็นกฎ (IF–THEN rules)</b>
+    ต้นไม้ 1 ต้น แปลงเป็นชุดกฎได้ตรง ๆ โดยนับ 1 เส้นทางจาก root ถึง leaf = 1 กฎ ต้นนี้จึงได้ 5 กฎ:
+    <ol style="margin:8px 0 0">
+      <li><code>IF age ≤ 30 AND student = no → Not-buy</code></li>
+      <li><code>IF age ≤ 30 AND student = yes → Buy</code></li>
+      <li><code>IF age = 31…40 → Buy</code></li>
+      <li><code>IF age &gt; 40 AND credit_rating = fair → Buy</code></li>
+      <li><code>IF age &gt; 40 AND credit_rating = excellent → Not-buy</code></li>
+    </ol>
+    ความอ่านออกได้นี้ (interpretability) คือจุดแข็งที่สุดของ decision tree เมื่อเทียบกับโมเดลอย่าง neural network
+  </div>
+
+  <h3>ทดลองทำนายข้อมูลใหม่</h3>
+  <p>
+    เลือกค่าของ tuple ใหม่ที่ยังไม่รู้คำตอบ แล้วกดปุ่ม — เส้นทางที่ข้อมูลไหลผ่านจะถูกไฮไลต์สีส้มบนต้นไม้ด้านบน
+    (ค่าเริ่มต้นคือ test data จากสไลด์: อายุ 28, income = low, student = yes, credit = excellent)
+  </p>
+
+  <div class="calcbox">
+    <div class="controls">
+      <span class="lbl">age</span>
+      <select id="p-age"><option value="&lt;=30">&lt;= 30</option><option value="31..40">31…40</option><option value="&gt;40">&gt; 40</option></select>
+      <span class="lbl">income</span>
+      <select id="p-income"><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select>
+      <span class="lbl">student</span>
+      <select id="p-student"><option value="yes">yes</option><option value="no">no</option></select>
+      <span class="lbl">credit_rating</span>
+      <select id="p-credit"><option value="excellent">excellent</option><option value="fair">fair</option></select>
+      <button class="chip" id="p-run" style="border-color:var(--accent);color:var(--accent);font-weight:600">▶ ทำนาย</button>
+    </div>
+    <div id="p-out" class="result"></div>
+  </div>
+
+  <div class="note">
+    <b class="lbl">ข้อสังเกตสำคัญ</b>
+    การทำนายไม่ต้องคำนวณ entropy ใด ๆ ทั้งสิ้น — ใช้เพียงการเปรียบเทียบค่าไม่กี่ครั้ง
+    ความลึกของต้นไม้คือจำนวนคำถามสูงสุดที่ต้องตอบ ต้นนี้ลึกแค่ 2 ระดับ จึงทำนายได้เร็วมาก
+    นี่คือเหตุผลที่ decision tree ถูกใช้ในระบบที่ต้องตอบสนองเร็ว
+  </div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="s7">
+  <h2><span class="num">07</span> อัลกอริทึมฉบับเต็ม และเงื่อนไขการหยุด</h2>
+  <p class="sub">รวบทุกอย่างที่ผ่านมาให้เป็น pseudocode ที่เขียนโปรแกรมตามได้จริง</p>
+
+<pre class="code"><span class="kw">Algorithm</span> GenerateDecisionTree(D, attribute_list)
+<span class="cm">// D = ชุด training tuples ที่อยู่บน node นี้ พร้อม class label</span>
+<span class="cm">// attribute_list = รายการ attribute ที่ยังไม่ถูกใช้บนเส้นทางนี้</span>
+
+1.  สร้าง node N
+
+2.  <span class="kw">if</span> ทุก tuple ใน D อยู่คลาส C เดียวกัน <span class="kw">then</span>
+        <span class="kw">return</span> N <span class="kw">as</span> leaf ที่ label = C          <span class="cm">// หยุดเงื่อนไขที่ 1</span>
+
+3.  <span class="kw">if</span> attribute_list ว่างเปล่า <span class="kw">then</span>
+        <span class="kw">return</span> N <span class="kw">as</span> leaf ที่ label = majority class ของ D   <span class="cm">// หยุดเงื่อนไขที่ 2</span>
+
+4.  <span class="cm">// ---- หัวใจ: เลือก attribute ที่ดีที่สุด ----</span>
+    splitting_attribute &larr; argmax<sub>A &isin; attribute_list</sub> <span class="st">Gain(A)</span>
+    label node N ด้วย splitting_attribute
+    attribute_list &larr; attribute_list &minus; {splitting_attribute}
+
+5.  <span class="kw">for each</span> ค่า a<sub>j</sub> ที่เป็นไปได้ของ splitting_attribute <span class="kw">do</span>
+        D<sub>j</sub> &larr; เซตของ tuple ใน D ที่มีค่า = a<sub>j</sub>
+        <span class="kw">if</span> D<sub>j</sub> ว่างเปล่า <span class="kw">then</span>
+            แขวน leaf ที่ label = majority class ของ D     <span class="cm">// หยุดเงื่อนไขที่ 3</span>
+        <span class="kw">else</span>
+            แขวนผลของ <span class="st">GenerateDecisionTree(D<sub>j</sub>, attribute_list)</span> เป็นลูกของ N   <span class="cm">// เรียกซ้ำ</span>
+
+6.  <span class="kw">return</span> N</pre>
+
+  <h3>เงื่อนไขการหยุดแตกกิ่ง (stopping conditions) 3 ข้อ</h3>
+  <div class="grid3">
+    <div class="card">
+      <b style="color:var(--green)">1. กองบริสุทธิ์แล้ว</b>
+      <p style="font-size:14px;color:var(--muted);margin:6px 0 0">
+        ทุก tuple ใน node อยู่คลาสเดียวกัน (entropy = 0) → ไม่มีอะไรให้แบ่งต่อ<br>
+        <b>ตัวอย่างในบทนี้:</b> กิ่ง age = 31…40
+      </p>
+    </div>
+    <div class="card">
+      <b style="color:var(--amber)">2. attribute หมดแล้ว</b>
+      <p style="font-size:14px;color:var(--muted);margin:6px 0 0">
+        ถามครบทุก attribute แล้วแต่ยังปนกันอยู่ → ทำเป็น leaf แล้วใช้ <b>majority voting</b>
+      </p>
+    </div>
+    <div class="card">
+      <b style="color:var(--red)">3. ไม่เหลือตัวอย่าง</b>
+      <p style="font-size:14px;color:var(--muted);margin:6px 0 0">
+        กิ่งนั้นไม่มี tuple ใดตกลงมาเลย → ทำเป็น leaf โดยใช้ majority class ของ node แม่
+      </p>
+    </div>
+  </div>
+
+  <h3>Majority Voting — เมื่อ leaf ไม่บริสุทธิ์</h3>
+  <p>
+    ถ้าหยุดด้วยเงื่อนไขข้อ 2 หรือ 3 leaf จะยังมีทั้ง yes และ no ปนกัน
+    วิธีกำหนด label คือ <b>ให้คลาสที่มีจำนวนมากที่สุดชนะ</b> เช่น leaf มี yes 4 / no 1 → label = yes
+    และเราสามารถรายงานความเชื่อมั่นได้ด้วยว่า 4/5 = 80%
+  </p>
+
+  <div class="note purple">
+    <b class="lbl">ก้าวต่อไปหลังจากบทนี้</b>
+    Information Gain มีจุดอ่อนคือ <b>ลำเอียงเข้าหา attribute ที่มีค่าเป็นไปได้เยอะ ๆ</b>
+    (ลองนึกถึง attribute <code>customer_id</code> ที่แบ่งแล้วทุกกองบริสุทธิ์แต่ทำนายอะไรไม่ได้เลย)
+    ทางแก้คือ <b>Gain Ratio</b> ใน C4.5 หรือใช้ <b>Gini Index</b> แบบ CART
+    และยังมีเรื่อง <b>overfitting / tree pruning</b> ที่ต้องเรียนต่อ — แต่ทั้งหมดนั้นตั้งอยู่บนแนวคิดเดียวกับที่เพิ่งเรียนจบนี้
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="s8">
+  <h2><span class="num">08</span> ห้องทดลอง: คำนวณ Information Gain ด้วยตัวเอง</h2>
+  <p class="sub">เลือก node และ attribute แล้วระบบจะแสดงการคำนวณทุกบรรทัดให้ตรวจทาน — ใช้ฝึกทำโจทย์ด้วยมือแล้วมาเทียบคำตอบ</p>
+
+  <div class="calcbox">
+    <div class="controls" style="margin-top:0">
+      <span class="lbl">node (ชุดข้อมูล D)</span>
+      <select id="lab-node">
+        <option value="root">Root — ข้อมูลทั้งหมด 14 แถว</option>
+        <option value="le30">กิ่ง age &lt;= 30 — 5 แถว</option>
+        <option value="3140">กิ่ง age = 31…40 — 4 แถว</option>
+        <option value="gt40">กิ่ง age &gt; 40 — 5 แถว</option>
+      </select>
+      <span class="lbl">attribute A</span>
+      <select id="lab-attr"></select>
+    </div>
+    <div id="lab-out"></div>
+  </div>
+
+  <div class="note">
+    <b class="lbl">แบบฝึกหัดที่แนะนำให้ลองทำด้วยมือก่อนกดดู</b>
+    <ol style="margin:8px 0 0">
+      <li>ที่กิ่ง <code>age &lt;= 30</code> จงหา Gain ของ <code>income</code> แล้วอธิบายว่าทำไมจึงแพ้ <code>student</code></li>
+      <li>ที่กิ่ง <code>age &gt; 40</code> จงหาว่าทำไม Gain ของ <code>income</code> กับ <code>student</code> ถึงเท่ากันพอดี</li>
+      <li>ที่กิ่ง <code>age = 31…40</code> จงอธิบายว่าทำไม Gain ของทุก attribute จึงเป็น 0 และมันหมายความว่าอะไร</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <p>
+    <b>สรุปทั้งบท:</b> Decision tree สร้างด้วยการถามซ้ำ ๆ ว่า “คำถามไหนลดความไม่แน่นอนได้มากที่สุด”
+    โดยวัดความไม่แน่นอนด้วย <b>Entropy</b> วัดความคุ้มค่าของคำถามด้วย <b>Information Gain</b>
+    แล้วทำซ้ำแบบ top-down, recursive, divide-and-conquer จนเข้าเงื่อนไขหยุด
+  </p>
+  <p style="margin-bottom:0">
+    ชุดข้อมูล “Who buys computer?” ดัดแปลงจากตัวอย่าง <i>Playing Tennis</i> ของ R. Quinlan ·
+    เนื้อหาอ้างอิงสไลด์ <span class="kbd">08ClassBasic.pdf</span> · MSC DPML 2026
+  </p>
+</footer>
+
+</div><!-- /wrap -->
+<script>
+(function(){
+"use strict";
+
+/* ================= DATA ================= */
+const ATTRS = ["age","income","student","credit_rating"];
+const LABELS = {age:"age", income:"income", student:"student", credit_rating:"credit_rating"};
+const ORDER = {
+  age:["<=30","31..40",">40"],
+  income:["high","medium","low"],
+  student:["no","yes"],
+  credit_rating:["fair","excellent"]
+};
+const DISP = {"<=30":"<=30","31..40":"31…40",">40":">40"};
+const D = [
+  {age:"<=30",  income:"high",   student:"no",  credit_rating:"fair",      buys:"no"},
+  {age:"<=30",  income:"high",   student:"no",  credit_rating:"excellent", buys:"no"},
+  {age:"31..40",income:"high",   student:"no",  credit_rating:"fair",      buys:"yes"},
+  {age:">40",   income:"medium", student:"no",  credit_rating:"fair",      buys:"yes"},
+  {age:">40",   income:"low",    student:"yes", credit_rating:"fair",      buys:"yes"},
+  {age:">40",   income:"low",    student:"yes", credit_rating:"excellent", buys:"no"},
+  {age:"31..40",income:"low",    student:"yes", credit_rating:"excellent", buys:"yes"},
+  {age:"<=30",  income:"medium", student:"no",  credit_rating:"fair",      buys:"no"},
+  {age:"<=30",  income:"low",    student:"yes", credit_rating:"fair",      buys:"yes"},
+  {age:">40",   income:"medium", student:"yes", credit_rating:"fair",      buys:"yes"},
+  {age:"<=30",  income:"medium", student:"yes", credit_rating:"excellent", buys:"yes"},
+  {age:"31..40",income:"medium", student:"no",  credit_rating:"excellent", buys:"yes"},
+  {age:"31..40",income:"high",   student:"yes", credit_rating:"fair",      buys:"yes"},
+  {age:">40",   income:"medium", student:"no",  credit_rating:"excellent", buys:"no"}
+];
+
+/* ================= MATH HELPERS ================= */
+const f3 = n => (Math.round(n*1000)/1000).toFixed(3);
+const f4 = n => (Math.round(n*10000)/10000).toFixed(4);
+const lg = p => (p<=0 ? 0 : Math.log2(p));
+
+function counts(set){
+  let y=0,n=0; set.forEach(r=> r.buys==="yes"?y++:n++); return {y,n,t:set.length};
+}
+function ent(set){
+  const {y,n,t}=counts(set);
+  if(t===0) return 0;
+  const py=y/t, pn=n/t;
+  return -(py>0?py*lg(py):0) - (pn>0?pn*lg(pn):0);
+}
+function entYN(y,n){
+  const t=y+n; if(t===0) return 0;
+  const py=y/t,pn=n/t;
+  return -(py>0?py*lg(py):0)-(pn>0?pn*lg(pn):0);
+}
+/* ข้อความแสดงการแทนค่า I(y,n) ทีละบรรทัด */
+function entExpr(y,n){
+  const t=y+n;
+  if(y===0||n===0) return `I(${y}, ${n}) = 0  ← กองบริสุทธิ์ มีคลาสเดียว`;
+  return `I(${y}, ${n}) = −(${y}/${t})·log₂(${y}/${t}) − (${n}/${t})·log₂(${n}/${t}) = ${f4(entYN(y,n))}`;
+}
+function partitionsOf(set, attr){
+  const out=[];
+  ORDER[attr].forEach(v=>{
+    const sub=set.filter(r=>r[attr]===v);
+    if(sub.length) out.push({v, sub, ...counts(sub), H:ent(sub)});
+  });
+  return out;
+}
+function gainOf(set, attr){
+  const base=ent(set), parts=partitionsOf(set,attr);
+  let info=0; parts.forEach(p=> info += (p.t/set.length)*p.H );
+  return {base, info, gain:base-info, parts, N:set.length};
+}
+
+/* ================= 1. DATA TABLE ================= */
+const tbody=document.getElementById("databody");
+D.forEach((r,i)=>{
+  const tr=document.createElement("tr");
+  tr.dataset.i=i;
+  tr.innerHTML=
+    `<td class="idx">${i+1}</td>`+
+    `<td class="mono">${DISP[r.age]||r.age}</td>`+
+    `<td class="mono">${r.income}</td>`+
+    `<td class="mono">${r.student}</td>`+
+    `<td class="mono">${r.credit_rating}</td>`+
+    `<td style="text-align:center"><span class="pill ${r.buys}">${r.buys}</span></td>`;
+  tbody.appendChild(tr);
+});
+
+let splitAttr="none", splitVal=null;
+const valueChips=document.getElementById("valuechips");
+const summary=document.getElementById("tablesummary");
+
+function paintTable(){
+  const rows=[...tbody.querySelectorAll("tr")];
+  rows.forEach(tr=>{ tr.classList.remove("dim","mark"); });
+  if(splitAttr==="none"||!splitVal){
+    const c=counts(D);
+    summary.innerHTML=`ทั้งหมด <b>${c.t}</b> แถว — yes <b style="color:var(--green)">${c.y}</b> / no <b style="color:var(--red)">${c.n}</b> · Info(D) = <b>${f3(ent(D))}</b> บิต`;
+    return;
+  }
+  rows.forEach(tr=>{
+    const r=D[+tr.dataset.i];
+    if(r[splitAttr]===splitVal) tr.classList.add("mark"); else tr.classList.add("dim");
+  });
+  const sub=D.filter(r=>r[splitAttr]===splitVal);
+  const c=counts(sub);
+  summary.innerHTML=`กอง <code>${LABELS[splitAttr]} = ${DISP[splitVal]||splitVal}</code> มี <b>${c.t}</b> แถว — yes <b style="color:var(--green)">${c.y}</b> / no <b style="color:var(--red)">${c.n}</b> · entropy ของกองนี้ = <b>${f3(ent(sub))}</b> บิต`;
+}
+
+document.querySelectorAll("[data-split]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("[data-split]").forEach(b=>b.setAttribute("aria-pressed", b===btn?"true":"false"));
+    splitAttr=btn.dataset.split; splitVal=null;
+    valueChips.querySelectorAll("button").forEach(b=>b.remove());
+    if(splitAttr==="none"){ valueChips.hidden=true; paintTable(); return; }
+    valueChips.hidden=false;
+    ORDER[splitAttr].forEach((v,idx)=>{
+      const b=document.createElement("button");
+      b.className="chip"; b.textContent=DISP[v]||v;
+      b.setAttribute("aria-pressed", idx===0?"true":"false");
+      b.addEventListener("click",()=>{
+        valueChips.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false"));
+        splitVal=v; paintTable();
+      });
+      valueChips.appendChild(b);
+    });
+    splitVal=ORDER[splitAttr][0];
+    paintTable();
+  });
+});
+paintTable();
+
+/* ================= 2. ENTROPY CURVE ================= */
+const X0=70,X1=520,Y0=260,Y1=30;
+(function buildCurve(){
+  const g=document.getElementById("entgrid");
+  for(let i=1;i<=4;i++){
+    const y=Y0-(Y0-Y1)*(i/4);
+    const l=document.createElementNS("http://www.w3.org/2000/svg","line");
+    l.setAttribute("class","gridline");
+    l.setAttribute("x1",X0); l.setAttribute("x2",X1); l.setAttribute("y1",y); l.setAttribute("y2",y);
+    g.appendChild(l);
+  }
+  let d="";
+  for(let i=0;i<=200;i++){
+    const p=i/200, h=entYN(p*1000,(1-p)*1000);
+    const x=X0+(X1-X0)*p, y=Y0-(Y0-Y1)*h;
+    d += (i===0?"M":"L")+x.toFixed(2)+" "+y.toFixed(2)+" ";
+  }
+  document.getElementById("entcurve").setAttribute("d",d);
+})();
+const slider=document.getElementById("entslider");
+function updateCurve(){
+  const p=+slider.value/100;
+  const h=entYN(p*1000,(1-p)*1000);
+  const x=X0+(X1-X0)*p, y=Y0-(Y0-Y1)*h;
+  document.getElementById("entdot").setAttribute("cx",x);
+  document.getElementById("entdot").setAttribute("cy",y);
+  const vl=document.getElementById("entvline");
+  vl.setAttribute("x1",x); vl.setAttribute("x2",x); vl.setAttribute("y1",y); vl.setAttribute("y2",Y0);
+  let verdict = h>0.95 ? "มั่วสุด ๆ เดาแทบไม่ได้" : h>0.7 ? "ยังปนกันมาก" : h>0.3 ? "เริ่มเอนไปทางหนึ่งแล้ว" : h>0.001 ? "ค่อนข้างบริสุทธิ์" : "บริสุทธิ์ 100% — ไม่ต้องเดาเลย";
+  document.getElementById("entreadout").innerHTML=
+    `p(yes) = <b>${p.toFixed(2)}</b> &nbsp; p(no) = <b>${(1-p).toFixed(2)}</b> &nbsp;→&nbsp; `+
+    `H = <span class="big">${f3(h)}</span> บิต &nbsp;<span style="font-family:var(--sans);color:var(--muted)">(${verdict})</span>`;
+}
+slider.addEventListener("input",updateCurve);
+updateCurve();
+
+/* ================= 3. CALC RENDERER ================= */
+function renderCalc(set, attr, opts){
+  opts=opts||{};
+  const g=gainOf(set,attr);
+  const N=set.length;
+  let html = `<h4 style="margin-top:0">แบ่ง D (${N} แถว) ด้วย attribute <code>${LABELS[attr]}</code></h4>`;
+  html += `<p style="font-size:14.5px;color:var(--muted);margin-bottom:12px">ขั้นที่ 1 — แยกข้อมูลออกเป็น ${g.parts.length} กองตามค่าของ ${LABELS[attr]} แล้วหา entropy ของแต่ละกอง</p>`;
+  g.parts.forEach(p=>{
+    const pct = p.t ? (p.y/p.t*100) : 0;
+    html += `<div class="partition">
+      <div class="ptitle"><span><code>${LABELS[attr]} = ${DISP[p.v]||p.v}</code></span>
+      <span style="color:var(--muted);font-weight:400;font-size:13.5px">${p.t} แถว · yes ${p.y} / no ${p.n}</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="pmath">${entExpr(p.y,p.n)}</div>
+    </div>`;
+  });
+  html += `<p style="font-size:14.5px;color:var(--muted);margin:16px 0 8px">ขั้นที่ 2 — ถัวเฉลี่ยแบบถ่วงน้ำหนักด้วยขนาดกอง</p>`;
+  const terms = g.parts.map(p=>`(${p.t}/${N})·I(${p.y},${p.n})`).join("  +  ");
+  const nums  = g.parts.map(p=>`(${f3(p.t/N)})(${f3(p.H)})`).join("  +  ");
+  html += `<div class="pmath" style="font-family:var(--mono);font-size:13.5px;line-height:2;overflow-x:auto">
+      Info<sub>${LABELS[attr]}</sub>(D) &nbsp;=&nbsp; ${terms}<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; =&nbsp; ${nums}<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; =&nbsp; <b>${f3(g.info)}</b>
+  </div>`;
+  html += `<div class="result">
+      ขั้นที่ 3 — Gain(${LABELS[attr]}) = Info(D) − Info<sub>${LABELS[attr]}</sub>(D)
+      = ${f3(g.base)} − ${f3(g.info)} = <span class="big">${f3(g.gain)}</span> บิต
+  </div>`;
+  if(opts.note) html += `<p style="font-size:14px;color:var(--muted);margin:12px 0 0">${opts.note}</p>`;
+  return html;
+}
+
+function renderRank(set, attrs, container){
+  const res = attrs.map(a=>({a, ...gainOf(set,a)})).sort((x,y)=>y.gain-x.gain);
+  const max = Math.max(...res.map(r=>r.gain), 0.0001);
+  container.innerHTML = res.map((r,i)=>`
+    <div class="rankrow ${i===0&&r.gain>0.0005?"win":""}">
+      <div class="nm">Gain(${LABELS[r.a]})</div>
+      <div class="track"><div class="fill" style="width:${Math.max(r.gain/max*100,1.5)}%"></div></div>
+      <div class="val">${f3(r.gain)}</div>
+    </div>`).join("");
+  return res;
+}
+
+/* ================= 4. ROOT CALC ================= */
+const rootNotes = {
+  age:"กอง <code>31…40</code> ให้ entropy = 0 ฟรี ๆ หนึ่งกอง ทำให้ค่าเฉลี่ยถ่วงน้ำหนักต่ำลงมาก จึงได้ Gain สูงสุด",
+  income:"ทั้งสามกองยัง entropy สูงใกล้ ๆ เดิม (0.81–1.00) แปลว่า income แทบไม่ช่วยแยก yes/no เลย Gain จึงต่ำที่สุด",
+  student:"student แบ่งได้พอใช้ — กอง <code>yes</code> เอนไปทาง buy ชัดเจน (6:1) แต่กอง <code>no</code> ยังมั่วอยู่ (3:4) จึงได้ Gain อันดับสอง",
+  credit_rating:"กอง <code>excellent</code> คือ 3:3 พอดี = entropy 1.0 เต็ม ซึ่งแย่ที่สุดเท่าที่จะเป็นไปได้ ทำให้ Gain รวมต่ำ"
+};
+const rootBox=document.getElementById("rootcalc");
+function showRoot(attr){
+  rootBox.innerHTML = renderCalc(D, attr, {note: rootNotes[attr]});
+}
+document.querySelectorAll("[data-rootattr]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("[data-rootattr]").forEach(b=>b.setAttribute("aria-pressed", b===btn?"true":"false"));
+    showRoot(btn.dataset.rootattr);
+  });
+});
+showRoot("age");
+renderRank(D, ATTRS, document.getElementById("rootrank"));
+
+/* ================= 5. RECURSION ================= */
+const branches=[
+  {v:"<=30", title:"กิ่งที่ 1 — age &lt;= 30 (5 แถว: yes 2 / no 3)",
+   intro:"กองนี้ยังปนกันอยู่ entropy = 0.971 จึงต้องถามต่อ โดยเลือกจาก 3 attribute ที่เหลือ",
+   outro:"<b>student ชนะแบบสมบูรณ์แบบ</b> ด้วย Gain = 0.971 ซึ่งเท่ากับ entropy ของ node นี้พอดี หมายความว่าแบ่งครั้งเดียวแล้วทั้งสองกองบริสุทธิ์ทันที — <code>student = no</code> เป็น Not-buy ทั้ง 3 แถว และ <code>student = yes</code> เป็น Buy ทั้ง 2 แถว จึงกลายเป็น leaf ทั้งคู่ ไม่ต้องถามต่อ"},
+  {v:"31..40", title:"กิ่งที่ 2 — age = 31…40 (4 แถว: yes 4 / no 0)",
+   intro:"ก่อนคำนวณอะไรทั้งสิ้น ให้ตรวจเงื่อนไขหยุดก่อนเสมอ",
+   outro:"เข้าเงื่อนไขหยุดข้อที่ 1 ทันที — ทุก tuple อยู่คลาสเดียวกันคือ yes ทำให้ entropy = 0 ไม่มีความไม่แน่นอนเหลือให้ลดอีกแล้ว ต่อให้คำนวณ Gain ของทุก attribute ก็จะได้ 0 ทั้งหมด <b>node นี้จบเป็น leaf ที่ label = Buy</b>"},
+  {v:">40", title:"กิ่งที่ 3 — age &gt; 40 (5 แถว: yes 3 / no 2)",
+   intro:"กองนี้ก็ยังปนกัน entropy = 0.971 เท่ากับกิ่งแรก จึงต้องคำนวณหา attribute ที่ดีที่สุดอีกครั้ง",
+   outro:"<b>credit_rating ชนะ</b> ด้วย Gain = 0.971 แบ่งแล้วบริสุทธิ์ทั้งสองกอง — <code>fair</code> เป็น Buy ทั้ง 3 แถว และ <code>excellent</code> เป็น Not-buy ทั้ง 2 แถว สังเกตว่า income กับ student ได้ Gain เท่ากันที่ 0.020 ซึ่งน้อยมาก"}
+];
+const recBox=document.getElementById("recursionsteps");
+branches.forEach((b,bi)=>{
+  const sub=D.filter(r=>r.age===b.v);
+  const rest=ATTRS.filter(a=>a!=="age");
+  const li=document.createElement("li");
+  let inner=`<h3>${b.title}</h3><p style="font-size:15px;color:var(--muted)">${b.intro}</p>`;
+  if(b.v==="31..40"){
+    inner+=`<div class="note green" style="margin-top:10px"><b class="lbl">ตรวจเงื่อนไขหยุด</b>${b.outro}</div>`;
+  }else{
+    inner+=`<div class="controls" data-branchctl="${bi}">
+        <span class="lbl">ดูการคำนวณของ:</span>
+        ${rest.map((a,i)=>`<button class="chip" data-b="${bi}" data-a="${a}" aria-pressed="${i===0}">${LABELS[a]}</button>`).join("")}
+      </div>
+      <div class="calcbox" id="bcalc-${bi}"></div>
+      <p style="font-size:14px;color:var(--muted);margin:18px 0 4px">เปรียบเทียบ Gain ของทั้ง 3 attribute ที่ node นี้</p>
+      <div class="rank" id="brank-${bi}"></div>
+      <div class="note green"><b class="lbl">ผลของ node นี้</b>${b.outro}</div>`;
+  }
+  li.innerHTML=inner;
+  recBox.appendChild(li);
+});
+branches.forEach((b,bi)=>{
+  if(b.v==="31..40") return;
+  const sub=D.filter(r=>r.age===b.v);
+  const rest=ATTRS.filter(a=>a!=="age");
+  const box=document.getElementById("bcalc-"+bi);
+  const show=a=>{ box.innerHTML=renderCalc(sub,a,{}); };
+  document.querySelectorAll(`[data-b="${bi}"]`).forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(`[data-b="${bi}"]`).forEach(x=>x.setAttribute("aria-pressed", x===btn?"true":"false"));
+      show(btn.dataset.a);
+    });
+  });
+  show(rest[0]);
+  renderRank(sub, rest, document.getElementById("brank-"+bi));
+});
+/* ขั้นสรุปปิดท้าย recursion */
+(function(){
+  const li=document.createElement("li");
+  li.innerHTML=`<h3>ปิดงาน — ทุกกิ่งกลายเป็น leaf แล้ว</h3>
+    <p style="font-size:15px;color:var(--muted)">ไล่ตรวจทุก node ที่ยังเปิดอยู่ ไม่มี node ไหนที่ยังปนคลาสอยู่อีก recursion จึงยุติ</p>
+    <div class="note blue"><b class="lbl">สังเกต</b>
+      ต้นไม้ต้นนี้ใช้ attribute เพียง 3 จาก 4 ตัว — <code>income</code> ไม่เคยชนะที่ node ใดเลย
+      จึงไม่ปรากฏในต้นไม้ นี่คือคุณสมบัติ <b>feature selection โดยอัตโนมัติ</b> ของ decision tree:
+      attribute ที่ไม่ให้ข้อมูลจะถูกคัดทิ้งไปเอง โดยที่เราไม่ต้องสั่ง
+    </div>`;
+  recBox.appendChild(li);
+})();
+
+/* ================= 6. PREDICTION TRACE ================= */
+const litIds=[];
+function clearLit(){
+  litIds.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.classList.remove("lit");
+    const r=el.querySelector("rect"); if(r) r.classList.remove("lit-node");
+  });
+  litIds.length=0;
+}
+function lightUp(ids){
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    if(el.tagName.toLowerCase()==="path") el.classList.add("edge","lit");
+    else { const r=el.querySelector("rect"); if(r) r.classList.add("lit-node"); }
+    litIds.push(id);
+  });
+}
+function predict(){
+  clearLit();
+  const age=document.getElementById("p-age").value;
+  const inc=document.getElementById("p-income").value;
+  const stu=document.getElementById("p-student").value;
+  const cr =document.getElementById("p-credit").value;
+  const path=["n-root"], steps=[], used=[];
+  let answer;
+  if(age==="31..40"){
+    path.push("e-root-mid","n-mid");
+    steps.push(`ถาม <b>age?</b> → ได้ <code>31…40</code> → เดินกิ่งกลาง`);
+    steps.push(`ถึง <b>leaf</b> ทันที ไม่ต้องถามอะไรอีก`);
+    used.push("age"); answer="Buy";
+  } else if(age==="<=30"){
+    path.push("e-root-le30","n-student");
+    steps.push(`ถาม <b>age?</b> → ได้ <code>&lt;=30</code> → เดินกิ่งซ้าย`);
+    steps.push(`ถาม <b>student?</b> → ได้ <code>${stu}</code>`);
+    used.push("age","student");
+    if(stu==="yes"){ path.push("e-st-yes","n-st-yes"); answer="Buy"; }
+    else { path.push("e-st-no","n-st-no"); answer="Not-buy"; }
+  } else {
+    path.push("e-root-gt40","n-credit");
+    steps.push(`ถาม <b>age?</b> → ได้ <code>&gt;40</code> → เดินกิ่งขวา`);
+    steps.push(`ถาม <b>credit rating?</b> → ได้ <code>${cr}</code>`);
+    used.push("age","credit_rating");
+    if(cr==="fair"){ path.push("e-cr-fair","n-cr-fair"); answer="Buy"; }
+    else { path.push("e-cr-exc","n-cr-exc"); answer="Not-buy"; }
+  }
+  lightUp(path);
+  const unused=ATTRS.filter(a=>!used.includes(a));
+  const color = answer==="Buy" ? "var(--green)" : "var(--red)";
+  document.getElementById("p-out").innerHTML =
+    `<div style="font-family:var(--sans);line-height:1.9">
+       <b>tuple ที่จะทำนาย:</b> <code>(${DISP[age]||age}, ${inc}, ${stu}, ${cr})</code>
+       <ol style="margin:8px 0 10px;padding-left:20px">${steps.map(s=>`<li>${s}</li>`).join("")}</ol>
+       <b>คำทำนาย:</b> <span class="big" style="color:${color}">${answer}</span>
+       ${answer==="Buy"?"(buys_computer = yes)":"(buys_computer = no)"}
+       <div style="font-size:13.5px;color:var(--muted);margin-top:8px">
+         ใช้คำถามเพียง <b>${used.length}</b> ครั้ง · attribute ที่ไม่ถูกใช้เลยในเส้นทางนี้: ${unused.length?"<code>"+unused.join("</code>, <code>")+"</code>":"— ไม่มี —"}
+       </div>
+     </div>`;
+}
+document.getElementById("p-run").addEventListener("click",predict);
+["p-age","p-income","p-student","p-credit"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",predict);
+});
+predict();
+
+/* ================= 7. LAB ================= */
+const NODESETS={
+  root:{set:D, attrs:ATTRS, name:"Root (ทั้ง 14 แถว)"},
+  le30:{set:D.filter(r=>r.age==="<=30"), attrs:["income","student","credit_rating"], name:"กิ่ง age &lt;= 30"},
+  "3140":{set:D.filter(r=>r.age==="31..40"), attrs:["income","student","credit_rating"], name:"กิ่ง age = 31…40"},
+  gt40:{set:D.filter(r=>r.age===">40"), attrs:["income","student","credit_rating"], name:"กิ่ง age &gt; 40"}
+};
+const labNode=document.getElementById("lab-node");
+const labAttr=document.getElementById("lab-attr");
+const labOut=document.getElementById("lab-out");
+function fillAttrs(){
+  const cfg=NODESETS[labNode.value];
+  labAttr.innerHTML=cfg.attrs.map(a=>`<option value="${a}">${LABELS[a]}</option>`).join("");
+}
+function runLab(){
+  const cfg=NODESETS[labNode.value];
+  const a=labAttr.value;
+  const c=counts(cfg.set);
+  let head=`<div class="note blue" style="margin-top:16px"><b class="lbl">โจทย์</b>
+      D = ${cfg.name} → ${c.t} แถว (yes ${c.y} / no ${c.n}) ·
+      Info(D) = <b>${f3(ent(cfg.set))}</b> บิต · หา Gain(${LABELS[a]})</div>`;
+  if(c.y===0||c.n===0){
+    head+=`<div class="note green"><b class="lbl">ตรวจก่อนคำนวณ</b>
+      node นี้บริสุทธิ์แล้ว (entropy = 0) อัลกอริทึมจะหยุดทันทีและทำเป็น leaf
+      — Gain ของทุก attribute จะเท่ากับ 0 ดังที่เห็นด้านล่าง</div>`;
+  }
+  labOut.innerHTML = head + renderCalc(cfg.set, a, {});
+}
+labNode.addEventListener("change",()=>{ fillAttrs(); runLab(); });
+labAttr.addEventListener("change",runLab);
+fillAttrs(); runLab();
+
+/* ================= 8. CHROME ================= */
+const btn=document.getElementById("themebtn");
+btn.addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  const prefersDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = cur ? (cur==="dark"?"light":"dark") : (prefersDark?"light":"dark");
+  document.documentElement.setAttribute("data-theme",next);
+  try{ localStorage.setItem("dt-theme",next); }catch(e){}
+});
+try{
+  const saved=localStorage.getItem("dt-theme");
+  if(saved) document.documentElement.setAttribute("data-theme",saved);
+}catch(e){}
+
+const bar=document.getElementById("progress");
+function onScroll(){
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  bar.style.width = (h>0 ? (window.scrollY/h*100) : 0) + "%";
+}
+window.addEventListener("scroll",onScroll,{passive:true});
+onScroll();
+
+})();
+</script>
+</body>
+</html>

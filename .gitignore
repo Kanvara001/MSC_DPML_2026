@@ -1,0 +1,18 @@
+# Large datasets and training outputs (keep local / on Kaggle)
+research-project/**/Celeb-DF-v2/
+research-project/**/FFD_level3*/
+research-project/**/ffpp_c23_faces/
+*.zip
+*.tar
+*.pt
+*.pth
+*.ckpt
+*.mp4
+*.avi
+*.bak*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+__pycache__/
+.ipynb_checkpoints/

@@ -1,0 +1,1241 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Tree — สไลด์บรรยาย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eceae6;
+  --paper:#ffffff;
+  --ink:#15181d;
+  --muted:#5c6572;
+  --faint:#8a919c;
+  --line:#e3e1dc;
+  --line2:#cdcbc5;
+  --accent:#1550c8;
+  --accent-soft:#e9f0ff;
+  --amber:#b4610d;
+  --amber-soft:#fdf0e0;
+  --green:#0f7a3d;
+  --green-soft:#e4f5ea;
+  --red:#b32318;
+  --red-soft:#fdeceb;
+  --purple:#5b32bd;
+  --purple-soft:#f0eaff;
+  --sans:"Sarabun","Leelawadee UI","Noto Sans Thai",Tahoma,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Consolas,monospace;
+}
+html[data-theme="dark"]{
+  --bg:#0d1014; --paper:#181c22; --ink:#eef1f5; --muted:#a4adba; --faint:#7c8694;
+  --line:#2a3038; --line2:#3c444f;
+  --accent:#79a8ff; --accent-soft:#152340;
+  --amber:#e8a55c; --amber-soft:#332516;
+  --green:#5ed48c; --green-soft:#11301e;
+  --red:#f58f84; --red-soft:#38201d;
+  --purple:#b79bff; --purple-soft:#241d3b;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+[hidden]{display:none!important}
+
+/* ===== viewport & stage ===== */
+#viewport{position:fixed; inset:0 0 58px 0; overflow:hidden}
+#stage{
+  position:absolute; left:50%; top:50%; width:1280px; height:720px;
+  transform-origin:center center;
+  transform:translate(-50%,-50%) scale(1);
+  background:var(--paper);
+  border-radius:16px;
+  box-shadow:0 2px 6px rgba(0,0,0,.06), 0 30px 70px -30px rgba(0,0,0,.35);
+  overflow:hidden;
+}
+html[data-theme="dark"] #stage{box-shadow:0 2px 6px rgba(0,0,0,.5), 0 30px 70px -30px rgba(0,0,0,.9)}
+
+.slide{
+  position:absolute; inset:0;
+  padding:44px 68px 54px;
+  display:none; flex-direction:column;
+  opacity:0;
+}
+.slide.on{display:flex; animation:fade .32s ease both}
+@keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+/* ===== slide chrome ===== */
+.shead{
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:14px; letter-spacing:.14em; text-transform:uppercase; font-weight:600;
+  color:var(--faint); padding-bottom:12px; border-bottom:1px solid var(--line);
+  flex:none;
+}
+.shead .sec{color:var(--accent)}
+.stitle{
+  font-size:38px; line-height:1.25; font-weight:700; letter-spacing:-.01em;
+  margin:22px 0 0; flex:none;
+}
+.stitle .lite{font-weight:400; color:var(--muted)}
+.ssub{font-size:20px; color:var(--muted); margin:9px 0 0; line-height:1.55; flex:none; max-width:96%}
+.sbody{flex:1; min-height:0; margin-top:24px; display:flex; flex-direction:column; justify-content:center; overflow:hidden}
+.eq{display:block}
+.sbody.top{justify-content:flex-start}
+
+/* ===== typography inside slides ===== */
+.slide p{margin:0 0 12px; font-size:20px; line-height:1.62}
+.slide p:last-child{margin-bottom:0}
+.slide ul,.slide ol{margin:0; padding-left:26px; font-size:20px; line-height:1.6}
+.slide li{margin-bottom:10px}
+.slide li:last-child{margin-bottom:0}
+b,strong{font-weight:600}
+.k{font-family:var(--mono); font-size:.92em; background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:1px 7px}
+.hi{color:var(--accent); font-weight:600}
+.hi2{color:var(--amber); font-weight:600}
+.hg{color:var(--green); font-weight:600}
+.hr{color:var(--red); font-weight:600}
+
+/* ===== layout helpers ===== */
+.row{display:flex; gap:26px}
+.row.c2 > *{flex:1 1 0; min-width:0}
+.g2{display:grid; grid-template-columns:1fr 1fr; gap:22px}
+.g3{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+.g4{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+.center{text-align:center}
+.mt{margin-top:20px}
+
+.card{
+  background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:20px 22px;
+}
+.card.plain{background:var(--paper)}
+.card h4{margin:0 0 8px; font-size:19px; font-weight:600}
+.card p{font-size:18px; margin:0; color:var(--muted); line-height:1.55}
+.card .big{font-size:34px; font-weight:700; line-height:1.1}
+
+.callout{
+  border-left:5px solid var(--accent); background:var(--accent-soft);
+  border-radius:0 12px 12px 0; padding:18px 24px;
+}
+.callout.amber{border-left-color:var(--amber); background:var(--amber-soft)}
+.callout.green{border-left-color:var(--green); background:var(--green-soft)}
+.callout.purple{border-left-color:var(--purple); background:var(--purple-soft)}
+.callout .lbl{
+  display:block; font-size:13px; letter-spacing:.13em; text-transform:uppercase;
+  font-weight:700; opacity:.75; margin-bottom:6px;
+}
+.callout p{font-size:19px; margin:0; line-height:1.58}
+
+/* ===== math ===== */
+.eq{
+  font-family:var(--mono); text-align:center;
+  background:var(--bg); border:1px solid var(--line); border-radius:14px;
+  padding:24px 26px; font-size:24px; line-height:1.9;
+}
+.eq.lg{font-size:30px}
+.eq .note{
+  display:block; font-family:var(--sans); font-size:16.5px; color:var(--muted);
+  margin-top:14px; line-height:1.6;
+}
+.eq .hi{color:var(--accent)}
+.eq .hi2{color:var(--amber)}
+.frac{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px; line-height:1.2}
+.frac>span:first-child{border-bottom:1.6px solid currentColor; padding:0 5px}
+.frac>span:last-child{padding:0 5px}
+.sum{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; font-size:.6em; line-height:1.05; margin:0 3px}
+.sum .big{font-size:2.3em; line-height:.82; font-weight:400}
+.steps-eq{font-family:var(--mono); font-size:20px; line-height:2.25; white-space:pre}
+
+/* ===== table ===== */
+table{border-collapse:collapse; width:100%; font-size:16px}
+th,td{padding:3.5px 12px; text-align:left; white-space:nowrap; border-bottom:1px solid var(--line)}
+thead th{
+  font-size:14px; letter-spacing:.05em; font-weight:700; color:var(--muted);
+  background:var(--bg); border-bottom:1.5px solid var(--line2);
+}
+tbody tr:last-child td{border-bottom:0}
+td.m,th.m{font-family:var(--mono); font-size:15px}
+.idx{color:var(--faint); font-family:var(--mono); font-size:13px; width:30px}
+.tag{display:inline-block; padding:0 10px; border-radius:99px; font-size:14.5px; font-weight:600; line-height:22px}
+.tag.yes{background:var(--green-soft); color:var(--green)}
+.tag.no{background:var(--red-soft); color:var(--red)}
+.tbl{border:1px solid var(--line); border-radius:12px; overflow:hidden}
+.tbl.compact table{font-size:13.5px}
+.tbl.compact th,.tbl.compact td{padding:1.5px 10px; font-size:13.5px}
+.tbl.compact .tag{font-size:13px; line-height:19px; padding:0 8px}
+.tbl.compact .idx{font-size:12px}
+th.hl,td.hl{background:var(--accent-soft); color:var(--accent); font-weight:600}
+tr.gA{background:var(--accent-soft)}
+tr.gB{background:var(--amber-soft)}
+tr.gC{background:var(--green-soft)}
+
+/* ===== bars ===== */
+.mix{height:9px; border-radius:99px; background:var(--red); overflow:hidden; display:flex}
+.mix i{display:block; background:var(--green); height:100%}
+.rank{display:grid; gap:11px}
+.rrow{display:grid; grid-template-columns:206px 1fr 74px; gap:14px; align-items:center}
+.rank.tight{gap:7px}
+.rank.tight .tr{height:18px}
+.rank.tight .nm{font-size:12px}
+.rank.tight .vl{font-size:16px}
+.rrow .nm{font-family:var(--mono); font-size:17px; color:var(--muted); white-space:nowrap}
+.rrow .tr{height:26px; background:var(--bg); border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.rrow .fl{height:100%; background:var(--line2); transition:width .7s cubic-bezier(.2,.7,.3,1)}
+.rrow .vl{font-family:var(--mono); font-size:19px; text-align:right; font-weight:500}
+.rrow.win .nm{color:var(--accent); font-weight:600}
+.rrow.win .fl{background:var(--accent)}
+.rrow.win .vl{color:var(--accent); font-weight:600}
+
+/* ===== partition boxes ===== */
+.parts{display:grid; gap:12px}
+.part{border:1px solid var(--line); border-radius:12px; padding:12px 16px; background:var(--bg)}
+.part .ph{display:flex; justify-content:space-between; align-items:baseline; gap:14px}
+.part .pn{font-family:var(--mono); font-size:17px; font-weight:600}
+.part .pc{font-size:16px; color:var(--muted)}
+.part .pe{font-family:var(--mono); font-size:16px; color:var(--muted); margin-top:7px}
+.part .mix{margin-top:8px}
+
+/* ===== chips ===== */
+.chips{display:flex; gap:9px; align-items:center; flex-wrap:wrap}
+.chips .lb{font-size:17px; color:var(--muted); margin-right:2px}
+button.chip{
+  font-family:var(--sans); font-size:17px; font-weight:500;
+  background:var(--paper); color:var(--muted); border:1.5px solid var(--line2);
+  border-radius:99px; padding:5px 18px; cursor:pointer; transition:all .15s;
+}
+button.chip:hover{border-color:var(--accent); color:var(--accent)}
+button.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#fff}
+select{
+  font-family:var(--sans); font-size:17px; padding:6px 12px; border-radius:9px;
+  border:1.5px solid var(--line2); background:var(--paper); color:var(--ink); cursor:pointer;
+}
+button:focus-visible,select:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+input[type=range]{accent-color:var(--accent)}
+
+.result{
+  background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 28%, transparent);
+  border-radius:12px; padding:14px 20px; font-family:var(--mono); font-size:19px; line-height:1.75;
+}
+.result .bg{font-size:26px; font-weight:600; color:var(--accent)}
+
+/* ===== svg ===== */
+svg{display:block; max-width:100%}
+.nb{fill:var(--bg); stroke:var(--line2); stroke-width:1.5}
+.nb.q{fill:var(--accent-soft); stroke:var(--accent)}
+.nb.y{fill:var(--green-soft); stroke:var(--green)}
+.nb.n{fill:var(--red-soft); stroke:var(--red)}
+.nt{fill:var(--ink); font-family:var(--sans); font-size:19px; font-weight:600; text-anchor:middle}
+.nsub{fill:var(--faint); font-family:var(--mono); font-size:13px; text-anchor:middle}
+.el{fill:var(--muted); font-family:var(--mono); font-size:15px; text-anchor:middle}
+.ed{stroke:var(--line2); stroke-width:2; fill:none}
+.ed.lit{stroke:var(--amber); stroke-width:4.5}
+.lit-box{stroke:var(--amber)!important; stroke-width:3.5!important}
+.ax{stroke:var(--line2); stroke-width:1.2}
+.gl{stroke:var(--line); stroke-width:1}
+.at{fill:var(--faint); font-family:var(--mono); font-size:13px}
+.cv{fill:none; stroke:var(--accent); stroke-width:3}
+
+/* ===== title slide ===== */
+.title-slide{padding:0; display:none}
+.title-slide.on{display:flex}
+.title-slide .inner{
+  flex:1; display:flex; flex-direction:column; justify-content:center;
+  padding:0 84px; position:relative;
+}
+.title-slide .eyebrow{
+  font-size:16px; letter-spacing:.2em; text-transform:uppercase; font-weight:700;
+  color:var(--amber); margin-bottom:20px;
+}
+.title-slide h1{font-size:60px; line-height:1.18; margin:0 0 20px; font-weight:700; letter-spacing:-.02em}
+.title-slide h1 .sub2{display:block; font-size:34px; font-weight:400; color:var(--muted); margin-top:12px; letter-spacing:0}
+.title-slide .meta{margin-top:34px; font-size:18px; color:var(--faint); line-height:1.9}
+.title-slide .inner > *:not(svg){max-width:61%}
+.title-slide .deco{position:absolute; right:58px; top:50%; transform:translateY(-50%); opacity:.95}
+
+/* ===== HUD ===== */
+#hud{
+  position:fixed; left:0; right:0; bottom:0; height:58px;
+  display:flex; align-items:center; gap:14px; padding:0 20px;
+  background:var(--bg); border-top:1px solid var(--line);
+}
+#hud button{
+  font-family:var(--sans); font-size:15px; border:1px solid var(--line2); background:var(--paper);
+  color:var(--muted); border-radius:9px; padding:6px 13px; cursor:pointer;
+}
+#hud button:hover{color:var(--ink); border-color:var(--accent)}
+#counter{font-family:var(--mono); font-size:15px; color:var(--muted); min-width:74px; text-align:center}
+#hud > button{flex:none}
+#counter{flex:none}
+#dots{display:flex; gap:5px; flex:1 1 0; min-width:40px; align-items:center; overflow:hidden}
+#dots i{
+  flex:1 1 0; height:6px; border-radius:99px; background:var(--line2); cursor:pointer; transition:background .2s;
+  max-width:44px;
+}
+#dots i:hover{background:var(--muted)}
+#dots i.done{background:var(--faint)}
+#dots i.cur{background:var(--accent)}
+#hint{font-size:14px; color:var(--faint); white-space:nowrap}
+@media(max-width:1200px){ #hint{display:none} }
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+<!-- 1 TITLE -->
+<section class="slide title-slide" data-sec="เปิดเรื่อง">
+  <div class="inner">
+    <div class="eyebrow">Machine Learning · Classification</div>
+    <h1>Decision Tree<span class="sub2">จากตารางข้อมูลดิบ สู่ต้นไม้ตัดสินใจ</span></h1>
+    <div class="meta">
+      ชุดข้อมูล “Who buys computer?” · 14 ตัวอย่าง · ID3 / C4.5<br>
+      MSC DPML 2026
+    </div>
+    <svg class="deco" width="300" height="290" viewBox="0 0 300 290" aria-hidden="true">
+      <path class="ed" d="M150 46 L64 130"></path>
+      <path class="ed" d="M150 46 L150 130"></path>
+      <path class="ed" d="M150 46 L236 130"></path>
+      <path class="ed" d="M64 170 L28 236"></path>
+      <path class="ed" d="M64 170 L104 236"></path>
+      <rect class="nb q" x="108" y="16" width="84" height="34" rx="9"></rect>
+      <rect class="nb q" x="26" y="136" width="76" height="34" rx="9"></rect>
+      <rect class="nb y" x="120" y="136" width="60" height="34" rx="9"></rect>
+      <rect class="nb q" x="192" y="136" width="88" height="34" rx="9"></rect>
+      <rect class="nb n" x="0" y="242" width="70" height="32" rx="9"></rect>
+      <rect class="nb y" x="78" y="242" width="58" height="32" rx="9"></rect>
+      <circle cx="236" cy="252" r="7" fill="var(--line2)"></circle>
+      <circle cx="262" cy="252" r="7" fill="var(--line2)"></circle>
+    </svg>
+  </div>
+</section>
+
+<!-- 2 ROADMAP -->
+<section class="slide" data-sec="เปิดเรื่อง">
+  <h2 class="stitle">แผนการเดินทาง</h2>
+  <div class="sbody">
+    <div class="g3">
+      <div class="card">
+        <div class="big hi">01</div>
+        <h4>รู้จักต้นไม้</h4>
+        <p>ส่วนประกอบ · 2 เฟส · ชุดข้อมูล</p>
+      </div>
+      <div class="card">
+        <div class="big hi">02</div>
+        <h4>Information Gain</h4>
+        <p>วัดว่าคำถามไหนคุ้มที่สุด</p>
+      </div>
+      <div class="card">
+        <div class="big hi">03</div>
+        <h4>สร้าง &amp; ใช้งาน</h4>
+        <p>ทำซ้ำจนได้ต้นไม้ แล้วนำไปทำนาย</p>
+      </div>
+    </div>
+    <div class="callout mt">
+      <span class="lbl">คำถามหลักของคาบนี้</span>
+      <p><b>ควรใช้ attribute ตัวไหนในการแบ่งดี?</b> — เราจะตอบด้วยตัวเลข ไม่ใช่ความรู้สึก</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 ANATOMY -->
+<section class="slide" data-sec="01 · รู้จักต้นไม้">
+  <h2 class="stitle">Decision Tree คืออะไร</h2>
+  <p class="ssub">โมเดลจำแนกประเภทที่มีหน้าตาเป็นผังคำถาม</p>
+  <div class="sbody">
+    <div class="row c2" style="align-items:center; gap:40px">
+      <svg viewBox="0 0 520 330" style="width:100%">
+        <path class="ed" d="M260 58 L120 130"></path>
+        <path class="ed" d="M260 58 L400 130"></path>
+        <path class="ed" d="M120 170 L60 240"></path>
+        <path class="ed" d="M120 170 L190 240"></path>
+        <text class="el" x="168" y="90">ค่า A</text>
+        <text class="el" x="352" y="90">ค่า B</text>
+        <rect class="nb q" x="196" y="24" width="128" height="36" rx="10"></rect>
+        <text class="nt" x="260" y="48">age ?</text>
+        <rect class="nb q" x="54" y="132" width="132" height="36" rx="10"></rect>
+        <text class="nt" x="120" y="156">student ?</text>
+        <rect class="nb y" x="336" y="132" width="128" height="36" rx="10"></rect>
+        <text class="nt" x="400" y="156">Buy</text>
+        <rect class="nb n" x="6" y="242" width="110" height="36" rx="10"></rect>
+        <text class="nt" x="61" y="266">Not-buy</text>
+        <rect class="nb y" x="140" y="242" width="100" height="36" rx="10"></rect>
+        <text class="nt" x="190" y="266">Buy</text>
+        <text class="at" x="336" y="20" text-anchor="start" style="font-size:15px; fill:var(--accent)">← root node</text>
+        <text class="at" x="478" y="156" text-anchor="start" style="font-size:15px; fill:var(--green)">leaf</text>
+        <text class="at" x="200" y="122" text-anchor="start" style="font-size:15px; fill:var(--accent)">internal node</text>
+        <text class="at" x="256" y="266" text-anchor="start" style="font-size:15px; fill:var(--green)">leaf nodes</text>
+      </svg>
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <h4 class="hi">Internal node = คำถาม</h4>
+          <p>ถามเกี่ยวกับ attribute หนึ่งตัว</p>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <h4>Branch = คำตอบ</h4>
+          <p>หนึ่งกิ่งต่อหนึ่งค่าที่เป็นไปได้</p>
+        </div>
+        <div class="card">
+          <h4 class="hg">Leaf node = คำตัดสิน</h4>
+          <p>class label สุดท้าย</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 PHASES -->
+<section class="slide" data-sec="01 · รู้จักต้นไม้">
+  <h2 class="stitle">โมเดลมี 2 เฟส</h2>
+  <div class="sbody">
+    <div class="g2">
+      <div class="card" style="border-left:5px solid var(--accent)">
+        <h4>เฟส 1 — Construction</h4>
+        <p>ป้อน training data ที่รู้คำตอบแล้ว ให้อัลกอริทึมงอกต้นไม้ขึ้นมาเอง</p>
+        <p style="margin-top:10px"><b class="hi">เฟสที่ต้องคำนวณ — เนื้อหาหลักของคาบนี้</b></p>
+      </div>
+      <div class="card" style="border-left:5px solid var(--green)">
+        <h4>เฟส 2 — Prediction</h4>
+        <p>ข้อมูลใหม่ไหลลงจาก root จนตกถึง leaf — ค่าที่ leaf คือคำทำนาย</p>
+        <p style="margin-top:10px"><b class="hg">ไม่มีการคำนวณ เร็วมาก</b></p>
+      </div>
+    </div>
+    <div class="g3 mt">
+      <div class="card center"><div style="font-size:30px; line-height:1.2">↓</div><h4>Top-down</h4><p>เริ่มที่ root แล้วไล่ลงล่าง</p></div>
+      <div class="card center"><div style="font-size:30px; line-height:1.2">↻</div><h4>Recursive</h4><p>ทำซ้ำกับทุกกิ่งที่แตกออกมา</p></div>
+      <div class="card center"><div style="font-size:30px; line-height:1.2">⑂</div><h4>Divide &amp; Conquer</h4><p>แบ่งเป็นก้อนเล็ก แล้วเอาชนะทีละก้อน</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 DATASET -->
+<section class="slide" data-sec="01 · รู้จักต้นไม้">
+  <h2 class="stitle">ชุดข้อมูลฝึกสอน</h2>
+  <p class="ssub">14 tuples · attribute 4 ตัว · class label คือ <span class="k">buys_computer</span></p>
+  <div class="sbody top">
+    <div class="row" style="gap:28px; align-items:flex-start">
+      <div class="tbl" style="flex:0 0 640px">
+        <table>
+          <thead><tr><th class="idx">#</th><th>age</th><th>income</th><th>student</th><th>credit_rating</th><th style="text-align:center">buys</th></tr></thead>
+          <tbody id="dbody"></tbody>
+        </table>
+      </div>
+      <div style="flex:1">
+        <div class="chips" style="margin-bottom:14px">
+          <span class="lb">ระบายสีตาม:</span>
+          <button class="chip" data-sp="none" aria-pressed="true">ไม่แบ่ง</button>
+          <button class="chip" data-sp="age" aria-pressed="false">age</button>
+          <button class="chip" data-sp="student" aria-pressed="false">student</button>
+        </div>
+        <div class="card">
+          <h4>สัดส่วนคลาส</h4>
+          <div class="mix" style="margin:12px 0 10px"><i style="width:64.3%"></i></div>
+          <p><b class="hg">yes 9 แถว</b> &nbsp;·&nbsp; <b class="hr">no 5 แถว</b></p>
+        </div>
+        <div class="callout amber mt">
+          <span class="lbl">สังเกต</span>
+          <p>ยังปนกันมาก — เดา “yes” ตลอดจะผิด 5 ใน 14 ครั้ง</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 WHY WE NEED A NUMBER -->
+<section class="slide" data-sec="01 · รู้จักต้นไม้">
+  <h2 class="stitle">มองด้วยตาเปล่า — ตัดสินไม่ได้</h2>
+  <p class="ssub">attribute ทั้ง 4 ตัวใช้แบ่งได้หมด แต่ตัวไหนดีกว่า? ลองของจริง ระหว่าง <span class="k">student</span> กับ <span class="k">credit_rating</span></p>
+  <div class="sbody">
+    <div class="g2">
+
+      <div class="card plain" style="border-left:5px solid var(--line2)">
+        <h4 style="font-family:var(--mono); font-size:18px">แบ่งด้วย student</h4>
+        <div style="margin-top:14px">
+          <div style="display:flex; justify-content:space-between; font-size:16px; color:var(--muted)">
+            <span class="k">no</span><span>7 แถว · yes 3 / no 4</span>
+          </div>
+          <div class="mix" style="margin-top:6px"><i style="width:42.9%"></i></div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="display:flex; justify-content:space-between; font-size:16px; color:var(--muted)">
+            <span class="k">yes</span><span>7 แถว · yes 6 / no 1</span>
+          </div>
+          <div class="mix" style="margin-top:6px"><i style="width:85.7%"></i></div>
+        </div>
+        <p style="font-size:16px; color:var(--muted); margin-top:13px">มีกองที่เกือบบริสุทธิ์ (6:1) แต่อีกกองยังมั่ว (3:4)</p>
+      </div>
+
+      <div class="card plain" style="border-left:5px solid var(--line2)">
+        <h4 style="font-family:var(--mono); font-size:18px">แบ่งด้วย credit_rating</h4>
+        <div style="margin-top:14px">
+          <div style="display:flex; justify-content:space-between; font-size:16px; color:var(--muted)">
+            <span class="k">fair</span><span>8 แถว · yes 6 / no 2</span>
+          </div>
+          <div class="mix" style="margin-top:6px"><i style="width:75%"></i></div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="display:flex; justify-content:space-between; font-size:16px; color:var(--muted)">
+            <span class="k">excellent</span><span>6 แถว · yes 3 / no 3</span>
+          </div>
+          <div class="mix" style="margin-top:6px"><i style="width:50%"></i></div>
+        </div>
+        <p style="font-size:16px; color:var(--muted); margin-top:13px">กองใหญ่เอนไปทางซื้อ (6:2) แต่อีกกองครึ่งต่อครึ่งพอดี</p>
+      </div>
+
+    </div>
+
+    <div class="callout amber" style="margin-top:18px">
+      <span class="lbl">ปัญหาคือ</span>
+      <p>ต่างคนต่างมอง คนหนึ่งเลือก <span class="k">student</span> อีกคนเลือก <span class="k">credit_rating</span> — <b>เถียงกันได้ทั้งวันโดยไม่มีใครผิด</b></p>
+    </div>
+
+    <div class="callout green" style="margin-top:12px">
+      <span class="lbl">ทางออก</span>
+      <p>ต้องมี <b>ตัวเลขกลาง</b> ที่ใครคำนวณก็ได้เท่ากัน นั่นคือ <b class="hi">Information Gain</b> — เริ่มหน้าถัดไป</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 Info(D) -->
+<section class="slide" data-sec="02 · Information Gain">
+  <h2 class="stitle"><span class="hi">Info(D)</span> — วัดความไม่เป็นระเบียบของข้อมูล</h2>
+  <p class="ssub">มีหน่วยเป็น “บิต” · 0 = บริสุทธิ์คลาสเดียว · 1 = ปนกัน 50:50 เดาไม่ได้เลย</p>
+  <div class="sbody">
+
+    <div class="eq" style="font-size:25px; padding:16px 26px; margin:0">
+      Info(D) &nbsp;=&nbsp; &minus;
+      <span class="sum"><span>m</span><span class="big">&Sigma;</span><span>i=1</span></span>
+      &nbsp;p<sub>i</sub> &middot; log<sub>2</sub>(p<sub>i</sub>)
+      <span class="note" style="margin-top:8px">p<sub>i</sub> = สัดส่วนของคลาส i ใน D &nbsp;=&nbsp;
+      <span style="font-family:var(--mono)">|C<sub>i,D</sub>| / |D|</span></span>
+    </div>
+
+    <div class="row" style="gap:20px; align-items:stretch; margin-top:20px">
+
+      <div class="card plain" style="flex:0 0 262px; display:flex; flex-direction:column; justify-content:center; padding:16px 18px">
+        <div style="font-size:13px; letter-spacing:.13em; text-transform:uppercase; font-weight:700; color:var(--faint); margin-bottom:10px">ข้อมูล D · 14 แถว</div>
+        <div class="tbl" style="font-size:14px">
+          <table style="font-size:14px">
+            <thead><tr><th class="idx">#</th><th style="text-align:center">buys</th><th class="idx">#</th><th style="text-align:center">buys</th></tr></thead>
+            <tbody>
+            <tr><td class="idx">1</td><td style="text-align:center"><span class="tag no">no</span></td><td class="idx">8</td><td style="text-align:center"><span class="tag no">no</span></td></tr>
+            <tr><td class="idx">2</td><td style="text-align:center"><span class="tag no">no</span></td><td class="idx">9</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">3</td><td style="text-align:center"><span class="tag yes">yes</span></td><td class="idx">10</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">4</td><td style="text-align:center"><span class="tag yes">yes</span></td><td class="idx">11</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">5</td><td style="text-align:center"><span class="tag yes">yes</span></td><td class="idx">12</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">6</td><td style="text-align:center"><span class="tag no">no</span></td><td class="idx">13</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">7</td><td style="text-align:center"><span class="tag yes">yes</span></td><td class="idx">14</td><td style="text-align:center"><span class="tag no">no</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card plain" style="flex:1 1 0; display:flex; flex-direction:column; justify-content:center">
+        <div style="font-size:13px; letter-spacing:.13em; text-transform:uppercase; font-weight:700; color:var(--faint); margin-bottom:10px">แทนค่า</div>
+        <div class="steps-eq" style="font-size:16px; line-height:2">p<sub>yes</sub> = 9/14 = 0.6429    p<sub>no</sub> = 5/14 = 0.3571
+
+Info(D) = I(9, 5)
+        = −(9/14)·log₂(9/14) − (5/14)·log₂(5/14)
+        = 0.4098 + 0.5305
+        = <b class="hi">0.940</b></div>
+      </div>
+
+      <div class="card" style="flex:0 0 322px; display:flex; flex-direction:column; justify-content:center; background:var(--accent-soft); border-color:color-mix(in srgb,var(--accent) 30%, transparent)">
+        <div style="font-size:13px; letter-spacing:.13em; text-transform:uppercase; font-weight:700; color:var(--accent); opacity:.8; margin-bottom:10px">ผลลัพธ์</div>
+        <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:4px">
+          <span style="font-family:var(--mono); font-size:40px; font-weight:600; color:var(--accent); line-height:1">0.940</span>
+          <span style="font-size:19px; color:var(--muted)">บิต</span>
+        </div>
+
+        <div style="position:relative; margin-top:20px">
+          <div style="height:12px; border-radius:99px; background:linear-gradient(90deg, var(--green) 0%, #d9a441 50%, var(--red) 100%)"></div>
+          <div style="position:absolute; left:94%; top:-7px; width:3px; height:26px; background:var(--ink); border-radius:2px"></div>
+          <div style="display:flex; justify-content:space-between; font-size:15px; color:var(--muted); margin-top:12px">
+            <span>0 — บริสุทธิ์</span><span>1 — มั่วที่สุด</span>
+          </div>
+        </div>
+
+        <p style="font-size:17px; color:var(--muted); margin:18px 0 0; line-height:1.5">
+          เกือบมั่วที่สุด — นี่คือ “ความไม่รู้เริ่มต้น” ที่เราจะพยายามลด
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 8 Info_A(D) -->
+<section class="slide" data-sec="02 · Information Gain">
+  <h2 class="stitle">แบ่งด้วย A แล้ว เหลือความไม่เป็นระเบียบเท่าไร?</h2>
+  <p class="ssub">แยกเป็นกองตามค่าของ A → หา Info ของแต่ละกอง → ถัวเฉลี่ยแบบถ่วงน้ำหนัก</p>
+  <div class="sbody">
+    <div class="eq lg">
+      <span class="hi">Info<sub>A</sub>(D)</span> &nbsp;=&nbsp;
+      <span class="sum"><span>v</span><span class="big">&Sigma;</span><span>j=1</span></span>
+      &nbsp;<span class="frac"><span>|D<sub>j</sub>|</span><span>|D|</span></span>
+      &nbsp;&times;&nbsp; Info(D<sub>j</sub>)
+      <span class="note">v = จำนวนค่าที่เป็นไปได้ของ A &nbsp;·&nbsp; D<sub>j</sub> = กองที่ j</span>
+    </div>
+    <div class="callout mt">
+      <span class="lbl">ทำไมต้องถ่วงน้ำหนัก</span>
+      <p>กอง 12 แถว กับกอง 2 แถว ไม่ควรมีน้ำหนักเท่ากัน — จึงชั่งด้วยสัดส่วนจำนวนตัวอย่างเสมอ</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 GAIN -->
+<section class="slide" data-sec="02 · Information Gain">
+  <h2 class="stitle">Information Gain</h2>
+  <p class="ssub">ความไม่เป็นระเบียบ “ก่อนถาม” ลบ “หลังถาม” = กำไรที่ได้จากคำถามนั้น</p>
+  <div class="sbody">
+    <div class="eq lg">
+      <span class="hi">Gain(A)</span> &nbsp;=&nbsp; <span class="hi2">Info(D)</span> &nbsp;&minus;&nbsp; Info<sub>A</sub>(D)
+    </div>
+    <div class="callout green mt">
+      <span class="lbl">กฎของ ID3 / C4.5</span>
+      <p>ที่ทุก node คำนวณ Gain ของ attribute ที่เหลือทุกตัว แล้ว <b>เลือกตัวที่สูงที่สุด</b></p>
+    </div>
+    <div class="g3 mt">
+      <div class="card"><h4 class="hg">Gain ≥ 0 เสมอ</h4><p>รู้เพิ่มไม่ทำให้มั่วขึ้น</p></div>
+      <div class="card"><h4 class="hr">Gain = 0</h4><p>ถามแล้วไม่ได้อะไรเลย</p></div>
+      <div class="card"><h4 class="hi">Gain = Info(D)</h4><p>แบ่งครั้งเดียวบริสุทธิ์หมด</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 ALL FOUR -->
+<section class="slide" data-sec="03 · หา Root Node">
+  <h2 class="stitle">คำนวณครบทั้ง 4 attribute</h2>
+  <div class="chips" style="margin-top:12px; flex:none">
+    <span class="lb">ดูวิธีคำนวณของ:</span>
+    <button class="chip" data-ra="age" aria-pressed="true">age</button>
+    <button class="chip" data-ra="income" aria-pressed="false">income</button>
+    <button class="chip" data-ra="student" aria-pressed="false">student</button>
+    <button class="chip" data-ra="credit_rating" aria-pressed="false">credit_rating</button>
+  </div>
+  <div class="sbody">
+    <div class="row" style="gap:20px; align-items:flex-start">
+
+      <div class="tbl compact" style="flex:0 0 424px">
+        <table>
+          <thead><tr>
+            <th class="idx">#</th>
+            <th data-col="age">age</th>
+            <th data-col="income">income</th>
+            <th data-col="student">student</th>
+            <th data-col="credit_rating">credit_rating</th>
+            <th style="text-align:center">buys</th>
+          </tr></thead>
+          <tbody id="calcbody"></tbody>
+        </table>
+      </div>
+
+      <div style="flex:1 1 0; min-width:0">
+        <div class="rank tight" id="rootrank"></div>
+        <div class="card plain" id="rootdetail" style="margin-top:14px; padding:14px 18px"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 13 ROOT CHOSEN -->
+<section class="slide" data-sec="03 · หา Root Node">
+  <h2 class="stitle"><span class="hi">age</span> ได้เป็น Root Node</h2>
+  <div class="sbody">
+    <div class="row" style="gap:34px; align-items:center">
+      <svg viewBox="0 0 560 250" style="flex:0 0 600px">
+        <path class="ed" d="M280 64 L110 150"></path>
+        <path class="ed" d="M280 64 L280 150"></path>
+        <path class="ed" d="M280 64 L450 150"></path>
+        <text class="el" x="168" y="100">&lt;=30</text>
+        <text class="el" x="303" y="112">31…40</text>
+        <text class="el" x="392" y="100">&gt;40</text>
+        <rect class="nb q" x="214" y="26" width="132" height="40" rx="10"></rect>
+        <text class="nt" x="280" y="52">age ?</text>
+        <rect class="nb" x="42" y="152" width="136" height="40" rx="10"></rect>
+        <text class="nt" x="110" y="178" style="font-size:17px">ยังปนกัน</text>
+        <text class="nsub" x="110" y="210">5 แถว · 2 yes / 3 no</text>
+        <text class="nsub" x="110" y="228" style="fill:var(--amber)">Info 0.971 → ถามต่อ</text>
+        <rect class="nb y" x="222" y="152" width="116" height="40" rx="10"></rect>
+        <text class="nt" x="280" y="178">Buy</text>
+        <text class="nsub" x="280" y="210">4 แถว · yes ทั้งหมด</text>
+        <text class="nsub" x="280" y="228" style="fill:var(--green)">Info 0 → leaf</text>
+        <rect class="nb" x="382" y="152" width="136" height="40" rx="10"></rect>
+        <text class="nt" x="450" y="178" style="font-size:17px">ยังปนกัน</text>
+        <text class="nsub" x="450" y="210">5 แถว · 3 yes / 2 no</text>
+        <text class="nsub" x="450" y="228" style="fill:var(--amber)">Info 0.971 → ถามต่อ</text>
+      </svg>
+      <div style="flex:1">
+        <div class="callout">
+          <span class="lbl">ต่อไป</span>
+          <p>แต่ละกองคือปัญหาเดิมในขนาดเล็กลง → ทำขั้นตอนเดิมซ้ำ นี่คือ <b>recursive</b></p>
+        </div>
+        <div class="callout amber mt">
+          <span class="lbl">กติกา</span>
+          <p>attribute ที่ใช้ไปแล้วบนเส้นทางนั้น จะไม่ถูกพิจารณาซ้ำ — เหลือ income, student, credit_rating</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 14 BRANCH <=30 -->
+<section class="slide" data-sec="04 · Recursion">
+  <h2 class="stitle">กิ่งที่ 1 — <span class="k" style="font-size:30px">age &lt;= 30</span></h2>
+  <p class="ssub">5 แถว · yes 2 / no 3 · Info = 0.971 → ยังต้องถามต่อ</p>
+  <div class="sbody">
+    <div class="rank" id="rank-le30"></div>
+    <div class="row" style="gap:18px; margin-top:22px; align-items:flex-start">
+      <div class="tbl compact" style="flex:0 0 348px">
+        <table>
+          <thead><tr><th class="idx">#</th><th>income</th><th class="hl">student</th><th>credit_rating</th><th style="text-align:center">buys</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td class="m">high</td><td class="m hl">no</td><td class="m">fair</td><td style="text-align:center"><span class="tag no">no</span></td></tr>
+            <tr><td class="idx">2</td><td class="m">high</td><td class="m hl">no</td><td class="m">excellent</td><td style="text-align:center"><span class="tag no">no</span></td></tr>
+            <tr><td class="idx">8</td><td class="m">medium</td><td class="m hl">no</td><td class="m">fair</td><td style="text-align:center"><span class="tag no">no</span></td></tr>
+            <tr style="border-top:2px solid var(--line2)"><td class="idx">9</td><td class="m">low</td><td class="m hl">yes</td><td class="m">fair</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">11</td><td class="m">medium</td><td class="m hl">yes</td><td class="m">excellent</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            </tbody>
+        </table>
+      </div>
+      <div class="card" style="flex:1 1 0">
+        <h4 class="hi">วิธีคำนวณของผู้ชนะ</h4>
+        <div class="steps-eq" style="font-size:16px; line-height:1.95">student = no  → I(0,3) = 0
+student = yes → I(2,0) = 0
+
+Info<sub>student</sub>(D) = 0
+Gain = 0.971 − 0 = <b class="hi">0.971</b></div>
+      </div>
+      <div class="callout green" style="flex:1 1 0">
+        <span class="lbl">ผลของ node นี้</span>
+        <p style="font-size:17.5px"><b>student ชนะแบบสมบูรณ์แบบ</b> — แบ่งครั้งเดียวบริสุทธิ์ทั้งสองกอง</p>
+        <p style="font-size:17.5px; margin-top:8px"><span class="k">no</span> → Not-buy · <span class="k">yes</span> → Buy<br>ทั้งคู่เป็น <b>leaf</b> ไม่ต้องถามต่อ</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 BRANCH 31..40 -->
+<section class="slide" data-sec="04 · Recursion">
+  <h2 class="stitle">กิ่งที่ 2 — <span class="k" style="font-size:30px">age = 31…40</span></h2>
+  <p class="ssub">4 แถว · yes ทั้งหมด — ตรวจเงื่อนไขหยุดก่อนคำนวณเสมอ</p>
+  <div class="sbody">
+    <div class="row" style="gap:30px; align-items:center">
+      <div style="flex:0 0 470px" class="tbl">
+        <table>
+          <thead><tr><th class="idx">#</th><th>age</th><th>income</th><th>student</th><th>credit_rating</th><th style="text-align:center">buys</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">3</td><td class="m">31…40</td><td class="m">high</td><td class="m">no</td><td class="m">fair</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">7</td><td class="m">31…40</td><td class="m">low</td><td class="m">yes</td><td class="m">excellent</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">12</td><td class="m">31…40</td><td class="m">medium</td><td class="m">no</td><td class="m">excellent</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">13</td><td class="m">31…40</td><td class="m">high</td><td class="m">yes</td><td class="m">fair</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="flex:1">
+        <div class="mix" style="height:14px; margin-bottom:18px"><i style="width:100%"></i></div>
+        <div class="callout green">
+          <span class="lbl">เข้าเงื่อนไขหยุดข้อ 1</span>
+          <p>ทุก tuple อยู่คลาสเดียวกัน → Info = 0 ไม่มีอะไรให้ลดอีก</p>
+          <p style="margin-top:10px">คำนวณ Gain ของ attribute ใดก็ได้ 0 ทั้งหมด</p>
+        </div>
+        <div class="result mt" style="text-align:center">
+          จบเป็น <span class="bg" style="color:var(--green)">leaf : Buy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 BRANCH >40 -->
+<section class="slide" data-sec="04 · Recursion">
+  <h2 class="stitle">กิ่งที่ 3 — <span class="k" style="font-size:30px">age &gt; 40</span></h2>
+  <p class="ssub">5 แถว · yes 3 / no 2 · Info = 0.971 → หาผู้ชนะอีกครั้ง</p>
+  <div class="sbody">
+    <div class="rank" id="rank-gt40"></div>
+    <div class="row" style="gap:18px; margin-top:22px; align-items:flex-start">
+      <div class="tbl compact" style="flex:0 0 348px">
+        <table>
+          <thead><tr><th class="idx">#</th><th>income</th><th>student</th><th class="hl">credit_rating</th><th style="text-align:center">buys</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">4</td><td class="m">medium</td><td class="m">no</td><td class="m hl">fair</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">5</td><td class="m">low</td><td class="m">yes</td><td class="m hl">fair</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr><td class="idx">10</td><td class="m">medium</td><td class="m">yes</td><td class="m hl">fair</td><td style="text-align:center"><span class="tag yes">yes</span></td></tr>
+            <tr style="border-top:2px solid var(--line2)"><td class="idx">6</td><td class="m">low</td><td class="m">yes</td><td class="m hl">excellent</td><td style="text-align:center"><span class="tag no">no</span></td></tr>
+            <tr><td class="idx">14</td><td class="m">medium</td><td class="m">no</td><td class="m hl">excellent</td><td style="text-align:center"><span class="tag no">no</span></td></tr>
+            </tbody>
+        </table>
+      </div>
+      <div class="card" style="flex:1 1 0">
+        <h4 class="hi">วิธีคำนวณของผู้ชนะ</h4>
+        <div class="steps-eq" style="font-size:16px; line-height:1.95">fair      → I(3,0) = 0
+excellent → I(0,2) = 0
+
+Info<sub>credit</sub>(D) = 0
+Gain = 0.971 − 0 = <b class="hi">0.971</b></div>
+      </div>
+      <div class="callout green" style="flex:1 1 0">
+        <span class="lbl">ผลของ node นี้</span>
+        <p style="font-size:17.5px"><b>credit_rating ชนะ</b> — บริสุทธิ์ทั้งสองกองเช่นกัน</p>
+        <p style="font-size:17.5px; margin-top:8px"><span class="k">fair</span> → Buy · <span class="k">excellent</span> → Not-buy<br>income กับ student ได้แค่ <b>0.020</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 FINAL TREE -->
+<section class="slide" data-sec="05 · ผลลัพธ์">
+  <h2 class="stitle">ต้นไม้ที่ได้</h2>
+  <p class="ssub">ทุกกิ่งเป็น leaf แล้ว recursion จึงยุติ — ลึกเพียง 2 ระดับ</p>
+  <div class="sbody">
+    <svg id="tree" viewBox="0 0 1060 400" style="width:100%; max-height:400px" role="img" aria-label="ต้นไม้ตัดสินใจสุดท้าย">
+      <path id="e-le30" class="ed" d="M530 70 L200 168"></path>
+      <path id="e-mid"  class="ed" d="M530 70 L530 168"></path>
+      <path id="e-gt40" class="ed" d="M530 70 L870 168"></path>
+      <path id="e-stno" class="ed" d="M200 212 L96 312"></path>
+      <path id="e-styes" class="ed" d="M200 212 L304 312"></path>
+      <path id="e-crex" class="ed" d="M870 212 L766 312"></path>
+      <path id="e-crfair" class="ed" d="M870 212 L974 312"></path>
+      <text class="el" x="336" y="108">age &lt;= 30</text>
+      <text class="el" x="576" y="124">31…40</text>
+      <text class="el" x="726" y="108">age &gt; 40</text>
+      <text class="el" x="126" y="258">no</text>
+      <text class="el" x="278" y="258">yes</text>
+      <text class="el" x="780" y="258">excellent</text>
+      <text class="el" x="948" y="258">fair</text>
+      <g id="n-root">
+        <rect class="nb q" x="464" y="26" width="132" height="44" rx="11"></rect>
+        <text class="nt" x="530" y="54">age ?</text>
+        <rect x="436" y="76" width="188" height="18" fill="var(--paper)"></rect>
+        <text class="nsub" x="530" y="90">14 tuples · 9 yes / 5 no</text>
+      </g>
+      <g id="n-student">
+        <rect class="nb q" x="134" y="168" width="132" height="44" rx="11"></rect>
+        <text class="nt" x="200" y="196">student ?</text>
+        <rect x="108" y="218" width="184" height="18" fill="var(--paper)"></rect>
+        <text class="nsub" x="200" y="232">5 tuples · 2 yes / 3 no</text>
+      </g>
+      <g id="n-mid">
+        <rect class="nb y" x="474" y="168" width="112" height="44" rx="11"></rect>
+        <text class="nt" x="530" y="196">Buy</text>
+        <rect x="462" y="218" width="136" height="18" fill="var(--paper)"></rect>
+        <text class="nsub" x="530" y="232">4 tuples · บริสุทธิ์</text>
+      </g>
+      <g id="n-credit">
+        <rect class="nb q" x="786" y="168" width="168" height="44" rx="11"></rect>
+        <text class="nt" x="870" y="196">credit rating ?</text>
+        <rect x="778" y="218" width="184" height="18" fill="var(--paper)"></rect>
+        <text class="nsub" x="870" y="232">5 tuples · 3 yes / 2 no</text>
+      </g>
+      <g id="n-stno">
+        <rect class="nb n" x="32" y="312" width="128" height="44" rx="11"></rect>
+        <text class="nt" x="96" y="340">Not-buy</text>
+        <text class="nsub" x="96" y="376">3 tuples</text>
+      </g>
+      <g id="n-styes">
+        <rect class="nb y" x="250" y="312" width="108" height="44" rx="11"></rect>
+        <text class="nt" x="304" y="340">Buy</text>
+        <text class="nsub" x="304" y="376">2 tuples</text>
+      </g>
+      <g id="n-crex">
+        <rect class="nb n" x="702" y="312" width="128" height="44" rx="11"></rect>
+        <text class="nt" x="766" y="340">Not-buy</text>
+        <text class="nsub" x="766" y="376">2 tuples</text>
+      </g>
+      <g id="n-crfair">
+        <rect class="nb y" x="920" y="312" width="108" height="44" rx="11"></rect>
+        <text class="nt" x="974" y="340">Buy</text>
+        <text class="nsub" x="974" y="376">3 tuples</text>
+      </g>
+    </svg>
+    <div class="callout" style="margin-top:10px">
+      <span class="lbl">สังเกต</span>
+      <p>ใช้ attribute เพียง 3 จาก 4 ตัว — <span class="k">income</span> ไม่เคยชนะจึงไม่ปรากฏ นี่คือ <b>feature selection อัตโนมัติ</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- 18 RULES -->
+<section class="slide" data-sec="05 · ผลลัพธ์">
+  <h2 class="stitle">แปลงต้นไม้เป็นกฎ IF–THEN</h2>
+  <p class="ssub">หนึ่งเส้นทางจาก root ถึง leaf = หนึ่งกฎ</p>
+  <div class="sbody">
+    <div class="card plain">
+      <div class="steps-eq" style="font-size:19px; line-height:2.5">1.  <b>IF</b> age ≤ 30    <b>AND</b> student = no           <b>THEN</b> <span class="hr">Not-buy</span>
+2.  <b>IF</b> age ≤ 30    <b>AND</b> student = yes          <b>THEN</b> <span class="hg">Buy</span>
+3.  <b>IF</b> age = 31…40                                 <b>THEN</b> <span class="hg">Buy</span>
+4.  <b>IF</b> age &gt; 40     <b>AND</b> credit_rating = fair      <b>THEN</b> <span class="hg">Buy</span>
+5.  <b>IF</b> age &gt; 40     <b>AND</b> credit_rating = excellent <b>THEN</b> <span class="hr">Not-buy</span></div>
+    </div>
+    <div class="callout purple mt">
+      <span class="lbl">จุดแข็ง</span>
+      <p><b>อ่านออกได้ (interpretability)</b> — อธิบายได้ว่าโมเดลตัดสินใจแบบนี้เพราะอะไร ต่างจาก neural network</p>
+    </div>
+  </div>
+</section>
+
+<!-- 19 PREDICTION -->
+<section class="slide" data-sec="05 · ผลลัพธ์">
+  <h2 class="stitle">ทดลองทำนายข้อมูลใหม่</h2>
+  <div class="sbody">
+    <div class="chips" style="margin-bottom:16px">
+      <span class="lb">age</span>
+      <select id="p-age"><option value="&lt;=30">&lt;= 30</option><option value="31..40">31…40</option><option value="&gt;40">&gt; 40</option></select>
+      <span class="lb">income</span>
+      <select id="p-income"><option value="low">low</option><option value="medium">medium</option><option value="high">high</option></select>
+      <span class="lb">student</span>
+      <select id="p-student"><option value="yes">yes</option><option value="no">no</option></select>
+      <span class="lb">credit_rating</span>
+      <select id="p-credit"><option value="excellent">excellent</option><option value="fair">fair</option></select>
+      <span style="font-size:15px; color:var(--faint); margin-left:6px">ค่าเริ่มต้น = test data จากสไลด์</span>
+    </div>
+    <div class="row" style="gap:26px; align-items:center">
+      <svg id="tree2" viewBox="0 0 700 300" style="flex:0 0 640px">
+        <path id="q-le30" class="ed" d="M350 56 L140 130"></path>
+        <path id="q-mid"  class="ed" d="M350 56 L350 130"></path>
+        <path id="q-gt40" class="ed" d="M350 56 L568 130"></path>
+        <path id="q-stno" class="ed" d="M140 166 L66 240"></path>
+        <path id="q-styes" class="ed" d="M140 166 L214 240"></path>
+        <path id="q-crex" class="ed" d="M568 166 L494 240"></path>
+        <path id="q-crfair" class="ed" d="M568 166 L642 240"></path>
+        <text class="el" x="212" y="86">&lt;=30</text>
+        <text class="el" x="382" y="100">31…40</text>
+        <text class="el" x="490" y="86">&gt;40</text>
+        <text class="el" x="86" y="200">no</text>
+        <text class="el" x="196" y="200">yes</text>
+        <text class="el" x="498" y="200">excellent</text>
+        <text class="el" x="628" y="200">fair</text>
+        <g id="q-root"><rect class="nb q" x="292" y="20" width="116" height="36" rx="10"></rect><text class="nt" x="350" y="44" style="font-size:17px">age ?</text></g>
+        <g id="q-student"><rect class="nb q" x="78" y="130" width="124" height="36" rx="10"></rect><text class="nt" x="140" y="154" style="font-size:17px">student ?</text></g>
+        <g id="q-mid-n"><rect class="nb y" x="302" y="130" width="96" height="36" rx="10"></rect><text class="nt" x="350" y="154" style="font-size:17px">Buy</text></g>
+        <g id="q-credit"><rect class="nb q" x="492" y="130" width="152" height="36" rx="10"></rect><text class="nt" x="568" y="154" style="font-size:17px">credit rating ?</text></g>
+        <g id="q-stno-n"><rect class="nb n" x="10" y="240" width="112" height="36" rx="10"></rect><text class="nt" x="66" y="264" style="font-size:17px">Not-buy</text></g>
+        <g id="q-styes-n"><rect class="nb y" x="166" y="240" width="96" height="36" rx="10"></rect><text class="nt" x="214" y="264" style="font-size:17px">Buy</text></g>
+        <g id="q-crex-n"><rect class="nb n" x="438" y="240" width="112" height="36" rx="10"></rect><text class="nt" x="494" y="264" style="font-size:17px">Not-buy</text></g>
+        <g id="q-crfair-n"><rect class="nb y" x="594" y="240" width="96" height="36" rx="10"></rect><text class="nt" x="642" y="264" style="font-size:17px">Buy</text></g>
+      </svg>
+      <div style="flex:1" id="p-out"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 WRAP UP -->
+<section class="slide" data-sec="สรุป">
+  <h2 class="stitle">สรุป และก้าวต่อไป</h2>
+  <div class="sbody">
+    <div class="g3">
+      <div class="card"><h4 class="hi">Info(D)</h4><p>วัดความไม่เป็นระเบียบ ยิ่งต่ำยิ่งบริสุทธิ์</p></div>
+      <div class="card"><h4 class="hi">Information Gain</h4><p>Info(D) − Info<sub>A</sub>(D) · เลือกตัวที่สูงสุด</p></div>
+      <div class="card"><h4 class="hi">Recursion</h4><p>ทำซ้ำทุกกิ่ง จนเข้าเงื่อนไขหยุด</p></div>
+    </div>
+    <div class="callout purple mt">
+      <span class="lbl">ข้อจำกัดที่ต้องเรียนต่อ</span>
+      <p>Information Gain <b>ลำเอียงเข้าหา attribute ที่มีค่าเยอะ ๆ</b> — เช่น <span class="k">customer_id</span> ที่แบ่งแล้วบริสุทธิ์หมด แต่ทำนายข้อมูลใหม่ไม่ได้</p>
+    </div>
+    <div class="g3 mt">
+      <div class="card plain" style="border:1px dashed var(--line2)"><h4>Gain Ratio</h4><p>C4.5 — ลงโทษ attribute ที่แตกกิ่งเยอะ</p></div>
+      <div class="card plain" style="border:1px dashed var(--line2)"><h4>Gini Index</h4><p>CART — แตกกิ่งสองทางเสมอ</p></div>
+      <div class="card plain" style="border:1px dashed var(--line2)"><h4>Pruning</h4><p>ตัดกิ่ง แก้ overfitting</p></div>
+    </div>
+  </div>
+</section>
+
+</div></div><!-- /stage /viewport -->
+
+<div id="hud">
+  <button id="prev" title="สไลด์ก่อนหน้า (←)">◀ ก่อนหน้า</button>
+  <span id="counter"></span>
+  <button id="next" title="สไลด์ถัดไป (→ หรือ Space)">ถัดไป ▶</button>
+  <div id="dots"></div>
+  <span id="hint">← → เปลี่ยนสไลด์ · F เต็มจอ · D สลับโหมดมืด</span>
+  <button id="theme" title="สลับโหมดสว่าง/มืด">◐</button>
+  <button id="full" title="เต็มจอ (F)">⛶ เต็มจอ</button>
+</div>
+<script>
+(function(){
+"use strict";
+
+/* ===================== DATA ===================== */
+const ATTRS=["age","income","student","credit_rating"];
+const ORDER={age:["<=30","31..40",">40"],income:["high","medium","low"],student:["no","yes"],credit_rating:["fair","excellent"]};
+const DISP={"<=30":"<=30","31..40":"31…40",">40":">40"};
+const D=[
+ {age:"<=30",  income:"high",  student:"no", credit_rating:"fair",      buys:"no"},
+ {age:"<=30",  income:"high",  student:"no", credit_rating:"excellent", buys:"no"},
+ {age:"31..40",income:"high",  student:"no", credit_rating:"fair",      buys:"yes"},
+ {age:">40",   income:"medium",student:"no", credit_rating:"fair",      buys:"yes"},
+ {age:">40",   income:"low",   student:"yes",credit_rating:"fair",      buys:"yes"},
+ {age:">40",   income:"low",   student:"yes",credit_rating:"excellent", buys:"no"},
+ {age:"31..40",income:"low",   student:"yes",credit_rating:"excellent", buys:"yes"},
+ {age:"<=30",  income:"medium",student:"no", credit_rating:"fair",      buys:"no"},
+ {age:"<=30",  income:"low",   student:"yes",credit_rating:"fair",      buys:"yes"},
+ {age:">40",   income:"medium",student:"yes",credit_rating:"fair",      buys:"yes"},
+ {age:"<=30",  income:"medium",student:"yes",credit_rating:"excellent", buys:"yes"},
+ {age:"31..40",income:"medium",student:"no", credit_rating:"excellent", buys:"yes"},
+ {age:"31..40",income:"high",  student:"yes",credit_rating:"fair",      buys:"yes"},
+ {age:">40",   income:"medium",student:"no", credit_rating:"excellent", buys:"no"}
+];
+const f3=n=>(Math.round(n*1000)/1000).toFixed(3);
+const lg=p=>p<=0?0:Math.log2(p);
+function counts(s){let y=0,n=0;s.forEach(r=>r.buys==="yes"?y++:n++);return{y,n,t:s.length};}
+function entYN(y,n){const t=y+n;if(!t)return 0;const a=y/t,b=n/t;return -(a>0?a*lg(a):0)-(b>0?b*lg(b):0);}
+function ent(s){const c=counts(s);return entYN(c.y,c.n);}
+function gainOf(set,attr){
+  const base=ent(set),parts=[];
+  ORDER[attr].forEach(v=>{
+    const sub=set.filter(r=>r[attr]===v);
+    if(sub.length){const c=counts(sub);parts.push({v,t:c.t,y:c.y,n:c.n,H:entYN(c.y,c.n)});}
+  });
+  let info=0;parts.forEach(p=>info+=p.t/set.length*p.H);
+  return {base,info,gain:base-info,parts,N:set.length};
+}
+
+/* ===================== DATA TABLE (slide 5) ===================== */
+const tb=document.getElementById("dbody");
+D.forEach((r,i)=>{
+  const tr=document.createElement("tr");
+  tr.dataset.i=i;
+  tr.innerHTML=`<td class="idx">${i+1}</td><td class="m">${DISP[r.age]}</td><td class="m">${r.income}</td>`+
+               `<td class="m">${r.student}</td><td class="m">${r.credit_rating}</td>`+
+               `<td style="text-align:center"><span class="tag ${r.buys}">${r.buys}</span></td>`;
+  tb.appendChild(tr);
+});
+function paint(attr){
+  const rows=[...tb.querySelectorAll("tr")];
+  rows.forEach(tr=>tr.classList.remove("gA","gB","gC"));
+  if(attr==="none")return;
+  const cls=["gA","gB","gC"];
+  rows.forEach(tr=>{
+    const idx=ORDER[attr].indexOf(D[+tr.dataset.i][attr]);
+    if(idx>=0)tr.classList.add(cls[idx]);
+  });
+}
+document.querySelectorAll("[data-sp]").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("[data-sp]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+    paint(b.dataset.sp);
+  });
+});
+
+/* ===================== RANK BARS ===================== */
+function rank(set,attrs,el){
+  const res=attrs.map(a=>({a,...gainOf(set,a)})).sort((x,y)=>y.gain-x.gain);
+  const mx=Math.max(...res.map(r=>r.gain),0.0001);
+  el.innerHTML=res.map((r,i)=>`
+    <div class="rrow ${i===0&&r.gain>0.0005?"win":""}">
+      <div class="nm">Gain(${r.a})</div>
+      <div class="tr"><div class="fl" style="width:${Math.max(r.gain/mx*100,2)}%"></div></div>
+      <div class="vl">${f3(r.gain)}</div>
+    </div>`).join("");
+}
+rank(D,ATTRS,document.getElementById("rootrank"));
+rank(D.filter(r=>r.age==="<=30"),["income","student","credit_rating"],document.getElementById("rank-le30"));
+rank(D.filter(r=>r.age===">40"),["income","student","credit_rating"],document.getElementById("rank-gt40"));
+
+/* ===================== ROOT DETAIL (slide 15) ===================== */
+const NOTE={
+  age:"กอง 31…40 ให้ Info = 0 มาฟรี ๆ ค่าเฉลี่ยถ่วงน้ำหนักจึงต่ำสุด → Gain สูงสุด",
+  income:"ทั้งสามกอง Info ยังสูงใกล้เดิม (0.81–1.00) แปลว่าแทบไม่ช่วยแยก yes/no",
+  student:"กอง yes เอนไปทาง Buy ชัด (6:1) แต่กอง no ยังมั่ว (3:4) จึงได้อันดับสอง",
+  credit_rating:"กอง excellent คือ 3:3 พอดี = Info 1.0 เต็ม แย่ที่สุดเท่าที่เป็นไปได้"
+};
+const det=document.getElementById("rootdetail");
+const calcbody=document.getElementById("calcbody");
+
+/* ตารางข้อมูล 14 แถว จัดกลุ่มตาม attribute ที่เลือก + ไฮไลต์คอลัมน์นั้น */
+function paintCalcTable(attr){
+  if(!calcbody) return;
+  const idx=new Map(D.map((r,i)=>[r,i+1]));
+  let html="", first=true;
+  ORDER[attr].forEach(v=>{
+    const sub=D.filter(r=>r[attr]===v);
+    if(!sub.length) return;
+    sub.forEach((r,k)=>{
+      const sep=(!first&&k===0)?' style="border-top:2px solid var(--line2)"':"";
+      html+=`<tr${sep}><td class="idx">${idx.get(r)}</td>`+
+        ATTRS.map(c=>`<td class="m${c===attr?" hl":""}">${DISP[r[c]]||r[c]}</td>`).join("")+
+        `<td style="text-align:center"><span class="tag ${r.buys}">${r.buys}</span></td></tr>`;
+    });
+    first=false;
+  });
+  calcbody.innerHTML=html;
+  document.querySelectorAll("[data-col]").forEach(th=>{
+    th.classList.toggle("hl", th.dataset.col===attr);
+  });
+}
+
+function showDetail(a){
+  paintCalcTable(a);
+  const g=gainOf(D,a), N=g.N;
+  /* ขั้นที่ 1 — Info ของแต่ละกอง แสดงการแทนค่าเต็ม */
+  const lines=g.parts.map(p=>{
+    const head=`${(a+" = "+(DISP[p.v]||p.v)).padEnd(22)} ${p.t} แถว · yes ${p.y} / no ${p.n}`;
+    const body=(p.y===0||p.n===0)
+      ? `   I(${p.y},${p.n}) = <b class="hg">0</b>   ← กองบริสุทธิ์ มีคลาสเดียว`
+      : `   I(${p.y},${p.n}) = −(${p.y}/${p.t})·log₂(${p.y}/${p.t}) − (${p.n}/${p.t})·log₂(${p.n}/${p.t}) = <b>${f3(p.H)}</b>`;
+    return head+"\n"+body;
+  }).join("\n");
+  /* ขั้นที่ 2 — ถัวเฉลี่ยถ่วงน้ำหนัก แสดงทั้งรูปเศษส่วนและรูปทศนิยม */
+  const pad=" ".repeat(("Info"+a+"(D) = ").length-3);
+  const t1=g.parts.map(p=>`(${p.t}/${N})·I(${p.y},${p.n})`).join(" + ");
+  const t2=g.parts.map(p=>`(${f3(p.t/N)})(${f3(p.H)})`).join(" + ");
+  det.innerHTML=
+    `<div class="steps-eq" style="font-size:13.5px; line-height:1.68">${lines}
+
+Info<sub>${a}</sub>(D) = ${t1}
+${pad} = ${t2}
+${pad} = <b>${f3(g.info)}</b>
+Gain(${a}) = 0.940 − ${f3(g.info)} = <b class="hi" style="font-size:20px">${f3(g.gain)}</b></div>
+     <p style="font-size:15px; color:var(--muted); margin:9px 0 0; line-height:1.45">${NOTE[a]}</p>`;
+}
+document.querySelectorAll("[data-ra]").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("[data-ra]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+    showDetail(b.dataset.ra);
+  });
+});
+showDetail("age");
+
+/* ===================== PREDICTION (slide 22) ===================== */
+let lit=[];
+function clearLit(){
+  lit.forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.remove("lit");
+    const r=el.querySelector("rect.nb");if(r)r.classList.remove("lit-box");
+  });
+  lit=[];
+}
+function light(ids){
+  ids.forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    if(el.tagName.toLowerCase()==="path")el.classList.add("lit");
+    else{const r=el.querySelector("rect.nb");if(r)r.classList.add("lit-box");}
+    lit.push(id);
+  });
+}
+function predict(){
+  clearLit();
+  const age=document.getElementById("p-age").value;
+  const inc=document.getElementById("p-income").value;
+  const stu=document.getElementById("p-student").value;
+  const cr =document.getElementById("p-credit").value;
+  const path=["q-root"],steps=[],used=[];let ans;
+  if(age==="31..40"){
+    path.push("q-mid","q-mid-n");
+    steps.push(`ถาม <b>age?</b> → ได้ <span class="k">31…40</span> → เดินกิ่งกลาง`);
+    steps.push(`ถึง leaf ทันที ไม่ต้องถามอะไรอีก`);
+    used.push("age");ans="Buy";
+  }else if(age==="<=30"){
+    path.push("q-le30","q-student");
+    steps.push(`ถาม <b>age?</b> → ได้ <span class="k">&lt;=30</span> → เดินกิ่งซ้าย`);
+    steps.push(`ถาม <b>student?</b> → ได้ <span class="k">${stu}</span>`);
+    used.push("age","student");
+    if(stu==="yes"){path.push("q-styes","q-styes-n");ans="Buy";}
+    else{path.push("q-stno","q-stno-n");ans="Not-buy";}
+  }else{
+    path.push("q-gt40","q-credit");
+    steps.push(`ถาม <b>age?</b> → ได้ <span class="k">&gt;40</span> → เดินกิ่งขวา`);
+    steps.push(`ถาม <b>credit rating?</b> → ได้ <span class="k">${cr}</span>`);
+    used.push("age","credit_rating");
+    if(cr==="fair"){path.push("q-crfair","q-crfair-n");ans="Buy";}
+    else{path.push("q-crex","q-crex-n");ans="Not-buy";}
+  }
+  light(path);
+  const unused=ATTRS.filter(a=>!used.includes(a));
+  const col=ans==="Buy"?"var(--green)":"var(--red)";
+  document.getElementById("p-out").innerHTML=
+    `<div class="card" style="margin-bottom:14px">
+       <h4>tuple ที่ทำนาย</h4>
+       <p style="font-family:var(--mono); font-size:17px; color:var(--ink); margin-top:6px">(${DISP[age]}, ${inc}, ${stu}, ${cr})</p>
+     </div>
+     <ol style="font-size:18px; margin:0 0 14px; padding-left:24px">${steps.map(s=>`<li>${s}</li>`).join("")}</ol>
+     <div class="result" style="text-align:center">
+       คำทำนาย: <span class="bg" style="color:${col}">${ans}</span>
+       <div style="font-family:var(--sans); font-size:16px; color:var(--muted); margin-top:4px">
+         ใช้คำถามเพียง ${used.length} ครั้ง · ไม่ได้ใช้: ${unused.length?unused.join(", "):"—"}
+       </div>
+     </div>`;
+}
+["p-age","p-income","p-student","p-credit"].forEach(id=>document.getElementById(id).addEventListener("change",predict));
+predict();
+
+/* ===================== DECK ENGINE ===================== */
+const slides=[...document.querySelectorAll(".slide")];
+const N=slides.length;
+let cur=0;
+const counter=document.getElementById("counter");
+const dots=document.getElementById("dots");
+slides.forEach((s,i)=>{
+  const d=document.createElement("i");
+  d.title="สไลด์ "+(i+1);
+  d.addEventListener("click",()=>go(i));
+  dots.appendChild(d);
+  const head=s.querySelector(".shead");
+  if(head) return;
+  if(!s.classList.contains("title-slide")){
+    const h=document.createElement("div");
+    h.className="shead";
+    h.innerHTML=`<span class="sec">${s.dataset.sec||""}</span><span>${i+1} / ${N}</span>`;
+    s.insertBefore(h,s.firstChild);
+  }
+});
+function go(i){
+  cur=Math.max(0,Math.min(N-1,i));
+  slides.forEach((s,k)=>s.classList.toggle("on",k===cur));
+  counter.textContent=(cur+1)+" / "+N;
+  [...dots.children].forEach((d,k)=>{
+    d.classList.toggle("cur",k===cur);
+    d.classList.toggle("done",k<cur);
+  });
+}
+document.getElementById("prev").addEventListener("click",()=>go(cur-1));
+document.getElementById("next").addEventListener("click",()=>go(cur+1));
+document.addEventListener("keydown",e=>{
+  const tag=(e.target.tagName||"").toLowerCase();
+  if(tag==="select"||tag==="input")return;
+  if(e.key==="ArrowRight"||e.key==="PageDown"||e.key===" "){e.preventDefault();go(cur+1);}
+  else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();go(cur-1);}
+  else if(e.key==="Home"){go(0);}
+  else if(e.key==="End"){go(N-1);}
+  else if(e.key==="f"||e.key==="F"){toggleFull();}
+  else if(e.key==="d"||e.key==="D"){toggleTheme();}
+});
+
+/* scale stage to fit */
+const stage=document.getElementById("stage");
+function fit(){
+  const vp=document.getElementById("viewport");
+  const s=Math.min((vp.clientWidth-28)/1280,(vp.clientHeight-20)/720);
+  stage.style.transform="translate(-50%,-50%) scale("+s+")";
+}
+window.addEventListener("resize",fit);
+fit();
+
+/* fullscreen */
+function toggleFull(){
+  if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.(); }
+  else { document.exitFullscreen?.(); }
+}
+document.getElementById("full").addEventListener("click",toggleFull);
+document.addEventListener("fullscreenchange",()=>setTimeout(fit,60));
+
+/* theme */
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute("data-theme");
+  const next=cur==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next);
+  try{localStorage.setItem("dtslides-theme",next);}catch(e){}
+}
+document.getElementById("theme").addEventListener("click",toggleTheme);
+try{
+  const sv=localStorage.getItem("dtslides-theme");
+  if(sv)document.documentElement.setAttribute("data-theme",sv);
+}catch(e){}
+
+go(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+model,FFpp_AUC,FFpp_ACC,CDF_AUC,CDF_ACC,WDF_AUC,WDF_ACC,avg_cross_AUC,avg_cross_ACC,note
+paper_reported,99.36,,90.46,83.20,,,,,Table II / Table IX (paper)
+author_checkpoint_our_pipeline,99.24,97.14,90.05,82.82,89.78,72.33,89.92,77.57,Final-mainbranch.tar · main branch · 3e_V2
+ours_cfb_full,96.57,91.71,84.97,71.04,84.44,68.98,84.70,70.01,3b best.pth · main branch · 3e_V2

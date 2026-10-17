@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Preparation, condensed — Session 5: Labels, reduction, synthesis and governance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#8A6A12;
+  --accent-soft:#F8F1DF;
+  --accent-ink:#6B520D;
+  --paper:#EDF1F6;
+  --card:#FFFFFF;
+  --ink:#111823;
+  --ink-2:#41505F;
+  --ink-3:#78859A;
+  --rule:#D3DCE6;
+  --rule-2:#E7EDF3;
+  --shell:#171E28;
+  --shell-2:#212A36;
+  --shell-3:#2E3946;
+  --ok:#0F7A6A;
+  --warn:#A3384F;
+  --f-ui:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --f-body:"Spectral",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --f-thai:"Noto Sans Thai","Archivo",sans-serif;
+  --W:1280px; --H:720px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--shell);color:var(--ink);font-family:var(--f-body);overflow:hidden;
+  -webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none;padding:0;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ============================ CHROME ============================ */
+.bar{
+  position:fixed;left:0;right:0;top:0;height:44px;z-index:40;
+  background:var(--shell-2);border-bottom:1px solid #000;
+  display:flex;align-items:center;gap:10px;padding:0 12px;color:#C6D1DD;
+}
+.bar .ch{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  background:var(--accent);color:#fff;padding:4px 8px;border-radius:4px;font-weight:600;flex:none;
+}
+.bar .tt{font-family:var(--f-ui);font-size:13px;font-weight:600;color:#EAF0F6;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.bar .sec{font-family:var(--f-mono);font-size:10.5px;color:#7C8C9C;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
+.bar .grp{display:flex;gap:4px;align-items:center;flex:none}
+.tb{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;padding:6px 9px;
+  border:1px solid var(--shell-3);border-radius:5px;color:#A9B7C5;background:transparent;white-space:nowrap;
+}
+.tb:hover{background:var(--shell-3);color:#fff}
+.tb[aria-pressed="true"]{background:#E9EEF3;color:var(--shell);border-color:#E9EEF3;font-weight:600}
+.tb.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.count{font-family:var(--f-mono);font-size:11px;color:#8FA0B0;padding:0 4px;flex:none}
+.count b{color:#fff}
+
+/* ============================ STAGE ============================ */
+.stage{
+  position:fixed;inset:44px 0 30px 0;display:grid;place-items:center;overflow:hidden;
+  background:var(--shell);
+}
+body.notes-on .stage{right:340px}
+.holder{width:var(--W);height:var(--H);transform-origin:center center;position:relative}
+.slide{
+  width:var(--W);height:var(--H);background:var(--card);position:relative;overflow:hidden;
+  box-shadow:0 12px 48px rgba(0,0,0,.45);display:flex;flex-direction:column;
+}
+
+/* progress */
+.prog{position:fixed;left:0;right:0;bottom:0;height:30px;z-index:40;background:var(--shell-2);
+  border-top:1px solid #000;display:flex;align-items:center;gap:10px;padding:0 12px}
+.track{flex:1;height:6px;background:#0D131A;border-radius:3px;position:relative;overflow:hidden;cursor:pointer}
+.fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:3px;transition:width .15s}
+.ticks{position:absolute;inset:0}
+.ticks i{position:absolute;top:0;bottom:0;width:1px;background:#33404E}
+.prog .hint{font-family:var(--f-mono);font-size:9.5px;color:#5F6E7D;letter-spacing:.05em;white-space:nowrap}
+.timer{font-family:var(--f-mono);font-size:11px;color:#8FA0B0;min-width:52px;text-align:right}
+
+/* ============================ SLIDE LAYOUTS ============================ */
+.pad{padding:52px 64px 46px}
+.slide{--k:1}
+.slide .kick{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:10px;
+}
+.slide .kick .dot{width:22px;height:2px;background:var(--accent);display:inline-block}
+.slide h2{
+  font-family:var(--f-ui);font-size:calc(37px * var(--k));line-height:1.14;letter-spacing:-.022em;
+  font-weight:650;margin:0 0 6px;color:var(--ink);
+}
+.slide h2.sm{font-size:calc(31px * var(--k))}
+.slide .lead{
+  font-size:calc(18.5px * var(--k));line-height:1.5;color:var(--ink-2);margin:calc(12px * var(--k)) 0 0;max-width:96ch;font-style:italic;
+}
+.slide .lead b{font-style:normal;color:var(--ink);font-weight:600}
+.rule{height:2px;background:var(--accent);width:64px;margin:calc(16px * var(--k)) 0 calc(20px * var(--k));flex:none}
+
+ul.bul{list-style:none;margin:0;padding:0}
+ul.bul>li{
+  position:relative;padding:0 0 0 24px;margin:0 0 calc(13px * var(--k));font-size:calc(17.5px * var(--k));line-height:1.48;color:var(--ink-2);
+}
+ul.bul>li:before{
+  content:"";position:absolute;left:3px;top:11px;width:9px;height:2px;background:var(--accent);
+}
+ul.bul>li b,ul.bul>li strong{color:var(--ink);font-weight:600}
+ul.bul>li em{font-style:italic;color:var(--ink)}
+ul.bul.tight>li{margin-bottom:calc(9px * var(--k));font-size:calc(16.5px * var(--k))}
+ul.bul.sm>li{font-size:calc(15.5px * var(--k));margin-bottom:calc(8px * var(--k));padding-left:20px}
+ul.bul.sm>li:before{width:7px;top:10px}
+.k{font-family:var(--f-mono);font-size:.86em;background:#EEF3F8;border:1px solid var(--rule-2);
+  border-radius:3px;padding:1px 5px;color:var(--ink)}
+.cite{font-family:var(--f-mono);font-size:.8em;color:var(--ink-3);letter-spacing:.01em;white-space:nowrap}
+.th{font-family:var(--f-thai)}
+
+/* two column body */
+.body{flex:1;min-height:0;display:flex;gap:34px}
+.body.v{flex-direction:column;gap:16px}
+.col{flex:1;min-width:0}
+.col.narrow{flex:0 0 40%}
+.col.wide{flex:0 0 58%}
+.figwrap{display:flex;flex-direction:column;justify-content:center;min-width:0;min-height:0;flex:1 1 auto}
+.figbox{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
+.figbox svg{width:100%;height:100%;max-height:100%;display:block}
+.figcap{
+  font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);margin-top:10px;line-height:1.45;
+  border-top:1px solid var(--rule-2);padding-top:8px;
+}
+.figcap b{color:var(--ink-2);font-weight:600}
+
+/* columns layout */
+.cols{display:grid;gap:18px;flex:1;min-height:0}
+.cols.n2{grid-template-columns:1fr 1fr}
+.cols.n3{grid-template-columns:1fr 1fr 1fr}
+.cols.n4{grid-template-columns:repeat(4,1fr)}
+.cbox{
+  border:1px solid var(--rule);border-radius:9px;padding:calc(16px * var(--k)) 17px;background:#FBFDFE;
+  display:flex;flex-direction:column;min-height:0;overflow:hidden;
+}
+.cbox.acc{border-color:var(--accent);background:var(--accent-soft)}
+.cbox h4{
+  font-family:var(--f-ui);font-size:calc(15px * var(--k));font-weight:650;margin:0 0 4px;letter-spacing:-.01em;color:var(--ink);
+}
+.cbox .sub{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent-ink);margin:0 0 9px;font-weight:600}
+.cbox p{margin:0 0 calc(8px * var(--k));font-size:calc(14.5px * var(--k));line-height:1.46;color:var(--ink-2)}
+.cbox ul.bul>li{font-size:calc(14.5px * var(--k));margin-bottom:calc(7px * var(--k));padding-left:18px}
+.cbox ul.bul>li:before{width:7px;top:9px}
+
+/* title slide */
+.slide.title{background:var(--shell);color:#E9EFF5;justify-content:center}
+.slide.title .pad{padding:0 78px}
+.slide.title .no{
+  font-family:var(--f-mono);font-size:13px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;margin:0 0 20px;
+}
+.slide.title h1{
+  font-family:var(--f-ui);font-size:60px;line-height:1.06;letter-spacing:-.03em;font-weight:700;
+  margin:0 0 20px;max-width:20ch;color:#fff;
+}
+.slide.title .dek{font-size:20px;line-height:1.5;color:#9DAEBE;max-width:62ch;margin:0 0 30px;font-style:italic}
+.slide.title .meta{
+  font-family:var(--f-mono);font-size:12px;color:#6F7F90;letter-spacing:.05em;line-height:1.9;
+  border-top:1px solid #303B48;padding-top:18px;max-width:62ch;
+}
+.slide.title .meta b{color:#C3D0DC;font-weight:500}
+.slide.title:after{
+  content:"";position:absolute;right:-120px;bottom:-160px;width:520px;height:520px;
+  border:2px solid var(--accent);border-radius:50%;opacity:.30;
+}
+.slide.title:before{
+  content:"";position:absolute;right:-40px;bottom:-240px;width:520px;height:520px;
+  border:2px solid var(--accent);border-radius:50%;opacity:.16;
+}
+
+/* divider */
+.slide.divider{background:var(--accent-soft);justify-content:center}
+.slide.divider .pad{padding:0 78px}
+.slide.divider .n{
+  font-family:var(--f-mono);font-size:96px;line-height:1;font-weight:600;letter-spacing:-.05em;
+  color:var(--accent);opacity:.30;margin:0 0 6px;
+}
+.slide.divider h2{font-size:46px;max-width:22ch;color:var(--accent-ink)}
+.slide.divider .lead{color:var(--ink-2);font-size:19px;max-width:70ch}
+.slide.divider .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px;max-width:84ch}
+.slide.divider .chips span{
+  font-family:var(--f-mono);font-size:11px;padding:5px 10px;border-radius:20px;
+  border:1px solid var(--accent);color:var(--accent-ink);background:rgba(255,255,255,.6);
+}
+
+/* refs */
+ol.refs{list-style:none;counter-reset:r;margin:0;padding:0;column-gap:34px}
+ol.refs.two{column-count:2}
+ol.refs>li{
+  counter-increment:r;position:relative;padding:0 0 0 30px;margin:0 0 11px;
+  font-size:calc(14.5px * var(--k));line-height:1.45;color:var(--ink-2);break-inside:avoid;
+}
+ol.refs>li:before{
+  content:counter(r);position:absolute;left:0;top:2px;font-family:var(--f-mono);font-size:10px;
+  font-weight:600;color:#fff;background:var(--accent);width:19px;height:19px;border-radius:4px;
+  display:grid;place-items:center;
+}
+ol.refs>li b{color:var(--ink);font-weight:600}
+ol.refs>li i{color:var(--ink-3);font-style:italic}
+
+/* callout / lab / vilab */
+.callout{
+  border-left:3px solid var(--accent);background:var(--accent-soft);padding:calc(14px * var(--k)) 18px;border-radius:0 8px 8px 0;
+  margin-top:calc(16px * var(--k));
+}
+.callout .h{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-ink);font-weight:600;margin-bottom:6px;
+}
+.callout p{margin:0;font-size:calc(15.5px * var(--k));line-height:1.5;color:var(--ink-2)}
+.slide.vilab{background:linear-gradient(180deg,#FBFDFE 0%,#F2F6FA 100%)}
+.slide.vilab .badge{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:10px;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#fff;background:var(--ink);
+  padding:5px 11px;border-radius:20px;margin-bottom:14px;
+}
+.slide.vilab .badge i{width:7px;height:7px;border-radius:50%;background:var(--accent);display:block}
+.slide.lab{background:#FCFBF6}
+.stat{display:flex;gap:calc(26px * var(--k));margin:calc(18px * var(--k)) 0 0;flex-wrap:wrap}
+.stat div{flex:0 0 auto}
+.stat .v{font-family:var(--f-ui);font-size:calc(34px * var(--k));font-weight:700;letter-spacing:-.03em;color:var(--accent);line-height:1}
+.stat .l{margin-top:calc(6px * var(--k))!important}
+.stat .l{font-family:var(--f-mono);font-size:calc(10px * var(--k));letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:6px;max-width:22ch;line-height:1.5}
+
+/* table */
+table.t{width:100%;border-collapse:collapse;font-size:14.5px}
+table.t th{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  text-align:left;padding:0 12px 9px;border-bottom:2px solid var(--accent);font-weight:600;
+}
+table.t td{padding:calc(10px * var(--k)) 12px;font-size:calc(14.5px * var(--k));border-bottom:1px solid var(--rule-2);color:var(--ink-2);vertical-align:top;line-height:1.42}
+table.t td:first-child{font-weight:600;color:var(--ink)}
+table.t tr:last-child td{border-bottom:none}
+
+/* per-slide citation footnotes */
+sup.fn{font-family:var(--f-mono);font-size:.62em;font-weight:600;color:var(--accent);
+  vertical-align:super;line-height:0;padding-left:1px}
+.cites{
+  flex:none;margin-top:calc(9px * var(--k));padding-top:6px;border-top:1px solid var(--rule-2);
+  display:flex;flex-direction:column;gap:calc(2px * var(--k));
+}
+.cites .c{
+  font-family:var(--f-ui);font-size:calc(10.5px * var(--k));line-height:1.42;color:var(--ink-3);
+  display:flex;gap:6px;align-items:baseline;
+}
+.cites .c b{color:var(--accent);font-weight:700;flex:none;font-family:var(--f-mono);font-size:.94em}
+.cites .c i{color:var(--ink-2);font-style:italic}
+.cites .c .ed{min-width:0}
+.slide.figure .cites,.slide.split .cites,.slide.splitr .cites{margin-top:calc(8px * var(--k))}
+
+/* slide footer */
+.foot{
+  position:absolute;left:64px;right:64px;bottom:16px;display:flex;align-items:center;gap:12px;
+  font-family:var(--f-mono);font-size:9.5px;color:#9FADBC;letter-spacing:.08em;text-transform:uppercase;
+  border-top:1px solid var(--rule-2);padding-top:9px;
+}
+.foot .sp{flex:1}
+.foot .tag{padding:2px 7px;border-radius:3px;border:1px solid var(--rule);letter-spacing:.09em}
+.foot .tag.frontier{color:var(--warn);border-color:#E4BCC4;background:#FDF2F4}
+.foot .tag.textbook{color:#3A4A57;border-color:#C3CCD4;background:#F2F5F7}
+.foot .tag.both{color:#8A6A12;border-color:#E0D0A4;background:#FDF8EA}
+.slide.title .foot,.slide.divider .foot{display:none}
+
+/* editing */
+body.edit .ed{border-radius:3px;cursor:text}
+body.edit .ed:hover{background:#F1F7FC;box-shadow:0 0 0 4px #F1F7FC}
+body.edit .ed:focus{background:#FFFBE6;box-shadow:0 0 0 4px #FFFBE6;outline:none}
+.slide.title .ed:hover,.slide.title .ed:focus{background:#2C3742!important;box-shadow:0 0 0 4px #2C3742!important}
+
+/* ============================ OVERVIEW ============================ */
+.ov{position:fixed;inset:44px 0 30px 0;z-index:35;background:#10161E;overflow-y:auto;display:none;padding:20px}
+body.ov-on .ov{display:block}
+body.ov-on .stage{visibility:hidden}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:16px;max-width:1500px;margin:0 auto}
+.ovc{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;background:#fff;
+  box-shadow:0 3px 12px rgba(0,0,0,.35);border:2px solid transparent}
+.ovc:hover{border-color:var(--accent)}
+.ovc.cur{border-color:#fff}
+.ovc .mini{width:var(--W);height:var(--H);transform-origin:top left;pointer-events:none}
+.ovc .shell{position:relative;overflow:hidden}
+.ovc .lb{position:absolute;left:0;bottom:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.82));
+  color:#fff;font-family:var(--f-mono);font-size:9.5px;padding:16px 8px 6px;letter-spacing:.05em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovc .no{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.65);color:#fff;
+  font-family:var(--f-mono);font-size:9.5px;padding:2px 6px;border-radius:3px}
+.ovsec{grid-column:1/-1;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:#7E8E9E;border-bottom:1px solid #29333F;padding:14px 0 7px;margin-top:6px}
+
+/* ============================ NOTES ============================ */
+.notes{
+  position:fixed;right:0;top:44px;bottom:30px;width:340px;z-index:38;background:#131A23;
+  border-left:1px solid #000;display:none;flex-direction:column;
+}
+body.notes-on .notes{display:flex}
+.notes .nh{padding:12px 14px;border-bottom:1px solid #262F3B;
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7E8E9E}
+.notes .nb{flex:1;overflow-y:auto;padding:12px 14px}
+.notes .nxt{background:#0D131A;border-radius:6px;padding:10px 12px;margin-bottom:12px}
+.notes .nxt .l{font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:#5D6C7B;margin-bottom:5px}
+.notes .nxt .t{font-family:var(--f-ui);font-size:13px;color:#C6D3DF;line-height:1.35}
+.notes textarea{
+  width:100%;min-height:280px;background:#0D131A;border:1px solid #262F3B;border-radius:6px;
+  color:#D2DCE6;padding:11px 12px;font-family:var(--f-body);font-size:14px;line-height:1.55;resize:vertical;
+}
+.notes textarea:focus{outline:none;border-color:var(--accent)}
+.notes .tip{font-family:var(--f-mono);font-size:9.5px;color:#4F5D6B;line-height:1.7;margin-top:12px}
+
+/* ============================ MODAL ============================ */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(8,12,17,.72);display:none;padding:26px}
+.modal.on{display:flex;align-items:center;justify-content:center}
+.sheet{background:#fff;border-radius:10px;width:min(940px,100%);max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.sheet header{padding:14px 18px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px}
+.sheet header h3{margin:0;font-family:var(--f-ui);font-size:15px;font-weight:650;flex:1}
+.sheet .mb{padding:0;flex:1;overflow:auto;min-height:0}
+.sheet textarea{width:100%;height:56vh;border:0;padding:16px 20px;font-family:var(--f-mono);font-size:11.5px;
+  line-height:1.6;resize:none;outline:none;background:#F7F9FB;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+.mbtn{font-family:var(--f-ui);font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:6px;
+  border:1px solid var(--rule);background:#fff;color:var(--ink)}
+.mbtn:hover{border-color:var(--ink-3)}
+.mbtn.pri{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.help{padding:6px 20px 20px}
+.help table{width:100%;border-collapse:collapse;font-size:13.5px}
+.help td{padding:7px 10px;border-bottom:1px solid var(--rule-2);color:var(--ink-2)}
+.help td:first-child{width:150px}
+.help kbd{font-family:var(--f-mono);font-size:11px;background:#EEF3F8;border:1px solid var(--rule);
+  border-bottom-width:2px;border-radius:4px;padding:2px 7px;color:var(--ink)}
+.help h4{font-family:var(--f-ui);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  margin:20px 0 6px}
+
+/* search */
+.srch{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:55;width:min(680px,92vw);display:none}
+body.srch-on .srch{display:block}
+.srch input{width:100%;padding:13px 16px;border-radius:9px;border:1px solid #33404E;background:#0D131A;
+  color:#E4EBF2;font-family:var(--f-ui);font-size:15px;box-shadow:0 14px 44px rgba(0,0,0,.55)}
+.srch input:focus{outline:none;border-color:var(--accent)}
+.sres{margin-top:6px;background:#131A23;border:1px solid #262F3B;border-radius:9px;max-height:52vh;
+  overflow-y:auto;box-shadow:0 14px 44px rgba(0,0,0,.55)}
+.sres button{display:block;width:100%;text-align:left;padding:9px 14px;border-bottom:1px solid #1E2732;color:#C0CDD9}
+.sres button:hover{background:#1C2530;color:#fff}
+.sres .n{font-family:var(--f-mono);font-size:9.5px;color:#5D6C7B;letter-spacing:.08em}
+.sres .t{font-family:var(--f-ui);font-size:13.5px;margin-top:2px}
+.sres mark{background:#5A4A16;color:#FFE8A3;border-radius:2px;padding:0 2px}
+
+#toast{position:fixed;left:50%;bottom:44px;transform:translate(-50%,14px);background:#0B1119;color:#fff;
+  padding:10px 18px;border-radius:8px;font-family:var(--f-ui);font-size:13px;opacity:0;pointer-events:none;
+  transition:.18s;z-index:70;box-shadow:0 8px 26px rgba(0,0,0,.5)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#err{display:none;position:fixed;left:0;right:0;bottom:0;z-index:99;background:#5A1020;color:#FFD9DF;
+  padding:12px 16px;font-family:var(--f-mono);font-size:11.5px;white-space:pre-wrap;line-height:1.5}
+
+/* ============================ PRINT ============================ */
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff;overflow:visible}
+  .bar,.prog,.notes,.ov,.modal,.srch,#toast,.navbtn{display:none!important}
+  .stage{position:static;inset:auto;display:block;overflow:visible}
+  .holder{transform:none!important;width:auto;height:auto}
+  .print-all{display:block}
+  .slide{width:277mm;height:auto;min-height:180mm;box-shadow:none;border:1px solid #CCC;
+    break-after:page;page-break-after:always;margin:0 0 6mm}
+  .slide:last-child{break-after:auto;page-break-after:auto}
+  .slide.title,.slide.divider{color:#111;background:#fff!important}
+  .slide.title h1,.slide.title .no{color:#111}
+  .slide.title .dek,.slide.title .meta{color:#444}
+  .slide.title:after,.slide.title:before{display:none}
+  .cites{border-top:1px solid #CCC}
+  .pnotes{display:block!important;border-top:1px dashed #BBB;margin:10px 64px 0;padding:8px 0;
+    font-family:var(--f-mono);font-size:9.5px;color:#666;white-space:pre-wrap;line-height:1.55}
+}
+.pnotes{display:none}
+body.handout .slide{margin-bottom:18px}
+
+/* nav arrows */
+.navbtn{position:fixed;top:50%;transform:translateY(-50%);z-index:30;width:44px;height:64px;
+  display:grid;place-items:center;color:#4C5A69;border-radius:8px;background:rgba(0,0,0,.18)}
+.navbtn:hover{color:#fff;background:rgba(0,0,0,.42)}
+.navbtn.l{left:8px}
+.navbtn.r{right:8px}
+body.notes-on .navbtn.r{right:348px}
+body.ov-on .navbtn{display:none}
+@media (max-width:900px){.navbtn{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="err"></div>
+<div id="toast"></div>
+
+<div class="bar">
+  <span class="ch" id="chNo">SESSION 5</span>
+  <span class="tt" id="chTitle">Session 5 · Labels and governance</span>
+  <span class="sec" id="secNow"></span>
+  <span class="count" id="cnt"></span>
+  <span class="grp">
+    <button class="tb" data-act="ov" aria-pressed="false" title="Overview grid (O)">Overview</button>
+    <button class="tb" data-act="notes" aria-pressed="false" title="Speaker notes (N)">Notes</button>
+    <button class="tb" data-act="edit" aria-pressed="false" title="Edit mode (E)">Edit</button>
+    <button class="tb" data-act="search" title="Search (/)">Find</button>
+    <button class="tb" data-act="export" title="Export">Export</button>
+    <button class="tb" data-act="print" title="Print / PDF (P)">PDF</button>
+    <button class="tb" data-act="help" title="Keyboard help (?)">?</button>
+    <button class="tb pri" data-act="hub" title="Course index">Course index</button>
+  </span>
+</div>
+
+<button class="navbtn l" data-act="prev" aria-label="Previous slide">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
+<button class="navbtn r" data-act="next" aria-label="Next slide">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></button>
+
+<div class="stage"><div class="holder" id="holder"></div></div>
+
+<div class="ov"><div class="ovgrid" id="ovgrid"></div></div>
+
+<aside class="notes">
+  <div class="nh">Speaker notes</div>
+  <div class="nb">
+    <div class="nxt"><div class="l">Up next</div><div class="t" id="nxt"></div></div>
+    <textarea id="noteBox" placeholder="What you actually want to say on this slide: the example, the aside, the question to ask the room, the thing that goes wrong in practice."></textarea>
+    <div class="tip">Notes autosave. They are included in the Markdown export and printed under each slide in PDF mode.</div>
+  </div>
+</aside>
+
+<div class="srch">
+  <input type="search" id="q" placeholder="Search every slide, reference and note…" autocomplete="off">
+  <div class="sres" id="sres"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <header>
+      <h3 id="mTitle">Export</h3>
+      <span id="mSeg"></span>
+      <button class="mbtn" data-act="mcopy">Copy</button>
+      <button class="mbtn" data-act="mdl">Download</button>
+      <button class="mbtn" data-act="mload" style="display:none">Load backup</button>
+      <button class="mbtn" data-act="mclose">Close</button>
+    </header>
+    <div class="mb" id="mBody"><textarea id="mText" spellcheck="false"></textarea></div>
+  </div>
+</div>
+
+<script id="deckdata" type="application/json">{"meta": {"key": "s5", "title": "Data Preparation, condensed — Session 5: Labels, reduction, synthesis and governance", "short": "Session 5 · Labels and governance", "hub": "index-condensed.html"}, "secs": [], "figs": {"f_confident": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"14\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Confident learning: estimate the joint, then rank</text><text x=\"20\" y=\"48\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">The object of study is the joint distribution of the noisy given label</text><text x=\"20\" y=\"62\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">and the latent true label — not the model's accuracy.</text><text x=\"204.0\" y=\"112\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">normal</text><text x=\"312.0\" y=\"112\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">stone</text><text x=\"420.0\" y=\"112\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">mass</text><text x=\"140\" y=\"165.0\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">normal</text><text x=\"140\" y=\"243.0\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">stone</text><text x=\"140\" y=\"321.0\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">mass</text><rect x=\"150\" y=\"122\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#D9E7F1\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"203.0\" y=\"165.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">412</text><rect x=\"258\" y=\"122\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#FBE7EB\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"311.0\" y=\"165.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">18</text><rect x=\"366\" y=\"122\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#FBE7EB\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"419.0\" y=\"165.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">6</text><rect x=\"150\" y=\"200\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#F6C9D2\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"203.0\" y=\"243.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">24</text><rect x=\"258\" y=\"200\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#D9E7F1\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"311.0\" y=\"243.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">281</text><rect x=\"366\" y=\"200\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#F6C9D2\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"419.0\" y=\"243.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">31</text><rect x=\"150\" y=\"278\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#FBE7EB\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"203.0\" y=\"321.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">9</text><rect x=\"258\" y=\"278\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#F6C9D2\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"311.0\" y=\"321.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">37</text><rect x=\"366\" y=\"278\" width=\"106\" height=\"76\" rx=\"4\" fill=\"#D9E7F1\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"419.0\" y=\"321.5\" font-size=\"14\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">196</text><text x=\"312.0\" y=\"82\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">predicted (confident) label</text><g transform=\"translate(88,239.0) rotate(-90)\"><text x=\"0\" y=\"0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">label the annotator gave</text></g><rect x=\"20\" y=\"378\" width=\"560\" height=\"62\" rx=\"8\" fill=\"#FBF0F2\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"38\" y=\"400\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">off-diagonal mass = candidate label errors</text><text x=\"38\" y=\"418\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Prune-by-noise-rate ranks them so a human adjudicates the worst first,</text><text x=\"38\" y=\"432\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">model-agnostically. It needs only calibrated out-of-sample probabilities.</text><rect x=\"20\" y=\"448\" width=\"560\" height=\"62\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"38\" y=\"470\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Where it bites</text><text x=\"38\" y=\"488\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Northcutt et al. estimate ~3.4% average label error across ten canonical test sets,</text><text x=\"38\" y=\"502\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">including ~6% of the ImageNet validation set — enough to reorder model rankings.</text></svg>", "f_prune": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Pruning can beat power-law scaling</text><line x1=\"76\" y1=\"138.5\" x2=\"556\" y2=\"138.5\" stroke=\"#D3DCE6\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-dasharray=\"3 5\" opacity=\"0.7\"/><line x1=\"76\" y1=\"201.0\" x2=\"556\" y2=\"201.0\" stroke=\"#D3DCE6\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-dasharray=\"3 5\" opacity=\"0.7\"/><line x1=\"76\" y1=\"263.5\" x2=\"556\" y2=\"263.5\" stroke=\"#D3DCE6\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-dasharray=\"3 5\" opacity=\"0.7\"/><line x1=\"76\" y1=\"326\" x2=\"556\" y2=\"326\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><line x1=\"76\" y1=\"76\" x2=\"76\" y2=\"326\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><text x=\"316.0\" y=\"362\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">dataset size (log)</text><g transform=\"translate(42,201.0) rotate(-90)\"><text x=\"0\" y=\"0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">test error (log)</text></g><line x1=\"76.0\" y1=\"326\" x2=\"76.0\" y2=\"331\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><text x=\"76.0\" y=\"346\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\"></text><line x1=\"236.0\" y1=\"326\" x2=\"236.0\" y2=\"331\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><text x=\"236.0\" y=\"346\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\"></text><line x1=\"396.0\" y1=\"326\" x2=\"396.0\" y2=\"331\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><text x=\"396.0\" y=\"346\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\"></text><line x1=\"556.0\" y1=\"326\" x2=\"556.0\" y2=\"331\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><text x=\"556.0\" y=\"346\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\"></text><path d=\"M76.0 297.4 C82.0 297.4 82.0 288.8 88.0 288.8 C94.0 288.8 94.0 280.7 100.0 280.7 C106.0 280.7 106.0 272.9 112.0 272.9 C118.0 272.9 118.0 265.6 124.0 265.6 C130.0 265.6 130.0 258.6 136.0 258.6 C142.0 258.6 142.0 252.0 148.0 252.0 C154.0 252.0 154.0 245.7 160.0 245.7 C166.0 245.7 166.0 239.8 172.0 239.8 C178.0 239.8 178.0 234.1 184.0 234.1 C190.0 234.1 190.0 228.8 196.0 228.8 C202.0 228.8 202.0 223.7 208.0 223.7 C214.0 223.7 214.0 218.9 220.0 218.9 C226.0 218.9 226.0 214.3 232.0 214.3 C238.0 214.3 238.0 210.0 244.0 210.0 C250.0 210.0 250.0 205.8 256.0 205.8 C262.0 205.8 262.0 201.9 268.0 201.9 C274.0 201.9 274.0 198.2 280.0 198.2 C286.0 198.2 286.0 194.7 292.0 194.7 C298.0 194.7 298.0 191.4 304.0 191.4 C310.0 191.4 310.0 188.2 316.0 188.2 C322.0 188.2 322.0 185.2 328.0 185.2 C334.0 185.2 334.0 182.3 340.0 182.3 C346.0 182.3 346.0 179.6 352.0 179.6 C358.0 179.6 358.0 177.1 364.0 177.1 C370.0 177.1 370.0 174.6 376.0 174.6 C382.0 174.6 382.0 172.3 388.0 172.3 C394.0 172.3 394.0 170.1 400.0 170.1 C406.0 170.1 406.0 168.0 412.0 168.0 C418.0 168.0 418.0 166.1 424.0 166.1 C430.0 166.1 430.0 164.2 436.0 164.2 C442.0 164.2 442.0 162.4 448.0 162.4 C454.0 162.4 454.0 160.7 460.0 160.7 C466.0 160.7 466.0 159.1 472.0 159.1 C478.0 159.1 478.0 157.6 484.0 157.6 C490.0 157.6 490.0 156.1 496.0 156.1 C502.0 156.1 502.0 154.8 508.0 154.8 C514.0 154.8 514.0 153.5 520.0 153.5 C526.0 153.5 526.0 152.3 532.0 152.3 C538.0 152.3 538.0 151.1 544.0 151.1 C550.0 151.1 550.0 150.0 556.0 150.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M76.0 291.1 C82.0 291.1 82.0 275.6 88.0 275.6 C94.0 275.6 94.0 261.3 100.0 261.3 C106.0 261.3 106.0 248.4 112.0 248.4 C118.0 248.4 118.0 236.5 124.0 236.5 C130.0 236.5 130.0 225.7 136.0 225.7 C142.0 225.7 142.0 215.7 148.0 215.7 C154.0 215.7 154.0 206.7 160.0 206.7 C166.0 206.7 166.0 198.4 172.0 198.4 C178.0 198.4 178.0 190.8 184.0 190.8 C190.0 190.8 190.0 183.9 196.0 183.9 C202.0 183.9 202.0 177.6 208.0 177.6 C214.0 177.6 214.0 171.8 220.0 171.8 C226.0 171.8 226.0 166.6 232.0 166.6 C238.0 166.6 238.0 161.7 244.0 161.7 C250.0 161.7 250.0 157.3 256.0 157.3 C262.0 157.3 262.0 153.3 268.0 153.3 C274.0 153.3 274.0 149.6 280.0 149.6 C286.0 149.6 286.0 146.2 292.0 146.2 C298.0 146.2 298.0 143.2 304.0 143.2 C310.0 143.2 310.0 140.4 316.0 140.4 C322.0 140.4 322.0 137.8 328.0 137.8 C334.0 137.8 334.0 135.4 340.0 135.4 C346.0 135.4 346.0 133.3 352.0 133.3 C358.0 133.3 358.0 131.3 364.0 131.3 C370.0 131.3 370.0 129.5 376.0 129.5 C382.0 129.5 382.0 127.9 388.0 127.9 C394.0 127.9 394.0 126.4 400.0 126.4 C406.0 126.4 406.0 125.0 412.0 125.0 C418.0 125.0 418.0 123.8 424.0 123.8 C430.0 123.8 430.0 122.6 436.0 122.6 C442.0 122.6 442.0 121.6 448.0 121.6 C454.0 121.6 454.0 120.6 460.0 120.6 C466.0 120.6 466.0 119.8 472.0 119.8 C478.0 119.8 478.0 119.0 484.0 119.0 C490.0 119.0 490.0 118.2 496.0 118.2 C502.0 118.2 502.0 117.6 508.0 117.6 C514.0 117.6 514.0 117.0 520.0 117.0 C526.0 117.0 526.0 116.4 532.0 116.4 C538.0 116.4 538.0 115.9 544.0 115.9 C550.0 115.9 550.0 115.4 556.0 115.4\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><line x1=\"252\" y1=\"106\" x2=\"270\" y2=\"106\" stroke=\"#8494A5\" stroke-width=\"3\" stroke-linecap=\"round\"/><text x=\"276\" y=\"110\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">random subsets — power law</text><line x1=\"252\" y1=\"127\" x2=\"270\" y2=\"127\" stroke=\"#8A6A12\" stroke-width=\"3\" stroke-linecap=\"round\"/><text x=\"276\" y=\"131\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">pruned by a good difficulty metric</text><rect x=\"20\" y=\"348\" width=\"560\" height=\"66\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"38\" y=\"372\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">Sorscher et al., NeurIPS 2022 (Outstanding Paper)</text><text x=\"38\" y=\"390\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">With a good pruning metric, error can fall faster than power-law scaling.</text><text x=\"38\" y=\"404\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">First large-scale benchmark of ten pruning metrics on ImageNet.</text><rect x=\"20\" y=\"424\" width=\"560\" height=\"82\" rx=\"8\" fill=\"#FBF0F2\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"38\" y=\"448\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\">The regime flip students always miss</text><text x=\"38\" y=\"468\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">In the scarce-data regime, keep the EASY examples — they define the class. In</text><text x=\"38\" y=\"482\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">the abundant-data regime, keep the HARD ones — the easy ones are already</text><text x=\"38\" y=\"496\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">learned. A metric that ignores the regime will lose to random selection.</text></svg>", "f_trilemma": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Synthetic data: you get to pick two</text><path d=\"M300.0 72.0 L450.0 331.8 L150.0 331.8 z\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"300.0\" cy=\"72\" r=\"7\" fill=\"#8A6A12\" stroke=\"#fff\" stroke-width=\"2.4\"/><text x=\"300.0\" y=\"18\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\">Fidelity</text><text x=\"300.0\" y=\"34\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">looks like the real</text><text x=\"300.0\" y=\"47\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">thing</text><circle cx=\"450\" cy=\"331.8076211353316\" r=\"7\" fill=\"#8A6A12\" stroke=\"#fff\" stroke-width=\"2.4\"/><text x=\"450\" y=\"361.8076211353316\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\">Privacy</text><text x=\"450\" y=\"377.8076211353316\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">reveals nothing</text><text x=\"450\" y=\"390.8076211353316\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">about a person</text><circle cx=\"150\" cy=\"331.8076211353316\" r=\"7\" fill=\"#8A6A12\" stroke=\"#fff\" stroke-width=\"2.4\"/><text x=\"150\" y=\"361.8076211353316\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\">Utility</text><text x=\"150\" y=\"377.8076211353316\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">trains a model that</text><text x=\"150\" y=\"390.8076211353316\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">works</text><text x=\"300.0\" y=\"222.68842025849233\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">Push any corner and at</text><text x=\"300.0\" y=\"238.68842025849233\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">least one other corner</text><text x=\"300.0\" y=\"254.68842025849233\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">moves.</text><rect x=\"20\" y=\"398\" width=\"560\" height=\"108\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"38\" y=\"422\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">So the evaluation must report all three</text><text x=\"38\" y=\"448\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">Fidelity</text><text x=\"112\" y=\"448\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">marginal and pairwise distances, discriminator AUC</text><text x=\"38\" y=\"466\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">Utility</text><text x=\"112\" y=\"466\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train-on-synthetic / test-on-real (TSTR), against a real-data baseline</text><text x=\"38\" y=\"484\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">Privacy</text><text x=\"112\" y=\"484\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">distance to closest record, membership-inference AUC, formal DP budget</text></svg>", "f_collapse": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Model collapse: each generation trains on its predecessor's output</text><rect x=\"40\" y=\"60\" width=\"200\" height=\"190\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><path d=\"M54.0 226.0 L54.0 218.0 L56.7 216.5 L59.4 214.7 L62.1 212.7 L64.8 210.5 L67.4 207.9 L70.1 205.1 L72.8 201.9 L75.5 198.4 L78.2 194.6 L80.9 190.4 L83.6 185.9 L86.2 181.1 L88.9 175.9 L91.6 170.5 L94.3 164.9 L97.0 159.0 L99.7 153.0 L102.4 146.9 L105.1 140.8 L107.8 134.7 L110.4 128.7 L113.1 122.9 L115.8 117.3 L118.5 112.1 L121.2 107.2 L123.9 102.9 L126.6 99.1 L129.2 95.9 L131.9 93.3 L134.6 91.5 L137.3 90.4 L140.0 90.0 L142.7 90.4 L145.4 91.5 L148.1 93.3 L150.8 95.9 L153.4 99.1 L156.1 102.9 L158.8 107.2 L161.5 112.1 L164.2 117.3 L166.9 122.9 L169.6 128.7 L172.2 134.7 L174.9 140.8 L177.6 146.9 L180.3 153.0 L183.0 159.0 L185.7 164.9 L188.4 170.5 L191.1 175.9 L193.8 181.1 L196.4 185.9 L199.1 190.4 L201.8 194.6 L204.5 198.4 L207.2 201.9 L209.9 205.1 L212.6 207.9 L215.2 210.5 L217.9 212.7 L220.6 214.7 L223.3 216.5 L226.0 218.0 L226.0 226.0 z\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.18\"/><path d=\"M54.0 218.0 C55.3 218.0 55.3 216.5 56.7 216.5 C58.0 216.5 58.0 214.7 59.4 214.7 C60.7 214.7 60.7 212.7 62.1 212.7 C63.4 212.7 63.4 210.5 64.8 210.5 C66.1 210.5 66.1 207.9 67.4 207.9 C68.8 207.9 68.8 205.1 70.1 205.1 C71.5 205.1 71.5 201.9 72.8 201.9 C74.2 201.9 74.2 198.4 75.5 198.4 C76.8 198.4 76.8 194.6 78.2 194.6 C79.5 194.6 79.5 190.4 80.9 190.4 C82.2 190.4 82.2 185.9 83.6 185.9 C84.9 185.9 84.9 181.1 86.2 181.1 C87.6 181.1 87.6 175.9 88.9 175.9 C90.3 175.9 90.3 170.5 91.6 170.5 C93.0 170.5 93.0 164.9 94.3 164.9 C95.7 164.9 95.7 159.0 97.0 159.0 C98.3 159.0 98.3 153.0 99.7 153.0 C101.0 153.0 101.0 146.9 102.4 146.9 C103.7 146.9 103.7 140.8 105.1 140.8 C106.4 140.8 106.4 134.7 107.8 134.7 C109.1 134.7 109.1 128.7 110.4 128.7 C111.8 128.7 111.8 122.9 113.1 122.9 C114.5 122.9 114.5 117.3 115.8 117.3 C117.2 117.3 117.2 112.1 118.5 112.1 C119.8 112.1 119.8 107.2 121.2 107.2 C122.5 107.2 122.5 102.9 123.9 102.9 C125.2 102.9 125.2 99.1 126.6 99.1 C127.9 99.1 127.9 95.9 129.2 95.9 C130.6 95.9 130.6 93.3 131.9 93.3 C133.3 93.3 133.3 91.5 134.6 91.5 C136.0 91.5 136.0 90.4 137.3 90.4 C138.7 90.4 138.7 90.0 140.0 90.0 C141.3 90.0 141.3 90.4 142.7 90.4 C144.0 90.4 144.0 91.5 145.4 91.5 C146.7 91.5 146.7 93.3 148.1 93.3 C149.4 93.3 149.4 95.9 150.8 95.9 C152.1 95.9 152.1 99.1 153.4 99.1 C154.8 99.1 154.8 102.9 156.1 102.9 C157.5 102.9 157.5 107.2 158.8 107.2 C160.2 107.2 160.2 112.1 161.5 112.1 C162.8 112.1 162.8 117.3 164.2 117.3 C165.5 117.3 165.5 122.9 166.9 122.9 C168.2 122.9 168.2 128.7 169.6 128.7 C170.9 128.7 170.9 134.7 172.2 134.7 C173.6 134.7 173.6 140.8 174.9 140.8 C176.3 140.8 176.3 146.9 177.6 146.9 C179.0 146.9 179.0 153.0 180.3 153.0 C181.7 153.0 181.7 159.0 183.0 159.0 C184.3 159.0 184.3 164.9 185.7 164.9 C187.0 164.9 187.0 170.5 188.4 170.5 C189.7 170.5 189.7 175.9 191.1 175.9 C192.4 175.9 192.4 181.1 193.8 181.1 C195.1 181.1 195.1 185.9 196.4 185.9 C197.8 185.9 197.8 190.4 199.1 190.4 C200.5 190.4 200.5 194.6 201.8 194.6 C203.2 194.6 203.2 198.4 204.5 198.4 C205.8 198.4 205.8 201.9 207.2 201.9 C208.5 201.9 208.5 205.1 209.9 205.1 C211.2 205.1 211.2 207.9 212.6 207.9 C213.9 207.9 213.9 210.5 215.2 210.5 C216.6 210.5 216.6 212.7 217.9 212.7 C219.3 212.7 219.3 214.7 220.6 214.7 C222.0 214.7 222.0 216.5 223.3 216.5 C224.7 216.5 224.7 218.0 226.0 218.0\" fill=\"none\" stroke=\"#2D5C8A\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"140.0\" y=\"80\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">generation 0</text><path d=\"M243 155.0 L251.0 155.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M258.0 155.0 L249.0 150.6 L249.0 159.4 z\" fill=\"#8494A5\"/><rect x=\"262\" y=\"60\" width=\"200\" height=\"190\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><path d=\"M276.0 226.0 L276.0 223.8 L278.7 223.2 L281.4 222.4 L284.1 221.4 L286.8 220.2 L289.4 218.8 L292.1 217.1 L294.8 215.1 L297.5 212.7 L300.2 209.9 L302.9 206.7 L305.6 203.0 L308.2 198.9 L310.9 194.3 L313.6 189.2 L316.3 183.6 L319.0 177.6 L321.7 171.1 L324.4 164.3 L327.1 157.2 L329.8 149.9 L332.4 142.5 L335.1 135.1 L337.8 127.9 L340.5 120.9 L343.2 114.4 L345.9 108.4 L348.6 103.0 L351.2 98.5 L353.9 94.8 L356.6 92.2 L359.3 90.5 L362.0 90.0 L364.7 90.5 L367.4 92.2 L370.1 94.8 L372.8 98.5 L375.4 103.0 L378.1 108.4 L380.8 114.4 L383.5 120.9 L386.2 127.9 L388.9 135.1 L391.6 142.5 L394.2 149.9 L396.9 157.2 L399.6 164.3 L402.3 171.1 L405.0 177.6 L407.7 183.6 L410.4 189.2 L413.1 194.3 L415.8 198.9 L418.4 203.0 L421.1 206.7 L423.8 209.9 L426.5 212.7 L429.2 215.1 L431.9 217.1 L434.6 218.8 L437.2 220.2 L439.9 221.4 L442.6 222.4 L445.3 223.2 L448.0 223.8 L448.0 226.0 z\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.18\"/><path d=\"M276.0 223.8 C277.3 223.8 277.3 223.2 278.7 223.2 C280.0 223.2 280.0 222.4 281.4 222.4 C282.7 222.4 282.7 221.4 284.1 221.4 C285.4 221.4 285.4 220.2 286.8 220.2 C288.1 220.2 288.1 218.8 289.4 218.8 C290.8 218.8 290.8 217.1 292.1 217.1 C293.5 217.1 293.5 215.1 294.8 215.1 C296.2 215.1 296.2 212.7 297.5 212.7 C298.8 212.7 298.8 209.9 300.2 209.9 C301.5 209.9 301.5 206.7 302.9 206.7 C304.2 206.7 304.2 203.0 305.6 203.0 C306.9 203.0 306.9 198.9 308.2 198.9 C309.6 198.9 309.6 194.3 310.9 194.3 C312.3 194.3 312.3 189.2 313.6 189.2 C315.0 189.2 315.0 183.6 316.3 183.6 C317.7 183.6 317.7 177.6 319.0 177.6 C320.3 177.6 320.3 171.1 321.7 171.1 C323.0 171.1 323.0 164.3 324.4 164.3 C325.7 164.3 325.7 157.2 327.1 157.2 C328.4 157.2 328.4 149.9 329.8 149.9 C331.1 149.9 331.1 142.5 332.4 142.5 C333.8 142.5 333.8 135.1 335.1 135.1 C336.5 135.1 336.5 127.9 337.8 127.9 C339.2 127.9 339.2 120.9 340.5 120.9 C341.8 120.9 341.8 114.4 343.2 114.4 C344.5 114.4 344.5 108.4 345.9 108.4 C347.2 108.4 347.2 103.0 348.6 103.0 C349.9 103.0 349.9 98.5 351.2 98.5 C352.6 98.5 352.6 94.8 353.9 94.8 C355.3 94.8 355.3 92.2 356.6 92.2 C358.0 92.2 358.0 90.5 359.3 90.5 C360.7 90.5 360.7 90.0 362.0 90.0 C363.3 90.0 363.3 90.5 364.7 90.5 C366.0 90.5 366.0 92.2 367.4 92.2 C368.7 92.2 368.7 94.8 370.1 94.8 C371.4 94.8 371.4 98.5 372.8 98.5 C374.1 98.5 374.1 103.0 375.4 103.0 C376.8 103.0 376.8 108.4 378.1 108.4 C379.5 108.4 379.5 114.4 380.8 114.4 C382.2 114.4 382.2 120.9 383.5 120.9 C384.8 120.9 384.8 127.9 386.2 127.9 C387.5 127.9 387.5 135.1 388.9 135.1 C390.2 135.1 390.2 142.5 391.6 142.5 C392.9 142.5 392.9 149.9 394.2 149.9 C395.6 149.9 395.6 157.2 396.9 157.2 C398.3 157.2 398.3 164.3 399.6 164.3 C401.0 164.3 401.0 171.1 402.3 171.1 C403.7 171.1 403.7 177.6 405.0 177.6 C406.3 177.6 406.3 183.6 407.7 183.6 C409.0 183.6 409.0 189.2 410.4 189.2 C411.7 189.2 411.7 194.3 413.1 194.3 C414.4 194.3 414.4 198.9 415.8 198.9 C417.1 198.9 417.1 203.0 418.4 203.0 C419.8 203.0 419.8 206.7 421.1 206.7 C422.5 206.7 422.5 209.9 423.8 209.9 C425.2 209.9 425.2 212.7 426.5 212.7 C427.8 212.7 427.8 215.1 429.2 215.1 C430.5 215.1 430.5 217.1 431.9 217.1 C433.2 217.1 433.2 218.8 434.6 218.8 C435.9 218.8 435.9 220.2 437.2 220.2 C438.6 220.2 438.6 221.4 439.9 221.4 C441.3 221.4 441.3 222.4 442.6 222.4 C444.0 222.4 444.0 223.2 445.3 223.2 C446.7 223.2 446.7 223.8 448.0 223.8\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"284\" y=\"238\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">tails gone</text><text x=\"362.0\" y=\"80\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">generation 1</text><path d=\"M465 155.0 L473.0 155.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M480.0 155.0 L471.0 150.6 L471.0 159.4 z\" fill=\"#8494A5\"/><rect x=\"484\" y=\"60\" width=\"200\" height=\"190\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><path d=\"M498.0 226.0 L498.0 225.8 L500.7 225.7 L503.4 225.6 L506.1 225.4 L508.8 225.1 L511.4 224.7 L514.1 224.2 L516.8 223.5 L519.5 222.6 L522.2 221.4 L524.9 219.9 L527.6 217.9 L530.2 215.5 L532.9 212.6 L535.6 209.0 L538.3 204.7 L541.0 199.6 L543.7 193.8 L546.4 187.3 L549.1 180.0 L551.8 172.0 L554.4 163.4 L557.1 154.4 L559.8 145.1 L562.5 135.8 L565.2 126.7 L567.9 118.0 L570.6 110.1 L573.2 103.3 L575.9 97.6 L578.6 93.4 L581.3 90.9 L584.0 90.0 L586.7 90.9 L589.4 93.4 L592.1 97.6 L594.8 103.3 L597.4 110.1 L600.1 118.0 L602.8 126.7 L605.5 135.8 L608.2 145.1 L610.9 154.4 L613.6 163.4 L616.2 172.0 L618.9 180.0 L621.6 187.3 L624.3 193.8 L627.0 199.6 L629.7 204.7 L632.4 209.0 L635.1 212.6 L637.8 215.5 L640.4 217.9 L643.1 219.9 L645.8 221.4 L648.5 222.6 L651.2 223.5 L653.9 224.2 L656.6 224.7 L659.2 225.1 L661.9 225.4 L664.6 225.6 L667.3 225.7 L670.0 225.8 L670.0 226.0 z\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.18\"/><path d=\"M498.0 225.8 C499.3 225.8 499.3 225.7 500.7 225.7 C502.0 225.7 502.0 225.6 503.4 225.6 C504.7 225.6 504.7 225.4 506.1 225.4 C507.4 225.4 507.4 225.1 508.8 225.1 C510.1 225.1 510.1 224.7 511.4 224.7 C512.8 224.7 512.8 224.2 514.1 224.2 C515.5 224.2 515.5 223.5 516.8 223.5 C518.2 223.5 518.2 222.6 519.5 222.6 C520.8 222.6 520.8 221.4 522.2 221.4 C523.5 221.4 523.5 219.9 524.9 219.9 C526.2 219.9 526.2 217.9 527.6 217.9 C528.9 217.9 528.9 215.5 530.2 215.5 C531.6 215.5 531.6 212.6 532.9 212.6 C534.3 212.6 534.3 209.0 535.6 209.0 C537.0 209.0 537.0 204.7 538.3 204.7 C539.7 204.7 539.7 199.6 541.0 199.6 C542.3 199.6 542.3 193.8 543.7 193.8 C545.0 193.8 545.0 187.3 546.4 187.3 C547.7 187.3 547.7 180.0 549.1 180.0 C550.4 180.0 550.4 172.0 551.8 172.0 C553.1 172.0 553.1 163.4 554.4 163.4 C555.8 163.4 555.8 154.4 557.1 154.4 C558.5 154.4 558.5 145.1 559.8 145.1 C561.2 145.1 561.2 135.8 562.5 135.8 C563.8 135.8 563.8 126.7 565.2 126.7 C566.5 126.7 566.5 118.0 567.9 118.0 C569.2 118.0 569.2 110.1 570.6 110.1 C571.9 110.1 571.9 103.3 573.2 103.3 C574.6 103.3 574.6 97.6 575.9 97.6 C577.3 97.6 577.3 93.4 578.6 93.4 C580.0 93.4 580.0 90.9 581.3 90.9 C582.7 90.9 582.7 90.0 584.0 90.0 C585.3 90.0 585.3 90.9 586.7 90.9 C588.0 90.9 588.0 93.4 589.4 93.4 C590.7 93.4 590.7 97.6 592.1 97.6 C593.4 97.6 593.4 103.3 594.8 103.3 C596.1 103.3 596.1 110.1 597.4 110.1 C598.8 110.1 598.8 118.0 600.1 118.0 C601.5 118.0 601.5 126.7 602.8 126.7 C604.2 126.7 604.2 135.8 605.5 135.8 C606.8 135.8 606.8 145.1 608.2 145.1 C609.5 145.1 609.5 154.4 610.9 154.4 C612.2 154.4 612.2 163.4 613.6 163.4 C614.9 163.4 614.9 172.0 616.2 172.0 C617.6 172.0 617.6 180.0 618.9 180.0 C620.3 180.0 620.3 187.3 621.6 187.3 C623.0 187.3 623.0 193.8 624.3 193.8 C625.7 193.8 625.7 199.6 627.0 199.6 C628.3 199.6 628.3 204.7 629.7 204.7 C631.0 204.7 631.0 209.0 632.4 209.0 C633.7 209.0 633.7 212.6 635.1 212.6 C636.4 212.6 636.4 215.5 637.8 215.5 C639.1 215.5 639.1 217.9 640.4 217.9 C641.8 217.9 641.8 219.9 643.1 219.9 C644.5 219.9 644.5 221.4 645.8 221.4 C647.2 221.4 647.2 222.6 648.5 222.6 C649.8 222.6 649.8 223.5 651.2 223.5 C652.5 223.5 652.5 224.2 653.9 224.2 C655.2 224.2 655.2 224.7 656.6 224.7 C657.9 224.7 657.9 225.1 659.2 225.1 C660.6 225.1 660.6 225.4 661.9 225.4 C663.3 225.4 663.3 225.6 664.6 225.6 C666.0 225.6 666.0 225.7 667.3 225.7 C668.7 225.7 668.7 225.8 670.0 225.8\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"506\" y=\"238\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">tails gone</text><text x=\"584.0\" y=\"80\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">generation 2</text><path d=\"M687 155.0 L695.0 155.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M702.0 155.0 L693.0 150.6 L693.0 159.4 z\" fill=\"#8494A5\"/><rect x=\"706\" y=\"60\" width=\"200\" height=\"190\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><path d=\"M720.0 226.0 L720.0 226.0 L722.7 226.0 L725.4 226.0 L728.1 226.0 L730.8 226.0 L733.4 226.0 L736.1 226.0 L738.8 225.9 L741.5 225.8 L744.2 225.7 L746.9 225.5 L749.6 225.2 L752.2 224.8 L754.9 224.0 L757.6 223.0 L760.3 221.4 L763.0 219.3 L765.7 216.3 L768.4 212.4 L771.1 207.3 L773.8 200.9 L776.4 193.1 L779.1 183.9 L781.8 173.4 L784.5 161.8 L787.2 149.5 L789.9 136.9 L792.6 124.6 L795.2 113.3 L797.9 103.6 L800.6 96.2 L803.3 91.6 L806.0 90.0 L808.7 91.6 L811.4 96.2 L814.1 103.6 L816.8 113.3 L819.4 124.6 L822.1 136.9 L824.8 149.5 L827.5 161.8 L830.2 173.4 L832.9 183.9 L835.6 193.1 L838.2 200.9 L840.9 207.3 L843.6 212.4 L846.3 216.3 L849.0 219.3 L851.7 221.4 L854.4 223.0 L857.1 224.0 L859.8 224.8 L862.4 225.2 L865.1 225.5 L867.8 225.7 L870.5 225.8 L873.2 225.9 L875.9 226.0 L878.6 226.0 L881.2 226.0 L883.9 226.0 L886.6 226.0 L889.3 226.0 L892.0 226.0 L892.0 226.0 z\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.18\"/><path d=\"M720.0 226.0 C721.3 226.0 721.3 226.0 722.7 226.0 C724.0 226.0 724.0 226.0 725.4 226.0 C726.7 226.0 726.7 226.0 728.1 226.0 C729.4 226.0 729.4 226.0 730.8 226.0 C732.1 226.0 732.1 226.0 733.4 226.0 C734.8 226.0 734.8 226.0 736.1 226.0 C737.5 226.0 737.5 225.9 738.8 225.9 C740.2 225.9 740.2 225.8 741.5 225.8 C742.8 225.8 742.8 225.7 744.2 225.7 C745.5 225.7 745.5 225.5 746.9 225.5 C748.2 225.5 748.2 225.2 749.6 225.2 C750.9 225.2 750.9 224.8 752.2 224.8 C753.6 224.8 753.6 224.0 754.9 224.0 C756.3 224.0 756.3 223.0 757.6 223.0 C759.0 223.0 759.0 221.4 760.3 221.4 C761.7 221.4 761.7 219.3 763.0 219.3 C764.3 219.3 764.3 216.3 765.7 216.3 C767.0 216.3 767.0 212.4 768.4 212.4 C769.7 212.4 769.7 207.3 771.1 207.3 C772.4 207.3 772.4 200.9 773.8 200.9 C775.1 200.9 775.1 193.1 776.4 193.1 C777.8 193.1 777.8 183.9 779.1 183.9 C780.5 183.9 780.5 173.4 781.8 173.4 C783.2 173.4 783.2 161.8 784.5 161.8 C785.8 161.8 785.8 149.5 787.2 149.5 C788.5 149.5 788.5 136.9 789.9 136.9 C791.2 136.9 791.2 124.6 792.6 124.6 C793.9 124.6 793.9 113.3 795.2 113.3 C796.6 113.3 796.6 103.6 797.9 103.6 C799.3 103.6 799.3 96.2 800.6 96.2 C802.0 96.2 802.0 91.6 803.3 91.6 C804.7 91.6 804.7 90.0 806.0 90.0 C807.3 90.0 807.3 91.6 808.7 91.6 C810.0 91.6 810.0 96.2 811.4 96.2 C812.7 96.2 812.7 103.6 814.1 103.6 C815.4 103.6 815.4 113.3 816.8 113.3 C818.1 113.3 818.1 124.6 819.4 124.6 C820.8 124.6 820.8 136.9 822.1 136.9 C823.5 136.9 823.5 149.5 824.8 149.5 C826.2 149.5 826.2 161.8 827.5 161.8 C828.8 161.8 828.8 173.4 830.2 173.4 C831.5 173.4 831.5 183.9 832.9 183.9 C834.2 183.9 834.2 193.1 835.6 193.1 C836.9 193.1 836.9 200.9 838.2 200.9 C839.6 200.9 839.6 207.3 840.9 207.3 C842.3 207.3 842.3 212.4 843.6 212.4 C845.0 212.4 845.0 216.3 846.3 216.3 C847.7 216.3 847.7 219.3 849.0 219.3 C850.3 219.3 850.3 221.4 851.7 221.4 C853.0 221.4 853.0 223.0 854.4 223.0 C855.7 223.0 855.7 224.0 857.1 224.0 C858.4 224.0 858.4 224.8 859.8 224.8 C861.1 224.8 861.1 225.2 862.4 225.2 C863.8 225.2 863.8 225.5 865.1 225.5 C866.5 225.5 866.5 225.7 867.8 225.7 C869.2 225.7 869.2 225.8 870.5 225.8 C871.8 225.8 871.8 225.9 873.2 225.9 C874.5 225.9 874.5 226.0 875.9 226.0 C877.2 226.0 877.2 226.0 878.6 226.0 C879.9 226.0 879.9 226.0 881.2 226.0 C882.6 226.0 882.6 226.0 883.9 226.0 C885.3 226.0 885.3 226.0 886.6 226.0 C888.0 226.0 888.0 226.0 889.3 226.0 C890.7 226.0 890.7 226.0 892.0 226.0\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"728\" y=\"238\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">tails gone</text><text x=\"806.0\" y=\"80\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">generation 3</text><path d=\"M909 155.0 L917.0 155.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M924.0 155.0 L915.0 150.6 L915.0 159.4 z\" fill=\"#8494A5\"/><rect x=\"928\" y=\"60\" width=\"200\" height=\"190\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><path d=\"M942.0 226.0 L942.0 226.0 L944.7 226.0 L947.4 226.0 L950.1 226.0 L952.8 226.0 L955.4 226.0 L958.1 226.0 L960.8 226.0 L963.5 226.0 L966.2 226.0 L968.9 226.0 L971.6 226.0 L974.2 226.0 L976.9 226.0 L979.6 226.0 L982.3 226.0 L985.0 225.9 L987.7 225.8 L990.4 225.4 L993.1 224.8 L995.8 223.6 L998.4 221.4 L1001.1 217.7 L1003.8 211.9 L1006.5 203.4 L1009.2 191.6 L1011.9 176.4 L1014.6 158.5 L1017.2 139.1 L1019.9 120.3 L1022.6 104.4 L1025.3 93.8 L1028.0 90.0 L1030.7 93.8 L1033.4 104.4 L1036.1 120.3 L1038.8 139.1 L1041.4 158.5 L1044.1 176.4 L1046.8 191.6 L1049.5 203.4 L1052.2 211.9 L1054.9 217.7 L1057.6 221.4 L1060.2 223.6 L1062.9 224.8 L1065.6 225.4 L1068.3 225.8 L1071.0 225.9 L1073.7 226.0 L1076.4 226.0 L1079.1 226.0 L1081.8 226.0 L1084.4 226.0 L1087.1 226.0 L1089.8 226.0 L1092.5 226.0 L1095.2 226.0 L1097.9 226.0 L1100.6 226.0 L1103.2 226.0 L1105.9 226.0 L1108.6 226.0 L1111.3 226.0 L1114.0 226.0 L1114.0 226.0 z\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.18\"/><path d=\"M942.0 226.0 C943.3 226.0 943.3 226.0 944.7 226.0 C946.0 226.0 946.0 226.0 947.4 226.0 C948.7 226.0 948.7 226.0 950.1 226.0 C951.4 226.0 951.4 226.0 952.8 226.0 C954.1 226.0 954.1 226.0 955.4 226.0 C956.8 226.0 956.8 226.0 958.1 226.0 C959.5 226.0 959.5 226.0 960.8 226.0 C962.2 226.0 962.2 226.0 963.5 226.0 C964.8 226.0 964.8 226.0 966.2 226.0 C967.5 226.0 967.5 226.0 968.9 226.0 C970.2 226.0 970.2 226.0 971.6 226.0 C972.9 226.0 972.9 226.0 974.2 226.0 C975.6 226.0 975.6 226.0 976.9 226.0 C978.3 226.0 978.3 226.0 979.6 226.0 C981.0 226.0 981.0 226.0 982.3 226.0 C983.7 226.0 983.7 225.9 985.0 225.9 C986.3 225.9 986.3 225.8 987.7 225.8 C989.0 225.8 989.0 225.4 990.4 225.4 C991.7 225.4 991.7 224.8 993.1 224.8 C994.4 224.8 994.4 223.6 995.8 223.6 C997.1 223.6 997.1 221.4 998.4 221.4 C999.8 221.4 999.8 217.7 1001.1 217.7 C1002.5 217.7 1002.5 211.9 1003.8 211.9 C1005.2 211.9 1005.2 203.4 1006.5 203.4 C1007.8 203.4 1007.8 191.6 1009.2 191.6 C1010.5 191.6 1010.5 176.4 1011.9 176.4 C1013.2 176.4 1013.2 158.5 1014.6 158.5 C1015.9 158.5 1015.9 139.1 1017.2 139.1 C1018.6 139.1 1018.6 120.3 1019.9 120.3 C1021.3 120.3 1021.3 104.4 1022.6 104.4 C1024.0 104.4 1024.0 93.8 1025.3 93.8 C1026.7 93.8 1026.7 90.0 1028.0 90.0 C1029.3 90.0 1029.3 93.8 1030.7 93.8 C1032.0 93.8 1032.0 104.4 1033.4 104.4 C1034.7 104.4 1034.7 120.3 1036.1 120.3 C1037.4 120.3 1037.4 139.1 1038.8 139.1 C1040.1 139.1 1040.1 158.5 1041.4 158.5 C1042.8 158.5 1042.8 176.4 1044.1 176.4 C1045.5 176.4 1045.5 191.6 1046.8 191.6 C1048.2 191.6 1048.2 203.4 1049.5 203.4 C1050.8 203.4 1050.8 211.9 1052.2 211.9 C1053.5 211.9 1053.5 217.7 1054.9 217.7 C1056.2 217.7 1056.2 221.4 1057.6 221.4 C1058.9 221.4 1058.9 223.6 1060.2 223.6 C1061.6 223.6 1061.6 224.8 1062.9 224.8 C1064.3 224.8 1064.3 225.4 1065.6 225.4 C1067.0 225.4 1067.0 225.8 1068.3 225.8 C1069.7 225.8 1069.7 225.9 1071.0 225.9 C1072.3 225.9 1072.3 226.0 1073.7 226.0 C1075.0 226.0 1075.0 226.0 1076.4 226.0 C1077.7 226.0 1077.7 226.0 1079.1 226.0 C1080.4 226.0 1080.4 226.0 1081.8 226.0 C1083.1 226.0 1083.1 226.0 1084.4 226.0 C1085.8 226.0 1085.8 226.0 1087.1 226.0 C1088.5 226.0 1088.5 226.0 1089.8 226.0 C1091.2 226.0 1091.2 226.0 1092.5 226.0 C1093.8 226.0 1093.8 226.0 1095.2 226.0 C1096.5 226.0 1096.5 226.0 1097.9 226.0 C1099.2 226.0 1099.2 226.0 1100.6 226.0 C1101.9 226.0 1101.9 226.0 1103.2 226.0 C1104.6 226.0 1104.6 226.0 1105.9 226.0 C1107.3 226.0 1107.3 226.0 1108.6 226.0 C1110.0 226.0 1110.0 226.0 1111.3 226.0 C1112.7 226.0 1112.7 226.0 1114.0 226.0\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"950\" y=\"238\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">tails gone</text><text x=\"1028.0\" y=\"80\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">generation 4</text><text x=\"575.0\" y=\"282\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">The mode survives; the rare events, the minority dialects, the unusual presentations do not.</text><rect x=\"16\" y=\"302\" width=\"552\" height=\"130\" rx=\"9\" fill=\"#FBF0F2\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"36\" y=\"330\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">Shumailov et al., Nature 631:755–759 (2024)</text><text x=\"36\" y=\"352\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Cite the Nature paper, not the earlier “Curse of Recursion”</text><text x=\"36\" y=\"368\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">preprint. Indiscriminate learning from generated data causes</text><text x=\"36\" y=\"384\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">irreversible defects: the tails of the original distribution</text><text x=\"36\" y=\"400\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">disappear first.</text><rect x=\"582\" y=\"302\" width=\"552\" height=\"130\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"602\" y=\"330\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">The two mitigations that actually work</text><text x=\"602\" y=\"352\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Anchor every generation to a fixed pool of real data rather than</text><text x=\"602\" y=\"368\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">replacing it, and mark provenance so synthetic records can never</text><text x=\"602\" y=\"384\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">drift silently into an evaluation set. Mixing ratio is a</text><text x=\"602\" y=\"400\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">hyper-parameter with a sharp optimum.</text></svg>", "f_kanon": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">k-anonymity and the attacks that produced each successor</text><text x=\"24\" y=\"54\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Raw quasi-identifiers — direct re-identification</text><text x=\"32\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">AGE</text><text x=\"96\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">POSTCODE</text><text x=\"174\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">SEX</text><text x=\"218\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">DIAGNOSIS</text><line x1=\"24\" y1=\"86\" x2=\"386\" y2=\"86\" stroke=\"#8A6A12\" stroke-width=\"2\" stroke-linecap=\"round\"/><text x=\"32\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">34</text><text x=\"96\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">40002</text><text x=\"174\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">F</text><text x=\"218\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Cholangiocarcinoma</text><text x=\"32\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">37</text><text x=\"96\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">40005</text><text x=\"174\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">F</text><text x=\"218\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Cholangiocarcinoma</text><text x=\"32\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">39</text><text x=\"96\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">40001</text><text x=\"174\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">F</text><text x=\"218\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Cholangiocarcinoma</text><text x=\"32\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">52</text><text x=\"96\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">40216</text><text x=\"174\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">M</text><text x=\"218\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Gallstones</text><text x=\"32\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">57</text><text x=\"96\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">40219</text><text x=\"174\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">M</text><text x=\"218\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Fatty liver</text><text x=\"32\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">55</text><text x=\"96\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">40211</text><text x=\"174\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">M</text><text x=\"218\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Gallstones</text><text x=\"428\" y=\"54\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Generalised to k = 3</text><text x=\"436\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">AGE</text><text x=\"500\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">POSTCODE</text><text x=\"578\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">SEX</text><text x=\"622\" y=\"78\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1\">DIAGNOSIS</text><line x1=\"428\" y1=\"86\" x2=\"790\" y2=\"86\" stroke=\"#8A6A12\" stroke-width=\"2\" stroke-linecap=\"round\"/><rect x=\"428\" y=\"92\" width=\"362\" height=\"24\" rx=\"3\" fill=\"#FBE7EB\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"436\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">30–39</text><text x=\"500\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">400**</text><text x=\"578\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">F</text><text x=\"622\" y=\"109\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Cholangiocarcinoma</text><rect x=\"428\" y=\"118\" width=\"362\" height=\"24\" rx=\"3\" fill=\"#FBE7EB\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"436\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">30–39</text><text x=\"500\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">400**</text><text x=\"578\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">F</text><text x=\"622\" y=\"135\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Cholangiocarcinoma</text><rect x=\"428\" y=\"144\" width=\"362\" height=\"24\" rx=\"3\" fill=\"#FBE7EB\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"436\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">30–39</text><text x=\"500\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">400**</text><text x=\"578\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">F</text><text x=\"622\" y=\"161\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Cholangiocarcinoma</text><text x=\"436\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">50–59</text><text x=\"500\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">402**</text><text x=\"578\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">M</text><text x=\"622\" y=\"187\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Gallstones</text><text x=\"436\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">50–59</text><text x=\"500\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">402**</text><text x=\"578\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">M</text><text x=\"622\" y=\"213\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Fatty liver</text><text x=\"436\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">50–59</text><text x=\"500\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">402**</text><text x=\"578\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">M</text><text x=\"622\" y=\"239\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Gallstones</text><path d=\"M392 150 L409.0 150.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M416.0 150.0 L407.0 145.6 L407.0 154.4 z\" fill=\"#8494A5\"/><rect x=\"830\" y=\"54\" width=\"304\" height=\"236\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"848\" y=\"80\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">…and it is still not enough</text><rect x=\"848\" y=\"98\" width=\"268\" height=\"56\" rx=\"6\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"862\" y=\"119\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">k-anonymity</text><text x=\"862\" y=\"134\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\">each record hides in a group of k</text><rect x=\"848\" y=\"162\" width=\"268\" height=\"56\" rx=\"6\" fill=\"#9FB6C9\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"862\" y=\"183\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">l-diversity</text><text x=\"862\" y=\"198\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\">the group must hold l distinct sensitive</text><text x=\"862\" y=\"210\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\">values</text><rect x=\"848\" y=\"226\" width=\"268\" height=\"56\" rx=\"6\" fill=\"#6E8BA5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"862\" y=\"247\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">t-closeness</text><text x=\"862\" y=\"262\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\">the group's distribution must match the</text><text x=\"862\" y=\"274\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\">whole</text><text x=\"848\" y=\"302\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">All three attacked in turn.</text><rect x=\"30\" y=\"316\" width=\"1090\" height=\"116\" rx=\"9\" fill=\"#FBF0F2\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"50\" y=\"344\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\">The homogeneity attack, in one line:</text><text x=\"50\" y=\"370\" font-size=\"13\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">every 30-something woman in postcode 400** has the same diagnosis — so knowing your neighbour's age and postcode is enough, even though k = 3.</text><text x=\"50\" y=\"400\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-style=\"italic\">This is why the field moved to differential privacy: a guarantee about the mechanism, not a property of the released table.</text></svg>", "f_dp": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Differential privacy: a promise about the mechanism</text><text x=\"20\" y=\"48\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Any single person's presence or absence changes the output</text><text x=\"20\" y=\"62\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">distribution by at most e^ε. It is not a property of the released</text><text x=\"20\" y=\"76\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">numbers.</text><line x1=\"70\" y1=\"250\" x2=\"550\" y2=\"250\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M70.0 250.0 L70.0 250.0 L77.5 250.0 L85.0 249.9 L92.5 249.9 L100.0 249.8 L107.5 249.6 L115.0 249.4 L122.5 249.1 L130.0 248.5 L137.5 247.8 L145.0 246.7 L152.5 245.1 L160.0 243.0 L167.5 240.2 L175.0 236.5 L182.5 231.7 L190.0 225.8 L197.5 218.5 L205.0 209.9 L212.5 200.0 L220.0 189.0 L227.5 176.9 L235.0 164.2 L242.5 151.3 L250.0 138.7 L257.5 127.1 L265.0 116.9 L272.5 108.7 L280.0 103.1 L287.5 100.3 L295.0 100.5 L302.5 103.6 L310.0 109.6 L317.5 118.0 L325.0 128.4 L332.5 140.2 L340.0 152.8 L347.5 165.7 L355.0 178.4 L362.5 190.3 L370.0 201.3 L377.5 211.0 L385.0 219.5 L392.5 226.5 L400.0 232.3 L407.5 237.0 L415.0 240.6 L422.5 243.3 L430.0 245.4 L437.5 246.8 L445.0 247.9 L452.5 248.6 L460.0 249.1 L467.5 249.4 L475.0 249.7 L482.5 249.8 L490.0 249.9 L497.5 249.9 L505.0 250.0 L512.5 250.0 L520.0 250.0 L527.5 250.0 L535.0 250.0 L542.5 250.0 L550.0 250.0 L550.0 250.0 z\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.2\"/><path d=\"M70.0 250.0 C73.8 250.0 73.8 250.0 77.5 250.0 C81.2 250.0 81.2 249.9 85.0 249.9 C88.8 249.9 88.8 249.9 92.5 249.9 C96.2 249.9 96.2 249.8 100.0 249.8 C103.8 249.8 103.8 249.6 107.5 249.6 C111.2 249.6 111.2 249.4 115.0 249.4 C118.8 249.4 118.8 249.1 122.5 249.1 C126.2 249.1 126.2 248.5 130.0 248.5 C133.8 248.5 133.8 247.8 137.5 247.8 C141.2 247.8 141.2 246.7 145.0 246.7 C148.8 246.7 148.8 245.1 152.5 245.1 C156.2 245.1 156.2 243.0 160.0 243.0 C163.8 243.0 163.8 240.2 167.5 240.2 C171.2 240.2 171.2 236.5 175.0 236.5 C178.8 236.5 178.8 231.7 182.5 231.7 C186.2 231.7 186.2 225.8 190.0 225.8 C193.8 225.8 193.8 218.5 197.5 218.5 C201.2 218.5 201.2 209.9 205.0 209.9 C208.8 209.9 208.8 200.0 212.5 200.0 C216.2 200.0 216.2 189.0 220.0 189.0 C223.8 189.0 223.8 176.9 227.5 176.9 C231.2 176.9 231.2 164.2 235.0 164.2 C238.8 164.2 238.8 151.3 242.5 151.3 C246.2 151.3 246.2 138.7 250.0 138.7 C253.8 138.7 253.8 127.1 257.5 127.1 C261.2 127.1 261.2 116.9 265.0 116.9 C268.8 116.9 268.8 108.7 272.5 108.7 C276.2 108.7 276.2 103.1 280.0 103.1 C283.8 103.1 283.8 100.3 287.5 100.3 C291.2 100.3 291.2 100.5 295.0 100.5 C298.8 100.5 298.8 103.6 302.5 103.6 C306.2 103.6 306.2 109.6 310.0 109.6 C313.8 109.6 313.8 118.0 317.5 118.0 C321.2 118.0 321.2 128.4 325.0 128.4 C328.8 128.4 328.8 140.2 332.5 140.2 C336.2 140.2 336.2 152.8 340.0 152.8 C343.8 152.8 343.8 165.7 347.5 165.7 C351.2 165.7 351.2 178.4 355.0 178.4 C358.8 178.4 358.8 190.3 362.5 190.3 C366.2 190.3 366.2 201.3 370.0 201.3 C373.8 201.3 373.8 211.0 377.5 211.0 C381.2 211.0 381.2 219.5 385.0 219.5 C388.8 219.5 388.8 226.5 392.5 226.5 C396.2 226.5 396.2 232.3 400.0 232.3 C403.8 232.3 403.8 237.0 407.5 237.0 C411.2 237.0 411.2 240.6 415.0 240.6 C418.8 240.6 418.8 243.3 422.5 243.3 C426.2 243.3 426.2 245.4 430.0 245.4 C433.8 245.4 433.8 246.8 437.5 246.8 C441.2 246.8 441.2 247.9 445.0 247.9 C448.8 247.9 448.8 248.6 452.5 248.6 C456.2 248.6 456.2 249.1 460.0 249.1 C463.8 249.1 463.8 249.4 467.5 249.4 C471.2 249.4 471.2 249.7 475.0 249.7 C478.8 249.7 478.8 249.8 482.5 249.8 C486.2 249.8 486.2 249.9 490.0 249.9 C493.8 249.9 493.8 249.9 497.5 249.9 C501.2 249.9 501.2 250.0 505.0 250.0 C508.8 250.0 508.8 250.0 512.5 250.0 C516.2 250.0 516.2 250.0 520.0 250.0 C523.8 250.0 523.8 250.0 527.5 250.0 C531.2 250.0 531.2 250.0 535.0 250.0 C538.8 250.0 538.8 250.0 542.5 250.0 C546.2 250.0 546.2 250.0 550.0 250.0\" fill=\"none\" stroke=\"#2D5C8A\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M70.0 250.0 L70.0 250.0 L77.5 250.0 L85.0 250.0 L92.5 250.0 L100.0 250.0 L107.5 250.0 L115.0 250.0 L122.5 249.9 L130.0 249.9 L137.5 249.8 L145.0 249.7 L152.5 249.4 L160.0 249.1 L167.5 248.6 L175.0 247.9 L182.5 246.8 L190.0 245.4 L197.5 243.3 L205.0 240.6 L212.5 237.0 L220.0 232.3 L227.5 226.5 L235.0 219.5 L242.5 211.0 L250.0 201.3 L257.5 190.3 L265.0 178.4 L272.5 165.7 L280.0 152.8 L287.5 140.2 L295.0 128.4 L302.5 118.0 L310.0 109.6 L317.5 103.6 L325.0 100.5 L332.5 100.3 L340.0 103.1 L347.5 108.7 L355.0 116.9 L362.5 127.1 L370.0 138.7 L377.5 151.3 L385.0 164.2 L392.5 176.9 L400.0 189.0 L407.5 200.0 L415.0 209.9 L422.5 218.5 L430.0 225.8 L437.5 231.7 L445.0 236.5 L452.5 240.2 L460.0 243.0 L467.5 245.1 L475.0 246.7 L482.5 247.8 L490.0 248.5 L497.5 249.1 L505.0 249.4 L512.5 249.6 L520.0 249.8 L527.5 249.9 L535.0 249.9 L542.5 250.0 L550.0 250.0 L550.0 250.0 z\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.18\"/><path d=\"M70.0 250.0 C73.8 250.0 73.8 250.0 77.5 250.0 C81.2 250.0 81.2 250.0 85.0 250.0 C88.8 250.0 88.8 250.0 92.5 250.0 C96.2 250.0 96.2 250.0 100.0 250.0 C103.8 250.0 103.8 250.0 107.5 250.0 C111.2 250.0 111.2 250.0 115.0 250.0 C118.8 250.0 118.8 249.9 122.5 249.9 C126.2 249.9 126.2 249.9 130.0 249.9 C133.8 249.9 133.8 249.8 137.5 249.8 C141.2 249.8 141.2 249.7 145.0 249.7 C148.8 249.7 148.8 249.4 152.5 249.4 C156.2 249.4 156.2 249.1 160.0 249.1 C163.8 249.1 163.8 248.6 167.5 248.6 C171.2 248.6 171.2 247.9 175.0 247.9 C178.8 247.9 178.8 246.8 182.5 246.8 C186.2 246.8 186.2 245.4 190.0 245.4 C193.8 245.4 193.8 243.3 197.5 243.3 C201.2 243.3 201.2 240.6 205.0 240.6 C208.8 240.6 208.8 237.0 212.5 237.0 C216.2 237.0 216.2 232.3 220.0 232.3 C223.8 232.3 223.8 226.5 227.5 226.5 C231.2 226.5 231.2 219.5 235.0 219.5 C238.8 219.5 238.8 211.0 242.5 211.0 C246.2 211.0 246.2 201.3 250.0 201.3 C253.8 201.3 253.8 190.3 257.5 190.3 C261.2 190.3 261.2 178.4 265.0 178.4 C268.8 178.4 268.8 165.7 272.5 165.7 C276.2 165.7 276.2 152.8 280.0 152.8 C283.8 152.8 283.8 140.2 287.5 140.2 C291.2 140.2 291.2 128.4 295.0 128.4 C298.8 128.4 298.8 118.0 302.5 118.0 C306.2 118.0 306.2 109.6 310.0 109.6 C313.8 109.6 313.8 103.6 317.5 103.6 C321.2 103.6 321.2 100.5 325.0 100.5 C328.8 100.5 328.8 100.3 332.5 100.3 C336.2 100.3 336.2 103.1 340.0 103.1 C343.8 103.1 343.8 108.7 347.5 108.7 C351.2 108.7 351.2 116.9 355.0 116.9 C358.8 116.9 358.8 127.1 362.5 127.1 C366.2 127.1 366.2 138.7 370.0 138.7 C373.8 138.7 373.8 151.3 377.5 151.3 C381.2 151.3 381.2 164.2 385.0 164.2 C388.8 164.2 388.8 176.9 392.5 176.9 C396.2 176.9 396.2 189.0 400.0 189.0 C403.8 189.0 403.8 200.0 407.5 200.0 C411.2 200.0 411.2 209.9 415.0 209.9 C418.8 209.9 418.8 218.5 422.5 218.5 C426.2 218.5 426.2 225.8 430.0 225.8 C433.8 225.8 433.8 231.7 437.5 231.7 C441.2 231.7 441.2 236.5 445.0 236.5 C448.8 236.5 448.8 240.2 452.5 240.2 C456.2 240.2 456.2 243.0 460.0 243.0 C463.8 243.0 463.8 245.1 467.5 245.1 C471.2 245.1 471.2 246.7 475.0 246.7 C478.8 246.7 478.8 247.8 482.5 247.8 C486.2 247.8 486.2 248.5 490.0 248.5 C493.8 248.5 493.8 249.1 497.5 249.1 C501.2 249.1 501.2 249.4 505.0 249.4 C508.8 249.4 508.8 249.6 512.5 249.6 C516.2 249.6 516.2 249.8 520.0 249.8 C523.8 249.8 523.8 249.9 527.5 249.9 C531.2 249.9 531.2 249.9 535.0 249.9 C538.8 249.9 538.8 250.0 542.5 250.0 C546.2 250.0 546.2 250.0 550.0 250.0\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"6 4\"/><line x1=\"78\" y1=\"114\" x2=\"96\" y2=\"114\" stroke=\"#2D5C8A\" stroke-width=\"3\" stroke-linecap=\"round\"/><text x=\"102\" y=\"118\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">query on D</text><line x1=\"78\" y1=\"135\" x2=\"96\" y2=\"135\" stroke=\"#8A6A12\" stroke-width=\"3\" stroke-linecap=\"round\"/><text x=\"102\" y=\"139\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">query on D without you</text><text x=\"310.0\" y=\"274\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">indistinguishable up to e^ε</text><rect x=\"20\" y=\"288\" width=\"560\" height=\"96\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"38\" y=\"314\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">The cost, stated honestly</text><text x=\"38\" y=\"336\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">DP-SGD adds clipped-gradient noise. On a small clinical cohort the accuracy</text><text x=\"38\" y=\"351\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">cost is real and grows as ε shrinks. Report the utility curve across ε, not</text><text x=\"38\" y=\"366\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">a single operating point, and never quote ε without δ and the composition</text><text x=\"38\" y=\"381\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">accounting.</text><rect x=\"20\" y=\"396\" width=\"560\" height=\"110\" rx=\"9\" fill=\"#FBF0F2\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"38\" y=\"422\" font-size=\"13\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\">What DP does not do</text><text x=\"38\" y=\"444\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">It does not protect a group-level fact you were happy to publish. It does</text><text x=\"38\" y=\"459\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">not fix a dataset whose very existence is the disclosure. And an ε large</text><text x=\"38\" y=\"474\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">enough to keep accuracy acceptable may offer little practical protection —</text><text x=\"38\" y=\"489\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">say so in the paper rather than letting the acronym do the work.</text></svg>", "f_bias": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Bias is not one thing that appears at the end — it enters at named points</text><rect x=\"40\" y=\"130\" width=\"155\" height=\"56\" rx=\"8\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"117.5\" y=\"163.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">The world</text><path d=\"M199 158 L212.0 158.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M219.0 158.0 L210.0 153.6 L210.0 162.4 z\" fill=\"#8494A5\"/><rect x=\"225\" y=\"130\" width=\"155\" height=\"56\" rx=\"8\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"302.5\" y=\"163.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Sampling</text><path d=\"M384 158 L397.0 158.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M404.0 158.0 L395.0 153.6 L395.0 162.4 z\" fill=\"#8494A5\"/><rect x=\"410\" y=\"130\" width=\"155\" height=\"56\" rx=\"8\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"487.5\" y=\"163.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Measurement</text><path d=\"M569 158 L582.0 158.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M589.0 158.0 L580.0 153.6 L580.0 162.4 z\" fill=\"#8494A5\"/><rect x=\"595\" y=\"130\" width=\"155\" height=\"56\" rx=\"8\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"672.5\" y=\"163.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Preparation</text><path d=\"M754 158 L767.0 158.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M774.0 158.0 L765.0 153.6 L765.0 162.4 z\" fill=\"#8494A5\"/><rect x=\"780\" y=\"130\" width=\"155\" height=\"56\" rx=\"8\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"857.5\" y=\"163.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Model</text><path d=\"M939 158 L952.0 158.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M959.0 158.0 L950.0 153.6 L950.0 162.4 z\" fill=\"#8494A5\"/><rect x=\"965\" y=\"130\" width=\"155\" height=\"56\" rx=\"8\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"1042.5\" y=\"163.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Deployment</text><line x1=\"302.5\" y1=\"190\" x2=\"302.5\" y2=\"216\" stroke=\"#8A6A12\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"4 4\"/><rect x=\"40\" y=\"222\" width=\"340\" height=\"122\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"58\" y=\"250\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\">Representation bias</text><text x=\"58\" y=\"274\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">the sampled population is not the target</text><text x=\"58\" y=\"290\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">population — one hospital, one scanner, one</text><text x=\"58\" y=\"306\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">city</text><path d=\"M302.5 216 L216.99346424156505 219.69757992468908\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"4 4\"/><path d=\"M210.0 220.0 L219.2 224.0 L218.8 215.2 z\" fill=\"#8A6A12\"/><line x1=\"487.5\" y1=\"190\" x2=\"487.5\" y2=\"216\" stroke=\"#8A6A12\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"4 4\"/><rect x=\"402\" y=\"222\" width=\"340\" height=\"122\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"420\" y=\"250\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\">Measurement bias</text><text x=\"420\" y=\"274\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">the proxy is not the construct — cost of</text><text x=\"420\" y=\"290\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">care as a proxy for need, coded diagnosis as</text><text x=\"420\" y=\"306\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">a proxy for disease</text><path d=\"M487.5 216 L565.0078297063897 219.66900969024329\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"4 4\"/><path d=\"M572.0 220.0 L563.2 215.2 L562.8 224.0 z\" fill=\"#8A6A12\"/><line x1=\"672.5\" y1=\"190\" x2=\"672.5\" y2=\"216\" stroke=\"#8A6A12\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"4 4\"/><rect x=\"764\" y=\"222\" width=\"340\" height=\"122\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"782\" y=\"250\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"700\">Aggregation bias</text><text x=\"782\" y=\"274\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">one model for groups that need different</text><text x=\"782\" y=\"290\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">models; and filtering / resampling that</text><text x=\"782\" y=\"306\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">quietly removes a subgroup</text><path d=\"M672.5 216 L927.0008187822834 219.89293795460472\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"4 4\"/><path d=\"M934.0 220.0 L925.1 215.5 L924.9 224.3 z\" fill=\"#8A6A12\"/><rect x=\"40\" y=\"362\" width=\"1070\" height=\"78\" rx=\"9\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"60\" y=\"390\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">The preparation-specific warning:</text><text x=\"300\" y=\"390\" font-size=\"13\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">every reduction step — quality filtering, deduplication, coreset selection, toxicity filtering — is a sampling decision.</text><text x=\"60\" y=\"418\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-style=\"italic\">Count your subgroups before and after each filter, and put the two counts in the paper. That single table pre-empts most fairness reviews.</text></svg>", "f_docstack": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Four documents, four different readers</text><rect x=\"24\" y=\"62\" width=\"552\" height=\"96\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"62\" width=\"6\" height=\"96\" rx=\"3\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"46\" y=\"88\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Datasheet for datasets</text><text x=\"46\" y=\"110\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">motivation, composition, collection, preprocessing, uses,</text><text x=\"46\" y=\"125\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">distribution, maintenance</text><text x=\"46\" y=\"148\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Gebru et al., CACM 2021</text><rect x=\"24\" y=\"170\" width=\"552\" height=\"96\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"170\" width=\"6\" height=\"96\" rx=\"3\" fill=\"#AEC0D0\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"46\" y=\"196\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Data statement / Data card</text><text x=\"46\" y=\"218\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">who is represented, in what language, gathered how, with what</text><text x=\"46\" y=\"233\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">known gaps</text><text x=\"46\" y=\"256\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Bender &amp; Friedman 2018; Pushkarna et al. 2022</text><rect x=\"24\" y=\"278\" width=\"552\" height=\"96\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"278\" width=\"6\" height=\"96\" rx=\"3\" fill=\"#93A9BD\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"46\" y=\"304\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Model card</text><text x=\"46\" y=\"326\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">intended use, out-of-scope use, metrics disaggregated by</text><text x=\"46\" y=\"341\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">subgroup</text><text x=\"46\" y=\"364\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Mitchell et al. 2019</text><rect x=\"24\" y=\"386\" width=\"552\" height=\"96\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"386\" width=\"6\" height=\"96\" rx=\"3\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"46\" y=\"412\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Croissant (JSON-LD)</text><text x=\"46\" y=\"434\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">machine-readable metadata, resources, structure and ML</text><text x=\"46\" y=\"449\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">semantics in one file</text><text x=\"46\" y=\"472\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">NeurIPS D&amp;B 2024; required for the dataset track</text><text x=\"300\" y=\"506\" font-size=\"12\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">The first three are for humans. The fourth is what makes a dataset findable.</text></svg>", "f_lineage": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">A result you cannot trace to exact bytes is an anecdote</text><rect x=\"60\" y=\"66\" width=\"470\" height=\"46\" rx=\"7\" fill=\"#DDE5EC\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"80\" y=\"94\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">raw/2024-11-03/  — immutable snapshot</text><path d=\"M295 116 L295.0 131.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M295.0 138.0 L299.4 129.0 L290.6 129.0 z\" fill=\"#8494A5\"/><rect x=\"60\" y=\"142\" width=\"470\" height=\"46\" rx=\"7\" fill=\"#C6D3DF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"80\" y=\"170\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">clean.v3  — content hash a91f…</text><path d=\"M295 192 L295.0 207.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M295.0 214.0 L299.4 205.0 L290.6 205.0 z\" fill=\"#8494A5\"/><rect x=\"60\" y=\"218\" width=\"470\" height=\"46\" rx=\"7\" fill=\"#AEC0D0\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"80\" y=\"246\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">split.seed42.groups=patient</text><path d=\"M295 268 L295.0 283.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M295.0 290.0 L299.4 281.0 L290.6 281.0 z\" fill=\"#8494A5\"/><rect x=\"60\" y=\"294\" width=\"470\" height=\"46\" rx=\"7\" fill=\"#93A9BD\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"80\" y=\"322\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">features.v3  — config pinned</text><path d=\"M295 344 L295.0 359.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M295.0 366.0 L299.4 357.0 L290.6 357.0 z\" fill=\"#8494A5\"/><rect x=\"60\" y=\"370\" width=\"470\" height=\"46\" rx=\"7\" fill=\"#8A6A12\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"80\" y=\"398\" font-size=\"12\" text-anchor=\"start\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">model.2024-11-09  — weights + prep config</text><rect x=\"20\" y=\"446\" width=\"560\" height=\"64\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"38\" y=\"470\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Ship the preprocessing config with the weights</text><text x=\"38\" y=\"488\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">For a regulated product, a preprocessing change is a device change.</text><text x=\"38\" y=\"502\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Version-pin the whole transform chain.</text></svg>", "f_skew": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Training / serving skew: the same transform, defined twice, drifting apart</text><rect x=\"30\" y=\"52\" width=\"500\" height=\"152\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"50\" y=\"80\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Offline: training</text><text x=\"50\" y=\"104\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">pandas notebook · batch · full history available</text><rect x=\"50\" y=\"118\" width=\"460\" height=\"66\" rx=\"7\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"66\" y=\"144\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">mean_bp = df.groupby('pid').bp.mean()</text><text x=\"66\" y=\"166\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">df['bp_z'] = (df.bp - mean_bp) / df.bp.std()</text><rect x=\"620\" y=\"52\" width=\"500\" height=\"152\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"640\" y=\"80\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Online: serving</text><text x=\"640\" y=\"104\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Java service · one row · only the last 24 h in cache</text><rect x=\"640\" y=\"118\" width=\"460\" height=\"66\" rx=\"7\" fill=\"#FBF0F2\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"656\" y=\"144\" font-size=\"12\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">double z = (bp - CACHED_MEAN) / SD;</text><text x=\"656\" y=\"166\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8A6A12\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">// re-implemented in 2023, never re-checked</text><path d=\"M534 128 L609.0 128.0\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"7 5\"/><path d=\"M616.0 128.0 L607.0 123.6 L607.0 132.4 z\" fill=\"#8A6A12\"/><text x=\"575.0\" y=\"118\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">should be identical</text><rect x=\"30\" y=\"224\" width=\"1090\" height=\"96\" rx=\"9\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"50\" y=\"252\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">The fix is architectural, not disciplinary:</text><text x=\"348\" y=\"252\" font-size=\"13\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">one transform definition, executed in both paths — a feature store, or the model artefact carrying its own preprocessing graph.</text><text x=\"50\" y=\"282\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\">Then add the test that actually catches it: replay a day of production requests through the offline path and assert the feature vectors match to tolerance.</text><text x=\"50\" y=\"304\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\">Point-in-time correctness is the other half — an offline join must only see what was knowable at the timestamp being scored.</text><text x=\"575.0\" y=\"358\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">This is where a large share of “the model was great in the notebook and useless in the clinic” stories actually end up.</text><text x=\"575.0\" y=\"390\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">It is a data-preparation bug, not a modelling bug, and it is invisible to every offline metric you have.</text></svg>", "f_assessstack": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Grade the artefacts, not the headline metric</text><text x=\"20\" y=\"46\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">A proposed weighting. The shape matters more than the exact</text><text x=\"20\" y=\"60\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">percentages — no single number can be tuned into a good mark.</text><rect x=\"24\" y=\"76\" width=\"163.6\" height=\"34\" rx=\"5\" fill=\"#93A9BD\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"105.8\" y=\"98\" font-size=\"13\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">30%</text><text x=\"105.8\" y=\"126\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Lab portfolio</text><rect x=\"189.6\" y=\"76\" width=\"80.8\" height=\"34\" rx=\"5\" fill=\"#AEC0D0\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"230.0\" y=\"98\" font-size=\"13\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">15%</text><text x=\"230.0\" y=\"126\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Seminars</text><rect x=\"272.4\" y=\"76\" width=\"53.2\" height=\"34\" rx=\"5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"299.0\" y=\"98\" font-size=\"13\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">10%</text><text x=\"299.0\" y=\"126\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Biblio.</text><rect x=\"327.59999999999997\" y=\"76\" width=\"246.4\" height=\"34\" rx=\"5\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"450.79999999999995\" y=\"98\" font-size=\"13\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">45%</text><text x=\"450.79999999999995\" y=\"126\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Capstone</text><line x1=\"327.6\" y1=\"134\" x2=\"327.6\" y2=\"152\" stroke=\"#8A6A12\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"4 3\"/><line x1=\"576\" y1=\"134\" x2=\"576\" y2=\"152\" stroke=\"#8A6A12\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"4 3\"/><text x=\"451.8\" y=\"168\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">the capstone, opened up</text><rect x=\"24\" y=\"184\" width=\"470\" height=\"52\" rx=\"7\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"184\" width=\"7\" height=\"52\" rx=\"3\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"44\" y=\"206\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Preregistered analysis plan</text><text x=\"44\" y=\"224\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">filed before the test set is unsealed</text><rect x=\"504\" y=\"194\" width=\"60\" height=\"32\" rx=\"6\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"534\" y=\"215\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">10%</text><rect x=\"24\" y=\"242\" width=\"470\" height=\"52\" rx=\"7\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"242\" width=\"7\" height=\"52\" rx=\"3\" fill=\"#AEC0D0\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"44\" y=\"264\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Datasheet + Croissant record</text><text x=\"44\" y=\"282\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">another group must load it unaided</text><rect x=\"504\" y=\"252\" width=\"60\" height=\"32\" rx=\"6\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"534\" y=\"273\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">8%</text><rect x=\"24\" y=\"300\" width=\"470\" height=\"52\" rx=\"7\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"300\" width=\"7\" height=\"52\" rx=\"3\" fill=\"#93A9BD\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"44\" y=\"322\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Pipeline code</text><text x=\"44\" y=\"340\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">one command, pinned environment, no notebook state</text><rect x=\"504\" y=\"310\" width=\"60\" height=\"32\" rx=\"6\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"534\" y=\"331\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">10%</text><rect x=\"24\" y=\"358\" width=\"470\" height=\"52\" rx=\"7\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"358\" width=\"7\" height=\"52\" rx=\"3\" fill=\"#6E8BA5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"44\" y=\"380\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Ablation table</text><text x=\"44\" y=\"398\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">with the honest baseline and its error bars</text><rect x=\"504\" y=\"368\" width=\"60\" height=\"32\" rx=\"6\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"534\" y=\"389\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">10%</text><rect x=\"24\" y=\"416\" width=\"470\" height=\"52\" rx=\"7\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"24\" y=\"416\" width=\"7\" height=\"52\" rx=\"3\" fill=\"#8A6A12\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"44\" y=\"438\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Limitations + risk assessment</text><text x=\"44\" y=\"456\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">named failure modes, named affected groups</text><rect x=\"504\" y=\"426\" width=\"60\" height=\"32\" rx=\"6\" fill=\"#F8F1DF\" stroke=\"#8A6A12\" stroke-width=\"1.4\"/><text x=\"534\" y=\"447\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">7%</text><rect x=\"20\" y=\"476\" width=\"560\" height=\"32\" rx=\"8\" fill=\"#16202C\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"300\" y=\"497\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"0.6\">not one mark here is the model's accuracy</text></svg>"}, "slides": [{"kind": "title", "kick": "Condensed edition · session 5 of 5", "title": "Labels, reduction, synthesis and governance", "lead": "The label is a measurement with an error rate. Every filter is a sampling decision. And the documentation is what makes any of it survive contact with a second person.", "meta": "<b>Session 5 of 5</b> &nbsp;·&nbsp; Data Preparation for Machine Learning and AI<br>Thanapong Intharah &nbsp;·&nbsp; Visual Intelligence Laboratory &nbsp;·&nbsp; Khon Kaen University<br>2 h lecture + 1 h clinic &nbsp;·&nbsp; long-form reference: Chapter 0 §0.4–§0.8, Chapter 4", "notes": "This session deliberately comes last: students have now met labels, filters and releases in three concrete domains, so the abstractions have something to attach to."}, {"kind": "cols", "kick": "Learning outcomes", "sm": true, "title": "What you should be able to do by the end of today", "cols": [{"sub": "Estimate", "h": "How wrong your labels are", "b": ["Design an annotation protocol with a refusal option", "Read agreement statistics, including the kappa paradox", "Run confident learning and adjudicate the flags"]}, {"sub": "Reduce", "h": "Against an honest baseline", "b": ["Use difficulty scores and coresets knowing the regime flip", "Plot the random baseline across budgets, with error bars", "Evaluate synthetic data on fidelity, utility, privacy and diversity"]}, {"sub": "Protect", "h": "People in the data", "b": ["Distinguish de-identification, k-anonymity and differential privacy", "Name the attacks that define the risk", "Count subgroups before and after every filter"], "acc": true}, {"sub": "Release", "h": "Something reusable", "b": ["Write a datasheet and a valid Croissant record", "Version data so a result traces to exact bytes", "Meet the capstone brief"]}], "notes": "The capstone brief is set at the end of this session — leave time for questions on it."}, {"kind": "table", "kick": "Run sheet", "title": "How the three hours run", "sm": true, "table": {"head": ["Block", "Clock", "What happens"], "rows": [["Lecture A", "0:00 – 1:05", "Labels, label noise and data reduction — annotation protocols, agreement, confident learning, coresets, and the random baseline"], ["Break", "1:05 – 1:20", "Coffee. Use it: the second block is the harder one."], ["Lecture B", "1:20 – 2:10", "Synthetic data, privacy, fairness and documentation — the trilemma, model collapse, differential privacy, bias entry points, datasheets and Croissant"], ["Paper clinic", "2:10 – 3:00", "Documentation and ethics: audit a release, then argue a filtering decision from the regulatory text."]]}, "callout": {"h": "Deck controls", "p": "<b>E</b> edit any line in place &nbsp;·&nbsp; <b>N</b> speaker notes &nbsp;·&nbsp; <b>O</b> slide grid &nbsp;·&nbsp; <b>T</b> timer &nbsp;·&nbsp; <b>/</b> search &nbsp;·&nbsp; <b>P</b> print a handout with notes underneath each slide."}, "notes": "Start the timer (T) at the top of the hour. The clinic is not optional padding — it is where the lecture material becomes a skill."}, {"kind": "divider", "sec": "0.4", "secTitle": "Labels, annotation and label noise", "no": "0.4", "title": "Labels, annotation and label noise", "lead": "The label is not ground truth. It is a measurement, made by a person, under a protocol, with an error rate you can estimate.", "chips": ["Annotation protocol", "Agreement statistics", "Aggregating annotators", "Weak supervision", "Active learning", "Noisy-label learning", "Confident learning"]}, {"kind": "bullets", "title": "Designing an annotation protocol", "kick": "0.4.1", "tag": "textbook", "lead": "Most label noise is not carelessness. It is an under-specified protocol meeting a genuinely ambiguous case.", "b": ["<b>Label definitions</b> written as decision rules, not as nouns. “Mass” is a noun; “a focal lesion ≥ 5 mm distinguishable from surrounding parenchyma on two planes” is a rule.", "<b>An edge-case catalogue</b> that grows during annotation and is versioned. Every disagreement resolved becomes a new entry.", "<b>A pilot round</b> on 50–100 items before the real run, scored for agreement. If agreement is poor, the protocol is wrong, not the annotators.", "<b>A defined reference standard</b> for clinical tasks: histopathology, follow-up outcome, or an adjudication panel — and an honest statement when the reference is itself imperfect.", "<b>Gold questions</b> seeded through the task to monitor drift in annotator behaviour over time.", "<b>A refusal option.</b> Forcing a label on an un-answerable item manufactures noise. “Uninterpretable” is a legitimate class."], "callout": {"h": "Cost reality", "p": "In our lab's experience, the pilot round and the edge-case catalogue are the cheapest quality investment available — and the first things cut when a deadline moves."}, "notes": "Tie to BiTNet and OV-RDT: both needed expert annotation, and in both the definition of an uninterpretable image mattered as much as the positive class definition.", "sec": "0.4", "secTitle": "Labels, annotation and label noise"}, {"kind": "cols", "title": "Agreement statistics, and how to read them", "kick": "0.4.2", "tag": "textbook", "sm": true, "cols": [{"sub": "Two annotators", "h": "Cohen's κ", "b": ["Chance-corrected agreement for nominal labels", "Use <b>weighted κ</b> for ordinal scales — disagreeing by one grade is not the same as disagreeing by three", "Landis &amp; Koch bands (0.61–0.80 “substantial”) are conventions, not thresholds"]}, {"sub": "Many annotators", "h": "Fleiss' κ, Krippendorff's α", "b": ["α handles missing data, any number of raters, and any measurement level", "Prefer α when annotators did not all see every item — which is the usual case", "Artstein &amp; Poesio<sup class=\"fn\">1</sup> (2008) is the definitive treatment for language tasks"]}, {"sub": "Continuous / dense", "h": "ICC, Dice, boundary distance", "b": ["ICC for continuous ratings; report which of the six ICC forms you used", "For segmentation, inter-annotator <b>Dice</b> is the ceiling your model is chasing", "Report it. A model at 0.85 Dice against annotators who agree at 0.82 has saturated"], "acc": true}, {"sub": "The trap", "h": "High κ is not high quality", "b": ["Two annotators trained on the same wrong protocol agree perfectly", "κ collapses when one class dominates, even with excellent agreement — the <b>kappa paradox</b>", "Always report the confusion pattern alongside the coefficient"]}], "notes": "The kappa paradox catches nearly everyone: 95% raw agreement with κ = 0.2 under heavy imbalance.", "cites": ["Artstein & Poesio. <i>Inter-Coder Agreement for.</i> Computational Linguistics, 2008."], "sec": "0.4", "secTitle": "Labels, annotation and label noise"}, {"kind": "split", "title": "Aggregating annotators, and buying labels cheaply", "kick": "0.4.3–0.4.5", "tag": "both", "wide": "text", "b": ["<b>Majority vote</b> is the baseline and is often fine. It assumes annotators are equally skilled, which they are not.", "<b>Dawid &amp; Skene<sup class=\"fn\">3</sup> (1979)</b> models each annotator's confusion matrix and infers the latent label — still the reference method after forty-five years.", "<b>Adjudication panels</b> beat both when the disagreement is substantive rather than random. Budget for the tie-breaking senior clinician.", "<b>Weak supervision (Snorkel):</b> write labelling <em>functions</em> — rules, patterns, existing classifiers — and learn a generative model of their accuracies. Trades label cost for engineering.", "<b>Active learning:</b> uncertainty, margin, entropy, query-by-committee, core-set, BALD. Real gains exist, but so do cold-start and batch-diversity failures.", "<b>Honest baseline, again:</b> many active-learning methods do not beat random sampling at moderate budgets. Report the random curve."], "fig": "f_confident", "figcap": "Once labels exist, confident learning gives you an estimate of how many are wrong.", "notes": "For a clinical audience, frame weak supervision as 'encoding what the senior clinician already knows as rules, then letting the model reconcile them'.", "cites": ["Recht et al. <i>Do ImageNet Classifiers Generalize to ImageNet?.</i> ICML, 2019.", "Krizhevsky et al. <i>ImageNet Classification with Deep Convolutional Neural Networks.</i> NeurIPS, 2012.", "Dawid & Skene. <i>Maximum Likelihood Estimation of Observer Error-Rates Using the EM Algorithm.</i> JRSS-C, 1979."], "sec": "0.4", "secTitle": "Labels, annotation and label noise"}, {"kind": "split", "title": "Label errors in benchmark test sets", "kick": "0.4.7–0.4.8", "tag": "frontier", "lead": "The datasets we use to rank models contain enough label error to change the ranking.", "b": ["<b>The consequence is not academic:</b> on datasets with higher noise, lower-capacity models can outperform higher-capacity ones on the <em>corrected</em> labels, reversing the published ordering.", "<b>Method:</b> confident learning estimates the joint distribution of noisy and true labels from out-of-sample predicted probabilities, then ranks candidates by Prune-By-Noise-Rate.", "<b>Protocol:</b> run it, adjudicate the top few hundred flags by hand, re-benchmark. Lab 10 does exactly this."], "stats": [{"v": "~3.4%", "l": "mean label error, ten benchmark test sets"}, {"v": "~6%", "l": "of the ImageNet validation set"}], "fig": "f_confident", "figcap": "Off-diagonal mass is where the candidate errors live. Human adjudication is still required — the method ranks, it does not decide.", "notes": "If someone objects that 3.4% is small: point out that the gap between the top ten ImageNet models is smaller than that.", "cites": ["Recht et al. <i>Do ImageNet Classifiers Generalize to ImageNet?.</i> ICML, 2019.", "Krizhevsky et al. <i>ImageNet Classification with Deep Convolutional Neural Networks.</i> NeurIPS, 2012."], "sec": "0.4", "secTitle": "Labels, annotation and label noise"}, {"kind": "refs", "title": "Section 0.4 — references", "kick": "Reading", "sm": true, "refs": ["Northcutt, Jiang &amp; Chuang. <b>Confident Learning: Estimating Uncertainty in Dataset Labels.</b> <i>JAIR</i> 70, 2021 (arXiv:1911.00068).", "Northcutt, Athalye &amp; Mueller. <b>Pervasive Label Errors in Test Sets Destabilize Machine Learning Benchmarks.</b> <i>NeurIPS Datasets &amp; Benchmarks</i>, 2021.", "Dawid &amp; Skene. <b>Maximum Likelihood Estimation of Observer Error-Rates Using the EM Algorithm.</b> <i>JRSS-C</i>, 1979.", "Artstein &amp; Poesio. <b>Inter-Coder Agreement for Computational Linguistics.</b> <i>Computational Linguistics</i>, 2008.", "Ratner, Bach, Ehrenberg, Fries, Wu &amp; Ré. <b>Snorkel: Rapid Training Data Creation with Weak Supervision.</b> <i>VLDB</i>, 2017.", "Settles. <b>Active Learning Literature Survey.</b> 2009; Sener &amp; Savarese, <b>Active Learning for CNNs: A Core-Set Approach</b>, <i>ICLR</i> 2018.", "Song, Kim, Park, Shin &amp; Lee. <b>Learning from Noisy Labels with Deep Neural Networks: A Survey.</b> <i>IEEE TNNLS</i>, 2022.", "Patrini, Rozza, Menon, Nock &amp; Qu. <b>Making Deep Neural Networks Robust to Label Noise.</b> <i>CVPR</i>, 2017.", "Tooling: cleanlab, Snorkel, Label Studio, CVAT."], "sec": "0.4", "secTitle": "Labels, annotation and label noise"}, {"kind": "divider", "sec": "0.5", "secTitle": "Data reduction, selection and valuation", "no": "0.5", "title": "Reduction, selection and valuation", "lead": "When you cannot keep everything: which examples earn their place, and what is each one worth?", "chips": ["Sampling designs", "Difficulty scores", "Coresets", "Difficulty vs diversity", "Pruning and scaling laws", "Data valuation", "Distillation", "The random baseline"]}, {"kind": "split", "title": "Difficulty and dynamics scores", "kick": "0.5.2", "tag": "frontier", "wide": "text", "lead": "Cheap per-example signals you get almost free from a training run you were doing anyway.", "b": ["<b>Forgetting events</b> (Toneva et al.<sup class=\"fn\">3</sup>, ICLR 2019) — how often an example flips from correct to incorrect during training. Never-forgotten examples are prunable.", "<b>EL2N and GraNd</b> (Paul et al.<sup class=\"fn\">4</sup>, NeurIPS 2021) — error-L2-norm and gradient-norm early in training. Computable after a handful of epochs.", "<b>Area under the margin</b> (Pleiss et al., 2020) — separates hard-but-correct from mislabelled, which the other scores conflate.", "<b>Prediction entropy</b> — the cheapest, and the weakest, because it confuses ambiguity with ignorance.", "<b>The regime flip that decides everything:</b> in the scarce-data regime keep the <em>easy</em> examples, because they define the class. In the abundant-data regime keep the <em>hard</em> ones, because the easy ones are already learned.", "<b>A score that ignores the regime will lose to random selection</b> — and frequently does."], "fig": "f_prune", "figcap": "With a good metric, error can fall faster than power-law scaling (Sorscher et al., NeurIPS 2022, Outstanding Paper).", "notes": "The regime flip is the insight students find genuinely surprising. Draw it on the board twice.", "cites": ["Recht et al. <i>Do ImageNet Classifiers Generalize to ImageNet?.</i> ICML, 2019.", "Krizhevsky et al. <i>ImageNet Classification with Deep Convolutional Neural Networks.</i> NeurIPS, 2012.", "Toneva et al. <i>An Empirical Study of Example Forgetting.</i> ICLR, 2019.", "Paul et al. <i>Deep Learning on a Data Diet: Finding Important Examples Early in Training.</i> NeurIPS, 2021."], "sec": "0.5", "secTitle": "Data reduction, selection and valuation"}, {"kind": "cols", "title": "Coresets, diversity, and what an example is worth", "kick": "0.5.3–0.5.7", "tag": "frontier", "sm": true, "cols": [{"sub": "Geometry", "h": "Coreset selection", "b": ["<b>k-center greedy</b> — cover the embedding space, minimise the maximum distance to a selected point", "<b>Herding</b> — match the mean of the full set incrementally", "<b>Moderate coresets</b> (Xia et al.<sup class=\"fn\">1</sup>, ICLR 2023) — pick examples at median distance to the class centre, robust across pruning rates", "<b>Coverage-centric</b> selection wins at high pruning rates where difficulty scores collapse"]}, {"sub": "The failure mode", "h": "Difficulty without diversity", "b": ["Pure hard-example selection collapses onto one region of the space — usually the ambiguous boundary between two classes", "<b>D2 Pruning</b> (Maharana et al.<sup class=\"fn\">2</sup>, ICLR 2024) runs message passing on a graph so selected points repel each other", "The general lesson: any single-score ranking needs a diversity constraint bolted on"], "acc": true}, {"sub": "Valuation", "h": "What is this row worth?", "b": ["<b>Leave-one-out</b> — exact, and computationally hopeless", "<b>Data Shapley</b> (Ghorbani &amp; Zou<sup class=\"fn\">3</sup>, 2019) — the game-theoretic answer, with Monte-Carlo approximations", "<b>Influence functions</b> (Koh &amp; Liang, 2017) — a second-order approximation that also explains predictions", "Use it to prune, to prioritise annotation, or to <em>price</em> data in a partnership"]}, {"sub": "The extreme", "h": "Distillation and condensation", "b": ["Synthesise a tiny surrogate set by gradient, distribution or trajectory matching", "Impressive on MNIST/CIFAR; the accuracy ceiling on realistic data is still low", "Teach it as a research direction, not a tool", "Yu<sup class=\"fn\">4</sup>, Liu &amp; Wang, <i>IEEE TPAMI</i>, 2023"]}], "notes": "For a health-data audience, data valuation is the most immediately useful: it answers 'which 200 scans should we pay to annotate next?'", "cites": ["Xia et al. <i>Moderate Coreset.</i> ICLR, 2023.", "Maharana et al. <i>D2 Pruning: Message Passing for Balancing Diversity and Difficulty.</i> ICLR, 2024.", "Ghorbani & Zou. <i>Data Shapley.</i> ICML, 2019.", "Yu et al. <i>Dataset Distillation: A Comprehensive Review.</i> IEEE TPAMI, 2023."], "sec": "0.5", "secTitle": "Data reduction, selection and valuation"}, {"kind": "bullets", "title": "The baseline every selection paper must beat", "kick": "0.5.8", "tag": "frontier", "lead": "Random selection is not a straw man. It is a strong, unbiased, zero-cost method, and a large fraction of published selection methods do not beat it.", "b": ["<b>Random is unbiased by construction.</b> It preserves the class distribution, the subgroup distribution and the difficulty distribution in expectation. No clever method gets that for free.", "<b>Random has no hyper-parameters,</b> so it cannot be tuned on the test set — which several of its competitors quietly are.", "<b>Random is embarrassingly cheap.</b> Any method costing a full training run to compute scores must beat random by enough to justify that run.", "<b>Report the random curve across budgets,</b> not a single point. Methods often win at 10% and lose at 50%, and papers tend to plot only the budget where they win.", "<b>Report variance.</b> Random selection has a distribution; a single draw is not a baseline.", "<b>If your method loses to random, that is a result</b> — and a more useful one than a marginal win nobody can reproduce."], "callout": {"h": "Rubric line", "p": "In this module, any submitted work involving data selection must plot the random baseline with error bars across at least three budgets. Absence of the baseline is a failed criterion, not a stylistic preference."}, "notes": "This slide does more for research quality than any technique slide in the module.", "sec": "0.5", "secTitle": "Data reduction, selection and valuation"}, {"kind": "divider", "sec": "0.6", "secTitle": "Synthetic data as a preparation strategy", "no": "0.6", "title": "Synthetic data as a preparation strategy", "lead": "Sometimes the right answer. Rarely the easy one, and never evaluable on fidelity alone.", "chips": ["Why synthesise", "The trilemma", "TSTR and TRTS", "Model collapse", "Mixing ratios", "Provenance marking"]}, {"kind": "split", "title": "Why synthesise — match the reason to the method", "kick": "0.6.1", "tag": "both", "wide": "text", "b": ["<b>Scarcity</b> — too few examples of anything. Generative augmentation, or transfer from a related domain. Hardest case to win.", "<b>Imbalance</b> — enough data overall, too few of one class. Often better solved by thresholds and class weights (Chapter 1, section 1.9).", "<b>Privacy</b> — the real data cannot leave the hospital. Differentially private synthesis, evaluated on downstream utility.", "<b>Coverage of rare events</b> — the scenario exists but was never captured. Simulation and domain randomisation, especially for CCTV and robotics.", "<b>Stress testing</b> — deliberately construct the hard case to probe a failure mode. The most reliably successful use, and the least published.", "<b>The diagnostic question:</b> which of these five is your reason? If you cannot answer in one sentence, the synthetic data will not help."], "fig": "f_trilemma", "figcap": "Push any corner and at least one other corner moves. An evaluation that reports only fidelity is not an evaluation.", "notes": "Stress testing is worth dwelling on — it is the use case where synthetic data is unambiguously the right tool.", "sec": "0.6", "secTitle": "Synthetic data as a preparation strategy"}, {"kind": "cols", "title": "The minimum acceptable evidence", "kick": "0.6.2–0.6.3", "tag": "frontier", "sm": true, "lead": "Four protocols. A synthetic-data paper that reports only the first one has not shown you anything actionable.", "cols": [{"sub": "Fidelity", "h": "Does it look right?", "b": ["Marginal distributions per column or per channel", "Pairwise correlations and joint structure", "Discriminator AUC — can a classifier tell real from synthetic?", "<b>Necessary, nowhere near sufficient.</b> A copy of the training set scores perfectly"]}, {"sub": "Utility", "h": "TSTR / TRTS", "b": ["<b>TSTR</b> — train on synthetic, test on real. The headline number", "<b>TRTS</b> — train on real, test on synthetic. Diagnoses coverage gaps", "Always against a <b>real-data baseline at the same size</b>", "Esteban<sup class=\"fn\">1</sup>, Hyland &amp; Rätsch (2017) established the protocol"], "acc": true}, {"sub": "Privacy", "h": "Did it memorise?", "b": ["Distance to closest record — the cheap screen", "Membership-inference AUC — the meaningful one", "A formal DP budget if you claim a guarantee", "A generator that memorises scores <em>well</em> on fidelity and utility"]}, {"sub": "Diversity", "h": "Did it collapse?", "b": ["Coverage and recall against the real distribution", "Per-class and per-subgroup counts, not just the aggregate", "Mode collapse shows up as excellent fidelity with poor coverage", "Report it or a reviewer will ask"]}], "notes": "Emphasise the trap on the fidelity card: a memorising generator wins on fidelity and utility and fails catastrophically on privacy. That is why all four are required.", "cites": ["Esteban et al. <i>Real-valued (Medical) Time Series Generation with Recurrent Conditional GANs.</i> 2017."], "sec": "0.6", "secTitle": "Synthetic data as a preparation strategy"}, {"kind": "figure", "title": "Model collapse", "kick": "0.6.4", "tag": "frontier", "lead": "What happens when each generation of models trains on the previous generation's output.", "fig": "f_collapse", "figcap": "Shumailov et al.<sup class=\"fn\">1</sup>, <i>Nature</i> 631:755–759 (2024). Cite the Nature paper, not the earlier “Curse of Recursion” preprint. The tails go first — which is to say, the rare disease, the minority dialect, the unusual presentation.", "notes": "The Thai-language angle: low-resource languages are disproportionately represented in the tails of web corpora, so recursive training degrades them fastest.", "cites": ["Shumailov et al. <i>AI models collapse when trained on recursively generated data.</i> Nature 631:755–759, 2024."], "sec": "0.6", "secTitle": "Synthetic data as a preparation strategy"}, {"kind": "refs", "title": "Section 0.6 — references", "kick": "Reading", "sm": true, "refs": ["Shumailov, Shumaylov, Zhao, Papernot, Anderson &amp; Gal. <b>AI models collapse when trained on recursively generated data.</b> <i>Nature</i> 631:755–759, 2024.", "Esteban, Hyland &amp; Rätsch. <b>Real-valued (Medical) Time Series Generation with Recurrent Conditional GANs.</b> 2017 — origin of the TSTR protocol.", "Xu, Skoularidou, Cuesta-Infante &amp; Veeramachaneni. <b>Modeling Tabular Data using Conditional GAN (CTGAN/TVAE).</b> <i>NeurIPS</i>, 2019.", "Kotelnikov, Baranchuk, Rubachev &amp; Babenko. <b>TabDDPM: Modelling Tabular Data with Diffusion Models.</b> <i>ICML</i>, 2023.", "Jordon, Yoon &amp; van der Schaar. <b>PATE-GAN: Generating Synthetic Data with Differential Privacy Guarantees.</b> <i>ICLR</i>, 2019.", "Manousakas &amp; Aydöre. <b>On the Usefulness of Synthetic Tabular Data Generation.</b> DMLR workshop at <i>ICML</i>, 2023 — the sceptical counterweight.", "Tooling: SDV (Synthetic Data Vault), synthcity."], "sec": "0.6", "secTitle": "Synthetic data as a preparation strategy"}, {"kind": "divider", "sec": "0.7", "secTitle": "Privacy, governance, fairness and law", "no": "0.7", "title": "Privacy, governance, fairness and law", "lead": "The constraints that are not negotiable, and the biases that enter through preparation rather than modelling.", "chips": ["De-identification", "k-anonymity and successors", "Differential privacy", "Attacks", "Federated preparation", "Bias entry points", "Subgroup audits", "EU AI Act"]}, {"kind": "figure", "title": "De-identification, and why it is not enough", "kick": "0.7.1–0.7.2", "tag": "textbook", "lead": "HIPAA Safe Harbor lists eighteen identifiers to remove. Removing them is necessary, and demonstrably insufficient.", "fig": "f_kanon", "figcap": "The homogeneity attack against k-anonymity, in one table. Each successor model closes one attack and opens the next — which is why the field moved to guarantees about the <em>mechanism</em>.", "notes": "Sweeney's original demonstration: 87% of the US population uniquely identified by ZIP, birth date and sex. Ask the room what the Thai equivalent quasi-identifier set is.", "sec": "0.7", "secTitle": "Privacy, governance, fairness and law"}, {"kind": "split", "title": "Differential privacy: what it does and does not promise", "kick": "0.7.3", "tag": "frontier", "wide": "text", "b": ["<b>The guarantee</b> is about the mechanism: any one person's presence changes the output distribution by at most a factor of e<sup>ε</sup> (with a δ slack term).", "<b>It composes.</b> Every query spends budget. Track it, or the guarantee you quote is not the one you have.", "<b>DP-SGD</b> (Abadi et al.<sup class=\"fn\">1</sup>, CCS 2016) clips per-example gradients and adds calibrated noise. It is the practical route for deep models.", "<b>The cost is real on small cohorts.</b> Report the utility-versus-ε curve, not a single operating point — and never quote ε without δ and the accounting method.", "<b>What it does not do:</b> protect a group-level fact you intended to publish; fix a dataset whose existence is itself the disclosure; or mean anything useful at ε values large enough to preserve accuracy.", "<b>Say so plainly in the paper.</b> An acronym is not a privacy analysis."], "fig": "f_dp", "figcap": "Two datasets differing in one person. The guarantee is that you cannot tell which one produced the output.", "notes": "Push back on ε-theatre. Many published 'DP' results use ε in the tens, where the formal guarantee is weak.", "cites": ["Abadi et al. <i>Deep Learning with Differential Privacy (DP-SGD).</i> ACM CCS, 2016."], "sec": "0.7", "secTitle": "Privacy, governance, fairness and law"}, {"kind": "cols", "title": "The attacks that define the risk", "kick": "0.7.4", "tag": "frontier", "sm": true, "lead": "Privacy is defined by what an adversary can do. Teach the attacks first; the defences then make sense.", "cols": [{"sub": "Membership", "h": "Were you in the training set?", "b": ["Shokri et al.<sup class=\"fn\">1</sup> (2017): train shadow models, learn to recognise the confidence signature of a training member", "In a cohort of cancer patients, membership <em>is</em> the sensitive attribute", "Now the standard privacy metric for synthetic data"]}, {"sub": "Attribute", "h": "What else can be inferred?", "b": ["Recover a redacted field from the remaining ones", "Works because features are correlated — which is also why the model works", "Redaction of one column rarely removes the information"]}, {"sub": "Extraction", "h": "Verbatim memorisation", "b": ["Carlini et al.<sup class=\"fn\">2</sup> (2021): extract training sequences from a language model by prompting", "Duplication is the main driver — deduplication is therefore a <b>privacy control</b>, not only a quality one", "Revisited in Chapter 2 §2.6"], "acc": true}, {"sub": "Re-identification", "h": "Linkage to an outside table", "b": ["The Netflix Prize and the Massachusetts hospital records are the canonical demonstrations", "3D renders of head MRI are re-identifiable (Schwarz et al.<sup class=\"fn\">3</sup>, <i>NEJM</i> 2019) — hence defacing", "The adversary's auxiliary data is the variable you cannot control"]}], "notes": "The extraction/deduplication link is the one that surprises people: a data-quality operation turns out to be the most effective privacy intervention available at pretraining scale.", "cites": ["Shokri et al. <i>Membership Inference Attacks Against Machine Learning Models.</i> IEEE S&P, 2017.", "Carlini et al. <i>Extracting Training Data from Large Language Models.</i> USENIX Security, 2021.", "Schwarz et al. <i>Identification of Anonymous MRI Research Participants with Face-Recognition Software.</i> NEJM, 2019."], "sec": "0.7", "secTitle": "Privacy, governance, fairness and law"}, {"kind": "figure", "title": "Bias enters at named points", "kick": "0.7.7–0.7.8", "tag": "textbook", "lead": "Suresh &amp; Guttag<sup class=\"fn\">1</sup>'s framing: not one “bias”, but distinct mechanisms with distinct diagnoses.", "fig": "f_bias", "figcap": "Every reduction step in this course — quality filtering, deduplication, coreset selection, toxicity filtering — is a sampling decision. Count subgroups before and after each one.", "notes": "The before/after subgroup table is one page and pre-empts most fairness reviews. Make it a required appendix, like the model info sheet.", "cites": ["Suresh & Guttag. <i>A Framework for Understanding Sources of Harm throughout the Machine Learning Life Cycle.</i> EAAMO, 2021."], "sec": "0.7", "secTitle": "Privacy, governance, fairness and law"}, {"kind": "bullets", "title": "Consent, licensing and the regulatory floor", "kick": "0.7.6, 0.7.9", "tag": "frontier", "b": ["<b>Provenance is now auditable.</b> The Data Provenance Initiative (Longpre et al.<sup class=\"fn\">1</sup>, 2024) found widespread licence mis-labelling in popular instruction datasets — “open” frequently was not.", "<b>Crawler opt-out signals</b> (robots.txt, meta directives) are increasingly treated as a compliance obligation rather than a courtesy. Record what you honoured and when.", "<b>EU AI Act</b> imposes data-governance obligations on high-risk systems: examination for bias, relevance and representativeness of training data, and documented gaps. Medical AI is high-risk by classification.", "<b>FDA and Thai FDA</b> expect a locked, versioned preprocessing chain. A change to normalisation is a change to the device.", "<b>GDPR / PDPA</b>: pseudonymisation is not anonymisation. Pseudonymised data is still personal data, with the full obligation set attached.", "<b>Practical minimum for a research group:</b> a licence and provenance column in your dataset registry, filled in at acquisition. Retrofitting it is a project, not a task."], "callout": {"h": "For Thai medical AI specifically", "p": "The combination that recurs in our own work: IRB approval defining the permitted use, HIPAA-equivalent identifier removal, PHI burned into pixel data checked separately from DICOM tags, and a locked preprocessing version recorded alongside the model."}, "notes": "Thailand's PDPA maps closely onto GDPR for these purposes. Worth ten minutes if the cohort is Thai.", "cites": ["Longpre et al. <i>The Data Provenance Initiative: A Large Scale Audit of Dataset Licensing and Attribution in AI.</i> 2024."], "sec": "0.7", "secTitle": "Privacy, governance, fairness and law"}, {"kind": "refs", "title": "Section 0.7 — references", "kick": "Reading", "sm": true, "refs": ["Sweeney. <b>k-anonymity: A Model for Protecting Privacy.</b> <i>IJUFKS</i>, 2002; Machanavajjhala et al., <b>l-diversity</b>, 2007.", "Dwork &amp; Roth. <b>The Algorithmic Foundations of Differential Privacy.</b> 2014.", "Abadi, Chu, Goodfellow, McMahan, Mironov, Talwar &amp; Zhang. <b>Deep Learning with Differential Privacy (DP-SGD).</b> <i>ACM CCS</i>, 2016.", "Shokri, Stronati, Song &amp; Shmatikov. <b>Membership Inference Attacks Against Machine Learning Models.</b> <i>IEEE S&amp;P</i>, 2017.", "Carlini et al. <b>Extracting Training Data from Large Language Models.</b> <i>USENIX Security</i>, 2021.", "Suresh &amp; Guttag. <b>A Framework for Understanding Sources of Harm throughout the Machine Learning Life Cycle.</b> <i>EAAMO</i>, 2021.", "Mehrabi, Morstatter, Saxena, Lerman &amp; Galstyan. <b>A Survey on Bias and Fairness in Machine Learning.</b> <i>ACM Computing Surveys</i>, 2021.", "Kairouz et al. <b>Advances and Open Problems in Federated Learning.</b> 2021; McMahan et al., 2017.", "Longpre et al. <b>The Data Provenance Initiative: A Large Scale Audit of Dataset Licensing and Attribution in AI.</b> 2024.", "Schwarz et al. <b>Identification of Anonymous MRI Research Participants with Face-Recognition Software.</b> <i>NEJM</i>, 2019."], "sec": "0.7", "secTitle": "Privacy, governance, fairness and law"}, {"kind": "divider", "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure", "no": "0.8", "title": "Documentation, versioning and infrastructure", "lead": "The unglamorous half that decides whether anything in the previous seven sections survives contact with a second person.", "chips": ["Datasheets", "Data and model cards", "Croissant", "Versioning", "Reproducibility", "Feature stores", "Storage formats", "Out-of-core"]}, {"kind": "figure", "title": "Four documents, four different readers", "kick": "0.8.1–0.8.3", "tag": "both", "lead": "They are not redundant. Each answers a question the others do not.", "fig": "f_docstack", "figcap": "NeurIPS now requires a Croissant record for dataset-track submissions. That is the point at which documentation stopped being optional and became infrastructure.", "notes": "Assign the datasheet questionnaire as homework against a dataset the student already uses. The questions they cannot answer are the finding.", "cites": ["Pushkarna et al. <i>Data Cards.</i> ACM FAccT, 2022."], "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure"}, {"kind": "split", "title": "Versioning and reproducibility", "kick": "0.8.4–0.8.5", "tag": "both", "wide": "text", "b": ["<b>Content hashing over file names.</b> <span class='k'>data_final_v2_REAL.csv</span> is not a version. A hash is.", "<b>Immutable raw snapshots.</b> The raw layer is append-only. Every correction is a new derived version with a recorded reason.", "<b>Tooling:</b> DVC, lakeFS, Git-LFS, or a dated object-store prefix with a manifest. The tool matters far less than the discipline.", "<b>Pin the environment:</b> seeds, determinism flags, library versions, container digest. A result that needs a specific BLAS build should say so.", "<b>Record the preprocessing config <em>with the weights</em>.</b> A model artefact without its transform chain is not deployable and not reproducible.", "<b>The test:</b> can a colleague, given only your repository and your dataset identifier, reproduce the number in your abstract? Try it once per project, with a real colleague."], "fig": "f_lineage", "figcap": "Each arrow is a recorded transformation with a hash on both ends. That is all “lineage” means.", "notes": "The 'try it with a real colleague' exercise is brutal and useful. Schedule it in week 10 of a project.", "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure"}, {"kind": "figure", "title": "Training / serving skew", "kick": "0.8.6", "tag": "both", "lead": "The same transform, defined twice, drifting apart. Invisible to every offline metric you have.", "fig": "f_skew", "figcap": "The fix is architectural: one transform definition executed in both paths, plus a replay test that asserts the two feature vectors match to tolerance.", "notes": "This is where a large share of 'great in the notebook, useless in the clinic' stories actually end up. It is a data-preparation bug, not a modelling bug.", "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure"}, {"kind": "refs", "title": "Section 0.8 — references", "kick": "Reading", "sm": true, "refs": ["Gebru, Morgenstern, Vecchione, Vaughan, Wallach, Daumé &amp; Crawford. <b>Datasheets for Datasets.</b> <i>CACM</i> 64(12), 2021.", "Bender &amp; Friedman. <b>Data Statements for Natural Language Processing.</b> <i>TACL</i>, 2018.", "Pushkarna, Zaldivar &amp; Kjartansson. <b>Data Cards.</b> <i>ACM FAccT</i>, 2022.", "Mitchell et al. <b>Model Cards for Model Reporting.</b> <i>ACM FAT*</i>, 2019.", "Benjelloun et al. <b>Croissant: A Metadata Format for ML-Ready Datasets.</b> <i>NeurIPS Datasets &amp; Benchmarks</i>, 2024; MLCommons.", "Kleppmann. <b>Designing Data-Intensive Applications.</b> O'Reilly, 2017 — for the storage and streaming material.", "Sculley et al. <b>Hidden Technical Debt in Machine Learning Systems.</b> <i>NeurIPS</i>, 2015.", "Tooling: DVC, lakeFS, MLflow, Feast, Delta Lake, Apache Iceberg, NVIDIA DALI."], "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure"}, {"kind": "split", "title": "Grade the artefacts, not the headline metric", "kick": "4.3.1", "tag": "both", "wide": "text", "lead": "The metric is the least informative object in the submission. It is a property of the split design and the label quality at least as much as of the student's work.", "b": ["<b>Four artefacts carry the marks:</b> datasheet, pipeline code, ablation table, limitations section. Each is independently gradeable and independently hard to fabricate.", "<b>The lab portfolio uses the same rubric</b>, from week 2 onward.", "<b>It survives a strong cohort:</b> none of the four can be tuned into a good mark. There is no leaderboard to climb.", "<b>It survives a hard dataset:</b> a difficult institutional project can score a distinction with a mediocre model, provided the four artefacts are honest.", "<b>Weightings are a proposal, not a finding.</b> Move them; keep the shape.", "<b>The one thing not to move:</b> no mark anywhere in the scheme is the model's accuracy."], "fig": "f_assessstack", "figcap": "A worked weighting. The capstone's 45% is itself split across the four artefacts.", "callout": {"h": "The external examiner's question", "p": "“How do you distinguish a good result from good luck?” The answer must be structural: the marks attach to things checkable without rerunning anything, and two rows are gates."}, "notes": "If you present one slide from this section at a programme board, present this one. The objection you will get is that it is soft on technical achievement — the answer is the rubric on the next-but-one slide, which is harder on technical achievement than a metric threshold ever was.", "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure"}, {"kind": "table", "title": "The rubric for data work", "kick": "4.3.3", "tag": "both", "sm": true, "lead": "Five criteria, four levels. Print it, hand it out in week 1, and mark every lab on two of its rows.", "table": {"head": ["Criterion", "0 · absent", "1 · asserted", "2 · justified", "3 · justified and tested"], "rows": [["Mechanism-aware handling", "A default applied silently — mean fill, drop rows, SMOTE", "The choice is named but not argued", "The mechanism is argued from the data <em>and</em> the collection process", "Two mechanisms compared, and the decision is shown to change the answer"], ["Leakage control &nbsp;<b>(gate)</b>", "No split design stated anywhere", "A split is named, but transforms are fitted outside the fold", "Grouping unit declared before the first experiment and enforced in code", "Naive and honest numbers both reported; model info sheet completed"], ["Documented decisions", "No record of what was removed or why", "Prose description only, no artefact", "Datasheet plus a versioned, pinned config", "A config hash traces to the reported number, and a colleague reproduced it"], ["Honest baselines &nbsp;<b>(gate)</b>", "No baseline at all", "One baseline, one budget, no variance reported", "Random baseline across at least three budgets", "Random with error bars, and the regions where the method <em>loses</em> are reported too"], ["Reported failure modes", "“Future work”", "Generic limitations paragraph", "Failure modes named, with the subgroup or slice affected", "Failure modes demonstrated on a held-out set built for the purpose"]]}, "callout": {"h": "How the five scores become one mark", "p": "Mean &ge; 1.5 passes. Mean &ge; 2.5 with nothing below 2 is a distinction. <b>A zero on either gate is a referral regardless of the mean</b> — because a leaky result is not eighty per cent of a clean one, it is a different claim about the world."}, "notes": "This is the most reusable slide in the deck and the one to print. It works unchanged for a thesis chapter, a journal review form and a lab report. The two gates are the part people argue about; the argument is worth having once, at the programme board, and then not again.", "cites": ["Chawla et al. <i>SMOTE: Synthetic Minority Over-sampling Technique.</i> JAIR, 2002.", "Blagus & Lusa. <i>SMOTE for high-dimensional class-imbalanced data.</i> BMC Bioinformatics, 2013."], "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure"}, {"kind": "cols", "title": "The capstone brief", "kick": "4.3.4", "tag": "both", "sm": true, "lead": "Take a raw institutional dataset to a documented, versioned, ML-ready release with a reproducible pipeline and a written risk assessment.", "cols": [{"sub": "The task", "h": "Raw institutional data to an ML-ready release", "b": ["A dataset the institution already holds and currently cannot share", "You deliver a <b>versioned release</b>, a reproducible pipeline and a written risk assessment", "One model is trained, and only to demonstrate that the release is usable", "Twelve weeks, in parallel with the labs, not after them"]}, {"sub": "The bundle", "h": "Six files, no more", "b": ["<span class='k'>datasheet.md</span> and <span class='k'>croissant.json</span>", "<span class='k'>pipeline/</span> — one entry point, pinned environment, no notebook state", "<span class='k'>prereg.md</span>, with its filing timestamp", "<span class='k'>ablations.csv</span>, including the random baseline", "<span class='k'>RISK.md</span> — named failure modes and named affected groups", "<span class='k'>CHANGELOG.md</span> — every amendment, dated"], "acc": true}, {"sub": "The constraints", "h": "Three things that are not negotiable", "b": ["The <b>grouping unit</b> is declared in week 4 and never changed", "The <b>test set is unsealed once</b>, in week 11, as filed", "Nothing is released without a licence and a provenance column", "A breach of any of the three is a referral, not a deduction"]}, {"sub": "The defence", "h": "Twenty minutes, two questions", "b": ["“Hand your release to the person beside you. Can they load it?”", "“Which of your decisions would change the answer?”", "The second question <em>is</em> the viva — a student who cannot name one has not run the ablations", "Marked on all five rubric rows"]}], "notes": "Sourcing the datasets is the lecturer's job and should start a term early: a hospital archive, a university registry export, a CCTV deployment with a consent regime, a Thai-language corpus. The students should never be the ones negotiating data access — that is a six-month job, not a twelve-week one.", "sec": "0.8", "secTitle": "Documentation, versioning and infrastructure"}, {"kind": "bullets", "kick": "Clinic · 50 minutes", "cls": "lab", "title": "Audit a release, then argue an ethics case", "tag": "both", "lead": "Two halves. The first is mechanical and uncomfortable. The second has no clean answer, which is the point.", "b": ["<b>Part one, twenty-five minutes.</b> Take a dataset your group actually owns or uses. Work through the datasheet questionnaire. Mark every question you cannot answer — not guess, <em>cannot answer</em>.", "<b>Swap with another group.</b> They try to state what the dataset contains, who is in it and what it may be used for, from your answers alone. Their questions are your finding.", "<b>Part two, twenty-five minutes.</b> One filtering or de-identification decision with no clean answer — a toxicity filter that removes a dialect, a de-identification rule that destroys clinical meaning, a consent boundary on retrospective data.", "<b>Argue it from the actual text.</b> The EU AI Act data-governance article, the PDPA or GDPR provision, the IRB protocol. Not from intuition, and not from what is convenient.", "<b>Then vote, and record the dissent.</b> A documented disagreement is a better research artefact than a false consensus."], "callout": {"h": "Capstone", "p": "Take a raw institutional dataset to a documented, versioned, ML-ready release: reproducible pipeline, datasheet, Croissant record, model info sheet, subgroup counts before and after every filter, and a written risk assessment."}, "notes": "The swap in part one is what makes it work. Groups discover their documentation is unusable within about four minutes.", "sec": "Close", "secTitle": "Clinic, takeaways and next steps"}, {"kind": "bullets", "kick": "Key takeaways", "title": "The five sentences from today", "b": ["<b>Labels are measurements with an error rate.</b> Estimate it, adjudicate the worst, and report the inter-annotator ceiling your model is actually chasing.", "<b>Random selection is a real baseline.</b> Plot it across budgets with error bars, or a selection result means nothing.", "<b>Synthetic data has four axes</b> — fidelity, utility, privacy, diversity — and a memorising generator wins on the first two.", "<b>Every filter is a sampling decision.</b> Count subgroups before and after each one, and put that table in the paper.", "<b>A result you cannot trace to exact bytes is an anecdote.</b> Ship the preprocessing config with the weights."], "notes": "Then move straight to the close — do not let the module end on a bullet list.", "sec": "Close", "secTitle": "Clinic, takeaways and next steps"}, {"kind": "bullets", "kick": "Closing the module", "title": "What the five sessions were actually about", "lead": "Not a catalogue of transforms. A way of making a claim that survives someone trying to break it.", "b": ["<b>Session 1</b> gave you the evaluation discipline: the grouping unit, the fold, the leakage taxonomy, the two numbers.", "<b>Sessions 2 to 4</b> gave you the technique per data family — and in each, the place where the popular default is the wrong one.", "<b>Session 5</b> gave you the parts that make it reusable: honest labels, honest baselines, honest documentation.", "<b>The thread through all five:</b> every preparation step is a decision with a stated reason, a measured effect, and a named person it might disadvantage.", "<b>What to do next:</b> pick one project you already have, and apply exactly three things from this module — the grouping unit, the random baseline, and the subgroup table. Those three change more results than any model you could swap in."], "callout": {"h": "Where to go deeper", "p": "The long-form edition — five chapters, 291 slides — expands every section here, with the full reference lists and eleven laboratory briefs."}, "notes": "End on the three-things instruction. It is small enough that people actually do it.", "sec": "Close", "secTitle": "Clinic, takeaways and next steps"}]}</script>
+<script>
+(function(){
+"use strict";
+function boom(e){
+  try{var b=document.getElementById("err");b.style.display="block";
+    b.textContent="Something broke: "+((e&&e.message)||e)+"\n"+((e&&e.stack)||"");}catch(_){}
+  if(window.console)console.error(e);
+}
+window.addEventListener("error",function(ev){boom(ev.error||ev.message);});
+
+try{
+
+var D      = JSON.parse(document.getElementById("deckdata").textContent);
+var SLIDES = D.slides, FIGS = D.figs, META = D.meta, SECS = D.secs || [];
+var KEY    = "dpslides-"+META.key+"-v1";
+var EDITS  = {}, NOTES = {};
+var cur = 0, editing = false, ovOn = false, notesOn = false;
+var t0 = null, tAcc = 0;
+
+/* ---------------- storage ---------------- */
+var Store = {
+  get:function(){
+    try{ if(window.storage&&window.storage.get)
+      return window.storage.get(KEY).then(function(r){return r&&r.value?r.value:null;}).catch(function(){return null;}); }catch(e){}
+    try{ return Promise.resolve(window.localStorage.getItem(KEY)); }catch(e){ return Promise.resolve(null); }
+  },
+  set:function(v){
+    try{ if(window.storage&&window.storage.set){ window.storage.set(KEY,v).catch(function(){}); return; } }catch(e){}
+    try{ window.localStorage.setItem(KEY,v); }catch(e){}
+  }
+};
+var svT=null;
+function save(){ clearTimeout(svT); svT=setTimeout(function(){
+  try{ Store.set(JSON.stringify({v:1,edits:EDITS,notes:NOTES})); }catch(e){} },350); }
+
+/* ---------------- helpers ---------------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+function txt(h){var d=document.createElement("div");d.innerHTML=h==null?"":h;return (d.textContent||"").trim();}
+function val(i,path,dflt){ var k=i+"."+path; return (k in EDITS)?EDITS[k]:dflt; }
+function ed(i,path,html,cls,tag){
+  tag=tag||"div";
+  return "<"+tag+' class="ed '+(cls||"")+'" data-k="'+i+"."+path+'">'+(val(i,path,html)||"")+"</"+tag+">";
+}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("on");
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("on");},1800);}
+
+/* ---------------- slide rendering ---------------- */
+function bullets(i,arr,key,cls){
+  if(!arr||!arr.length)return "";
+  var h='<ul class="bul '+(cls||"")+'">';
+  for(var j=0;j<arr.length;j++){
+    h+='<li class="ed" data-k="'+i+"."+key+"."+j+'">'+(val(i,key+"."+j,arr[j])||"")+"</li>";
+  }
+  return h+"</ul>";
+}
+function fig(s){
+  if(!s.fig)return "";
+  var svg=FIGS[s.fig]||'<svg viewBox="0 0 900 380"><rect width="900" height="380" fill="#F1F5F9"/><text x="450" y="195" text-anchor="middle" font-family="monospace" font-size="15" fill="#8A97A6">figure: '+esc(s.fig)+"</text></svg>";
+  return svg;
+}
+function figblock(i,s){
+  if(!s.fig)return "";
+  return '<div class="figwrap col"><div class="figbox">'+fig(s)+"</div>"+
+    (s.figcap?'<div class="figcap ed" data-k="'+i+'.figcap">'+val(i,"figcap",s.figcap)+"</div>":"")+"</div>";
+}
+function head(i,s,small){
+  var h="";
+  if(s.kick)h+='<p class="kick"><span class="dot"></span><span class="ed" data-k="'+i+'.kick">'+val(i,"kick",s.kick)+"</span></p>";
+  if(s.title)h+=ed(i,"title",s.title,small?"sm":"","h2");
+  if(s.lead)h+=ed(i,"lead",s.lead,"lead","p");
+  return h;
+}
+function citesHTML(i,s){
+  if(!s.cites||!s.cites.length)return "";
+  var h='<div class="cites">';
+  for(var j=0;j<s.cites.length;j++)
+    h+='<span class="c"><b>'+(j+1)+'</b><span class="ed" data-k="'+i+".cites."+j+'">'+
+       val(i,"cites."+j,s.cites[j])+"</span></span>";
+  return h+"</div>";
+}
+function foot(i,s){
+  var sec=s.sec?("&sect; "+s.sec+(s.secTitle?" &nbsp;"+s.secTitle:"")):META.title;
+  return '<div class="foot"><span>'+esc(META.short)+"</span><span>"+sec+'</span><span class="sp"></span>'+
+    (s.tag?'<span class="tag '+s.tag+'">'+s.tag+"</span>":"")+
+    "<span>"+(i+1)+" / "+SLIDES.length+"</span></div>";
+}
+function colsHTML(i,s){
+  var n=s.cols.length,h='<div class="cols n'+n+'">';
+  for(var j=0;j<n;j++){
+    var c=s.cols[j];
+    h+='<div class="cbox'+(c.acc?" acc":"")+'">';
+    if(c.sub)h+='<div class="sub ed" data-k="'+i+".cols."+j+'.sub">'+val(i,"cols."+j+".sub",c.sub)+"</div>";
+    if(c.h)h+='<h4 class="ed" data-k="'+i+".cols."+j+'.h">'+val(i,"cols."+j+".h",c.h)+"</h4>";
+    if(c.p)h+='<p class="ed" data-k="'+i+".cols."+j+'.p">'+val(i,"cols."+j+".p",c.p)+"</p>";
+    if(c.b&&c.b.length){
+      h+='<ul class="bul">';
+      for(var m=0;m<c.b.length;m++)
+        h+='<li class="ed" data-k="'+i+".cols."+j+".b."+m+'">'+val(i,"cols."+j+".b."+m,c.b[m])+"</li>";
+      h+="</ul>";
+    }
+    h+="</div>";
+  }
+  return h+"</div>";
+}
+function tableHTML(i,s){
+  var h='<table class="t"><thead><tr>';
+  s.table.head.forEach(function(x){h+="<th>"+x+"</th>";});
+  h+="</tr></thead><tbody>";
+  s.table.rows.forEach(function(r,ri){
+    h+="<tr>";
+    r.forEach(function(c,ci){h+='<td class="ed" data-k="'+i+".table."+ri+"."+ci+'">'+val(i,"table."+ri+"."+ci,c)+"</td>";});
+    h+="</tr>";
+  });
+  return h+"</tbody></table>";
+}
+function statHTML(i,s){
+  var h='<div class="stat">';
+  s.stats.forEach(function(x,j){
+    h+='<div><div class="v ed" data-k="'+i+".stats."+j+'.v">'+val(i,"stats."+j+".v",x.v)+"</div>"+
+       '<div class="l ed" data-k="'+i+".stats."+j+'.l">'+val(i,"stats."+j+".l",x.l)+"</div></div>";
+  });
+  return h+"</div>";
+}
+function refsHTML(i,s){
+  var h='<ol class="refs'+(s.refs.length>7?" two":"")+'">';
+  for(var j=0;j<s.refs.length;j++)
+    h+='<li class="ed" data-k="'+i+".refs."+j+'">'+val(i,"refs."+j,s.refs[j])+"</li>";
+  return h+"</ol>";
+}
+function calloutHTML(i,s){
+  return '<div class="callout"><div class="h">'+esc(s.callout.h||"Teaching point")+"</div>"+
+    '<p class="ed" data-k="'+i+'.callout.p">'+val(i,"callout.p",s.callout.p)+"</p></div>";
+}
+
+function slideHTML(i){
+  var s=SLIDES[i],k=s.kind||"bullets",h="";
+  var cls="slide "+k+(s.cls?" "+s.cls:"");
+
+  if(k==="title"){
+    h='<div class="pad">'+
+      '<p class="no ed" data-k="'+i+'.kick">'+val(i,"kick",s.kick||"")+"</p>"+
+      ed(i,"title",s.title,"","h1")+
+      (s.lead?ed(i,"lead",s.lead,"dek","p"):"")+
+      (s.meta?'<div class="meta ed" data-k="'+i+'.meta">'+val(i,"meta",s.meta)+"</div>":"")+
+      "</div>";
+  }else if(k==="divider"){
+    h='<div class="pad">'+
+      '<div class="n">'+esc(s.no||"")+"</div>"+
+      ed(i,"title",s.title,"","h2")+
+      (s.lead?ed(i,"lead",s.lead,"lead","p"):"")+
+      (s.chips&&s.chips.length?'<div class="chips">'+s.chips.map(function(c){return "<span>"+esc(c)+"</span>";}).join("")+"</div>":"")+
+      "</div>";
+  }else{
+    var inner="";
+    if(k==="figure"){
+      inner='<div class="body v">'+figblock(i,s).replace('class="figwrap col"','class="figwrap"')+
+            (s.callout?calloutHTML(i,s):"")+"</div>";
+    }else if(k==="split"||k==="splitr"){
+      var left='<div class="col '+(s.wide==="text"?"wide":"")+'">'+bullets(i,s.b,"b")+
+        (s.callout?calloutHTML(i,s):"")+(s.stats?statHTML(i,s):"")+"</div>";
+      var right=figblock(i,s);
+      if(s.wide==="text")right=right.replace('class="figwrap col"','class="figwrap col narrow"');
+      inner='<div class="body">'+(k==="splitr"?right+left:left+right)+"</div>";
+    }else if(k==="cols"){
+      inner=colsHTML(i,s)+(s.callout?calloutHTML(i,s):"");
+    }else if(k==="refs"){
+      inner='<div class="body v">'+refsHTML(i,s)+"</div>";
+    }else if(k==="table"){
+      inner='<div class="body v">'+tableHTML(i,s)+(s.callout?calloutHTML(i,s):"")+"</div>";
+    }else{
+      inner='<div class="body v">'+bullets(i,s.b,"b",s.b&&s.b.length>6?"tight":"")+
+        (s.stats?statHTML(i,s):"")+(s.callout?calloutHTML(i,s):"")+"</div>";
+    }
+    h='<div class="pad" style="flex:1;display:flex;flex-direction:column;min-height:0">'+
+      head(i,s,s.sm)+'<div class="rule"></div>'+inner+citesHTML(i,s)+"</div>"+foot(i,s);
+  }
+  return '<section class="'+cls+'" data-i="'+i+'">'+h+
+    '<div class="pnotes">'+esc(NOTES[i]||s.notes||"")+"</div></section>";
+}
+
+/* ---------------- shrink-to-fit ---------------- */
+function autofit(sl){
+  try{
+    if(!sl)return;
+    var box=sl.querySelector(".body")||sl.querySelector(".cols");
+    if(!box)return;
+    var foot=sl.querySelector(".foot"),cit=sl.querySelector(".cites");
+    sl.style.setProperty("--k","1");
+    for(var i=0;i<9;i++){
+      var lim=cit?cit.getBoundingClientRect().top
+              :(foot?foot.getBoundingClientRect().top:sl.getBoundingClientRect().bottom);
+      var over=(box.scrollHeight>box.clientHeight+1)||(box.getBoundingClientRect().bottom>lim+1);
+      var kid=false;
+      var cbs=sl.querySelectorAll(".cbox");
+      for(var j=0;j<cbs.length;j++)if(cbs[j].scrollHeight>cbs[j].clientHeight+1){kid=true;break;}
+      if(!over&&!kid)break;
+      sl.style.setProperty("--k",(1-0.035*(i+1)).toFixed(3));
+    }
+  }catch(e){}
+}
+
+/* ---------------- layout / scale ---------------- */
+function fit(){
+  var st=document.querySelector(".stage"),ho=document.getElementById("holder");
+  if(!st)return;
+  var pad=26;
+  var sc=Math.min((st.clientWidth-pad*2)/1280,(st.clientHeight-pad*2)/720);
+  if(!isFinite(sc)||sc<=0)sc=.5;
+  ho.style.transform="scale("+sc+")";
+}
+window.addEventListener("resize",fit);
+
+/* ---------------- render current ---------------- */
+function render(){
+  var ho=document.getElementById("holder");
+  ho.innerHTML=slideHTML(cur);
+  applyEdit();
+  autofit(ho.querySelector(".slide"));
+  fit();
+  var s=SLIDES[cur];
+  document.getElementById("secNow").innerHTML=s.sec?("&sect; "+s.sec+" &nbsp;"+(s.secTitle||"")):"";
+  document.getElementById("cnt").innerHTML="<b>"+(cur+1)+"</b> / "+SLIDES.length;
+  var f=document.querySelector(".fill");
+  if(f)f.style.width=((cur+1)/SLIDES.length*100)+"%";
+  var nb=document.getElementById("noteBox");
+  if(nb)nb.value=NOTES[cur]!=null?NOTES[cur]:(SLIDES[cur].notes||"");
+  var nx=document.getElementById("nxt");
+  if(nx)nx.textContent=cur+1<SLIDES.length?txt(val(cur+1,"title",SLIDES[cur+1].title||"—")):"End of deck";
+  if(ovOn)markOv();
+  if(location.hash!=="#"+(cur+1))history.replaceState(null,"","#"+(cur+1));
+}
+function go(i){
+  i=Math.max(0,Math.min(SLIDES.length-1,i));
+  if(i===cur){render();return;}
+  cur=i;render();
+}
+function applyEdit(){
+  var els=document.querySelectorAll("#holder .ed");
+  for(var i=0;i<els.length;i++){
+    if(editing)els[i].setAttribute("contenteditable","true");
+    else els[i].removeAttribute("contenteditable");
+  }
+}
+
+/* ---------------- overview ---------------- */
+function buildOv(){
+  var g=document.getElementById("ovgrid"),h="",lastSec=null;
+  for(var i=0;i<SLIDES.length;i++){
+    var s=SLIDES[i];
+    var sk=(s.sec||"")+"|"+(s.secTitle||"");
+    if(sk!==lastSec){
+      lastSec=sk;
+      h+='<div class="ovsec">'+(s.sec?esc(s.sec)+" &nbsp; "+esc(s.secTitle||""):esc(META.short))+"</div>";
+    }
+    h+='<div class="ovc" data-go="'+i+'"><div class="shell" data-shell><div class="mini" data-mini>'+
+      slideHTML(i)+'</div></div><div class="no">'+(i+1)+'</div><div class="lb">'+
+      esc(txt(val(i,"title",s.title||""))||(s.kind==="divider"?"Section":"Slide"))+"</div></div>";
+  }
+  g.innerHTML=h;
+  var ms=g.querySelectorAll(".mini .slide");
+  for(var q=0;q<ms.length;q++)autofit(ms[q]);
+  // scale minis
+  var cards=g.querySelectorAll(".ovc");
+  for(var j=0;j<cards.length;j++){
+    var shell=cards[j].querySelector("[data-shell]"),mini=cards[j].querySelector("[data-mini]");
+    var w=cards[j].clientWidth||232,sc=w/1280;
+    mini.style.transform="scale("+sc+")";
+    shell.style.height=(720*sc)+"px";
+  }
+  markOv();
+}
+function markOv(){
+  var cards=document.querySelectorAll(".ovc");
+  for(var i=0;i<cards.length;i++)cards[i].classList.toggle("cur",+cards[i].getAttribute("data-go")===cur);
+  var c=document.querySelector(".ovc.cur");
+  if(c)c.scrollIntoView({block:"nearest"});
+}
+
+/* ---------------- export ---------------- */
+function toMarkdown(){
+  var L=[];
+  L.push("# "+META.title);
+  L.push("");
+  L.push("_"+META.short+" · "+SLIDES.length+" slides · exported from the editable HTML deck._");
+  L.push("");
+  var lastSec=null;
+  for(var i=0;i<SLIDES.length;i++){
+    var s=SLIDES[i];
+    if(s.sec&&s.sec!==lastSec){lastSec=s.sec;L.push("");L.push("## "+s.sec+" "+(s.secTitle||""));L.push("");}
+    var t=txt(val(i,"title",s.title||""));
+    L.push("### ["+(i+1)+"] "+(t||"(untitled)"));
+    var ld=txt(val(i,"lead",s.lead||""));
+    if(ld)L.push("");
+    if(ld)L.push("_"+ld+"_");
+    if(s.b&&s.b.length){L.push("");for(var j=0;j<s.b.length;j++)L.push("- "+txt(val(i,"b."+j,s.b[j])));}
+    if(s.cols)s.cols.forEach(function(c,j){
+      L.push("");L.push("**"+txt(val(i,"cols."+j+".h",c.h||""))+"**");
+      var p=txt(val(i,"cols."+j+".p",c.p||""));if(p)L.push(p);
+      (c.b||[]).forEach(function(x,m){L.push("- "+txt(val(i,"cols."+j+".b."+m,x)));});
+    });
+    if(s.table){L.push("");L.push("| "+s.table.head.join(" | ")+" |");
+      L.push("|"+s.table.head.map(function(){return "---";}).join("|")+"|");
+      s.table.rows.forEach(function(r,ri){L.push("| "+r.map(function(c,ci){
+        return txt(val(i,"table."+ri+"."+ci,c));}).join(" | ")+" |");});}
+    if(s.stats){L.push("");s.stats.forEach(function(x,j){
+      L.push("- **"+txt(val(i,"stats."+j+".v",x.v))+"** — "+txt(val(i,"stats."+j+".l",x.l)));});}
+    if(s.callout){L.push("");L.push("> **"+(s.callout.h||"Teaching point")+".** "+txt(val(i,"callout.p",s.callout.p)));}
+    if(s.figcap){L.push("");L.push("_Figure: "+txt(val(i,"figcap",s.figcap))+"_");}
+    if(s.refs){L.push("");s.refs.forEach(function(r,j){L.push((j+1)+". "+txt(val(i,"refs."+j,r)));});}
+    if(s.cites&&s.cites.length){L.push("");
+      L.push("_Sources: "+s.cites.map(function(c,j){
+        return "["+(j+1)+"] "+txt(val(i,"cites."+j,c));}).join(" · ")+"_");}
+    var nt=(NOTES[i]!=null?NOTES[i]:(s.notes||"")).trim();
+    if(nt){L.push("");L.push("> **Speaker notes.** "+nt.replace(/\n/g," "));}
+    L.push("");
+  }
+  return L.join("\n");
+}
+function openModal(title,text,name,mode){
+  var m=document.getElementById("modal");
+  document.getElementById("mTitle").textContent=title;
+  var body=document.getElementById("mBody");
+  if(mode==="help"){ body.innerHTML=HELP; }
+  else{
+    body.innerHTML='<textarea id="mText" spellcheck="false"></textarea>';
+    var ta=document.getElementById("mText");ta.value=text;ta.setAttribute("data-name",name||"export.txt");
+  }
+  document.querySelector('[data-act="mcopy"]').style.display=mode==="help"?"none":"";
+  document.querySelector('[data-act="mdl"]').style.display=mode==="help"?"none":"";
+  document.querySelector('[data-act="mload"]').style.display=mode==="import"?"":"none";
+  m.classList.add("on");
+}
+var HELP='<div class="help"><h4>Moving around</h4><table>'+
+  '<tr><td><kbd>&rarr;</kbd> <kbd>&larr;</kbd> <kbd>Space</kbd></td><td>Next / previous slide</td></tr>'+
+  '<tr><td><kbd>Home</kbd> <kbd>End</kbd></td><td>First / last slide</td></tr>'+
+  '<tr><td><kbd>O</kbd></td><td>Overview grid of every slide, click one to jump</td></tr>'+
+  '<tr><td><kbd>/</kbd></td><td>Search titles, bullets, references and your notes</td></tr>'+
+  '<tr><td>number then <kbd>Enter</kbd></td><td>Jump to that slide</td></tr>'+
+  '<tr><td><kbd>F</kbd></td><td>Fullscreen</td></tr></table>'+
+  '<h4>Teaching and editing</h4><table>'+
+  '<tr><td><kbd>E</kbd></td><td>Edit mode: click any heading, bullet, caption, table cell or reference and rewrite it</td></tr>'+
+  '<tr><td><kbd>N</kbd></td><td>Speaker-notes panel, with the next slide title shown above it</td></tr>'+
+  '<tr><td><kbd>T</kbd></td><td>Start / pause the lecture timer</td></tr>'+
+  '<tr><td><kbd>P</kbd></td><td>Print or save as PDF, one slide per page with notes underneath</td></tr>'+
+  '</table><h4>Keeping your work</h4><table>'+
+  '<tr><td>Autosave</td><td>Edits and notes save to this browser automatically</td></tr>'+
+  '<tr><td>Export</td><td>Markdown for handouts and lecture prep, JSON as a portable backup</td></tr>'+
+  '<tr><td>Import</td><td>Paste a JSON backup to move your edits to another machine</td></tr>'+
+  '</table></div>';
+
+/* ---------------- search ---------------- */
+function slideText(i){
+  var s=SLIDES[i],parts=[txt(val(i,"title",s.title||"")),txt(val(i,"lead",s.lead||""))];
+  (s.b||[]).forEach(function(x,j){parts.push(txt(val(i,"b."+j,x)));});
+  (s.refs||[]).forEach(function(x,j){parts.push(txt(val(i,"refs."+j,x)));});
+  (s.cols||[]).forEach(function(c,j){parts.push(txt(val(i,"cols."+j+".h",c.h||"")));
+    parts.push(txt(val(i,"cols."+j+".p",c.p||"")));
+    (c.b||[]).forEach(function(x,m){parts.push(txt(val(i,"cols."+j+".b."+m,x)));});});
+  if(s.table)s.table.rows.forEach(function(r,ri){r.forEach(function(c,ci){
+    parts.push(txt(val(i,"table."+ri+"."+ci,c)));});});
+  if(s.figcap)parts.push(txt(val(i,"figcap",s.figcap)));
+  (s.cites||[]).forEach(function(c,j){parts.push(txt(val(i,"cites."+j,c)));});
+  if(s.callout)parts.push(txt(val(i,"callout.p",s.callout.p)));
+  parts.push(NOTES[i]||s.notes||"");
+  parts.push(s.sec||"",s.secTitle||"");
+  return parts.join("  ");
+}
+function doSearch(q){
+  var box=document.getElementById("sres");
+  q=(q||"").trim();
+  if(q.length<2){box.innerHTML="";return;}
+  var lq=q.toLowerCase(),h="",n=0;
+  for(var i=0;i<SLIDES.length&&n<40;i++){
+    var t=slideText(i),p=t.toLowerCase().indexOf(lq);
+    if(p<0)continue;
+    n++;
+    var a=Math.max(0,p-46),snip=esc(t.slice(a,p))+"<mark>"+esc(t.slice(p,p+q.length))+"</mark>"+esc(t.slice(p+q.length,p+q.length+80));
+    h+='<button data-go="'+i+'"><span class="n">slide '+(i+1)+(SLIDES[i].sec?" &nbsp;&sect; "+esc(SLIDES[i].sec):"")+
+       '</span><div class="t">'+esc(txt(val(i,"title",SLIDES[i].title||"")))+'</div><div class="n" style="margin-top:3px">'+
+       (a>0?"…":"")+snip+"…</div></button>";
+  }
+  box.innerHTML=h||'<button style="cursor:default"><span class="n">no match</span></button>';
+}
+
+/* ---------------- timer ---------------- */
+function tick(){
+  var el=document.querySelector(".timer");if(!el)return;
+  var ms=tAcc+(t0?(Date.now()-t0):0),s=Math.floor(ms/1000);
+  el.textContent=(t0?"":"⏸ ")+String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+}
+setInterval(tick,500);
+
+/* ---------------- events ---------------- */
+document.addEventListener("click",function(ev){
+try{
+  var t=ev.target;
+  var g=t.closest?t.closest("[data-go]"):null;
+  if(g){ go(+g.getAttribute("data-go"));
+    if(ovOn)setOv(false);
+    document.body.classList.remove("srch-on");
+    return; }
+  var b=t.closest?t.closest("[data-act]"):null;
+  if(!b)return;
+  var a=b.getAttribute("data-act");
+  if(a==="next"){go(cur+1);return;}
+  if(a==="prev"){go(cur-1);return;}
+  if(a==="ov"){setOv(!ovOn);return;}
+  if(a==="notes"){notesOn=!notesOn;document.body.classList.toggle("notes-on",notesOn);
+    b.setAttribute("aria-pressed",String(notesOn));fit();return;}
+  if(a==="edit"){editing=!editing;document.body.classList.toggle("edit",editing);
+    b.setAttribute("aria-pressed",String(editing));applyEdit();
+    toast(editing?"Edit mode on — click any text to rewrite it":"Edit mode off");return;}
+  if(a==="search"){document.body.classList.toggle("srch-on");
+    if(document.body.classList.contains("srch-on"))document.getElementById("q").focus();return;}
+  if(a==="print"){printAll();return;}
+  if(a==="help"){openModal("Keyboard and features","","","help");return;}
+  if(a==="hub"){window.location.href=META.hub;return;}
+  if(a==="export"){
+    openModal("Export — Markdown",toMarkdown(),META.key+"-slides.md");
+    document.getElementById("mSeg").innerHTML=
+      '<button class="mbtn" data-act="expmd">Markdown</button>'+
+      '<button class="mbtn" data-act="expjson">JSON backup</button>'+
+      '<button class="mbtn" data-act="expimp">Import…</button>';
+    return;}
+  if(a==="expmd"){document.getElementById("mTitle").textContent="Export — Markdown";
+    var t1=document.getElementById("mText");if(t1){t1.value=toMarkdown();t1.setAttribute("data-name",META.key+"-slides.md");}
+    document.querySelector('[data-act="mload"]').style.display="none";return;}
+  if(a==="expjson"){document.getElementById("mTitle").textContent="Export — JSON backup";
+    var t2=document.getElementById("mText");if(t2){t2.value=JSON.stringify({v:1,edits:EDITS,notes:NOTES},null,2);
+      t2.setAttribute("data-name",META.key+"-backup.json");}
+    document.querySelector('[data-act="mload"]').style.display="none";return;}
+  if(a==="expimp"){document.getElementById("mTitle").textContent="Import — paste a JSON backup, then Load";
+    var t3=document.getElementById("mText");if(t3)t3.value="";
+    document.querySelector('[data-act="mload"]').style.display="";return;}
+  if(a==="mload"){
+    try{ var o=JSON.parse(document.getElementById("mText").value);
+      EDITS=o.edits||{};NOTES=o.notes||{};save();render();
+      document.getElementById("modal").classList.remove("on");toast("Backup loaded");
+    }catch(e){toast("That is not valid JSON");}
+    return;}
+  if(a==="mclose"){document.getElementById("modal").classList.remove("on");return;}
+  if(a==="mcopy"){var ta=document.getElementById("mText");if(!ta)return;
+    ta.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}
+    if(!ok&&navigator.clipboard)navigator.clipboard.writeText(ta.value).then(function(){toast("Copied");},function(){toast("Select and copy manually");});
+    else toast(ok?"Copied to clipboard":"Select and copy manually");return;}
+  if(a==="mdl"){var ta2=document.getElementById("mText");if(!ta2)return;
+    var nm=ta2.getAttribute("data-name")||"export.txt";
+    var bl=new Blob([ta2.value],{type:"text/plain;charset=utf-8"});
+    var A=document.createElement("a");A.href=URL.createObjectURL(bl);A.download=nm;
+    document.body.appendChild(A);A.click();A.remove();toast("Downloaded "+nm);return;}
+}catch(e){boom(e);}
+},false);
+
+function setOv(on){
+  ovOn=on;document.body.classList.toggle("ov-on",on);
+  var b=document.querySelector('[data-act="ov"]');if(b)b.setAttribute("aria-pressed",String(on));
+  if(on)buildOv();
+}
+function printAll(){
+  var ho=document.getElementById("holder"),h="";
+  for(var i=0;i<SLIDES.length;i++)h+=slideHTML(i);
+  ho.innerHTML=h;ho.style.transform="none";
+  var ps=ho.querySelectorAll(".slide");
+  for(var q=0;q<ps.length;q++)autofit(ps[q]);
+  document.body.classList.add("handout");
+  window.print();
+  setTimeout(function(){document.body.classList.remove("handout");render();},400);
+}
+
+/* progress bar click */
+document.addEventListener("mousedown",function(ev){
+  var tr=ev.target.closest?ev.target.closest(".track"):null;
+  if(!tr)return;
+  var r=tr.getBoundingClientRect();
+  go(Math.round((ev.clientX-r.left)/r.width*(SLIDES.length-1)));
+});
+
+/* edits */
+document.addEventListener("focusout",function(ev){
+  try{
+    var t=ev.target;
+    if(t&&t.classList&&t.classList.contains("ed")&&t.isContentEditable){
+      var k=t.getAttribute("data-k");
+      if(k){EDITS[k]=t.innerHTML.trim();save();}
+    }
+  }catch(e){boom(e);}
+},true);
+document.addEventListener("input",function(ev){
+  var t=ev.target;
+  if(t.id==="noteBox"){NOTES[cur]=t.value;save();return;}
+  if(t.id==="q"){doSearch(t.value);return;}
+});
+document.addEventListener("paste",function(ev){
+  var t=ev.target;
+  if(t&&t.classList&&t.classList.contains("ed")&&t.isContentEditable){
+    ev.preventDefault();
+    var s=(ev.clipboardData||window.clipboardData).getData("text/plain");
+    document.execCommand("insertText",false,s);
+  }
+});
+
+/* keys */
+var numBuf="";
+document.addEventListener("keydown",function(ev){
+try{
+  var tag=(ev.target.tagName||"").toLowerCase();
+  var typing=ev.target.isContentEditable||tag==="input"||tag==="textarea";
+  if(ev.key==="Escape"){
+    document.getElementById("modal").classList.remove("on");
+    document.body.classList.remove("srch-on");
+    if(ovOn)setOv(false);
+    if(ev.target.isContentEditable)ev.target.blur();
+    return;
+  }
+  if(typing){
+    if(ev.target.id==="q"&&ev.key==="Enter"){
+      var f=document.querySelector("#sres [data-go]");
+      if(f){go(+f.getAttribute("data-go"));document.body.classList.remove("srch-on");}
+      ev.preventDefault();
+    }
+    return;
+  }
+  if(ev.key==="ArrowRight"||ev.key==="PageDown"||ev.key===" "){ev.preventDefault();go(cur+1);return;}
+  if(ev.key==="ArrowLeft"||ev.key==="PageUp"){ev.preventDefault();go(cur-1);return;}
+  if(ev.key==="ArrowDown"){ev.preventDefault();go(cur+1);return;}
+  if(ev.key==="ArrowUp"){ev.preventDefault();go(cur-1);return;}
+  if(ev.key==="Home"){ev.preventDefault();go(0);return;}
+  if(ev.key==="End"){ev.preventDefault();go(SLIDES.length-1);return;}
+  if(ev.key>="0"&&ev.key<="9"){numBuf+=ev.key;return;}
+  if(ev.key==="Enter"&&numBuf){go(parseInt(numBuf,10)-1);numBuf="";return;}
+  var k=ev.key.toLowerCase();
+  numBuf="";
+  if(k==="o"){setOv(!ovOn);return;}
+  if(k==="n"){document.querySelector('[data-act="notes"]').click();return;}
+  if(k==="e"){document.querySelector('[data-act="edit"]').click();return;}
+  if(k==="p"){ev.preventDefault();printAll();return;}
+  if(k==="/"||k==="?"){ev.preventDefault();
+    if(ev.key==="?"){openModal("Keyboard and features","","","help");return;}
+    document.body.classList.add("srch-on");document.getElementById("q").focus();return;}
+  if(k==="t"){ if(t0){tAcc+=Date.now()-t0;t0=null;}else{t0=Date.now();} tick(); return;}
+  if(k==="f"){ if(document.fullscreenElement)document.exitFullscreen();
+    else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); return;}
+}catch(e){boom(e);}
+},false);
+
+/* progress bar dom */
+(function(){
+  var p=document.createElement("div");p.className="prog";
+  var ticks="";
+  for(var i=0;i<SLIDES.length;i++){
+    if(SLIDES[i].kind==="divider")ticks+='<i style="left:'+(i/(SLIDES.length-1)*100)+'%"></i>';
+  }
+  p.innerHTML='<span class="hint">&larr;/&rarr; move &nbsp;·&nbsp; O overview &nbsp;·&nbsp; E edit &nbsp;·&nbsp; N notes &nbsp;·&nbsp; T timer &nbsp;·&nbsp; ? help</span>'+
+    '<div class="track"><div class="ticks">'+ticks+'</div><div class="fill"></div></div>'+
+    '<span class="timer">⏸ 00:00</span>';
+  document.body.appendChild(p);
+})();
+
+/* boot */
+Store.get().then(function(raw){
+  try{ if(raw){var o=JSON.parse(raw);EDITS=o.edits||{};NOTES=o.notes||{};} }catch(e){}
+  var h=parseInt((location.hash||"").replace("#",""),10);
+  if(h>0&&h<=SLIDES.length)cur=h-1;
+  render();
+  if(raw)toast("Your saved edits and notes are back");
+}).catch(function(){render();});
+
+}catch(e){boom(e);}
+})();
+</script>
+</body>
+</html>

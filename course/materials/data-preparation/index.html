@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Preparation for ML and AI — course index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111823;--ink2:#41505F;--ink3:#78859A;--rule:#D8E0E9;--rule2:#EAEFF4;
+ --paper:#EDF1F6;--card:#fff;--shell:#171E28;
+ --ui:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+ --bd:"Spectral",Georgia,serif;--mo:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--bd);font-size:16px;line-height:1.6}
+a{color:inherit}
+.masthead{background:var(--shell);color:#E9EFF5;padding:56px 0 46px;position:relative;overflow:hidden}
+.masthead:after{content:"";position:absolute;right:-140px;top:-120px;width:460px;height:460px;
+ border:2px solid #A3384F;border-radius:50%;opacity:.28}
+.masthead:before{content:"";position:absolute;right:-30px;top:-40px;width:460px;height:460px;
+ border:2px solid #2D5C8A;border-radius:50%;opacity:.20}
+.wrap{max-width:1180px;margin:0 auto;padding:0 34px;position:relative}
+.eyebrow{font-family:var(--mo);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#7E8E9E}
+h1{font-family:var(--ui);font-size:46px;line-height:1.08;letter-spacing:-.03em;font-weight:700;
+ margin:16px 0 14px;max-width:20ch;color:#fff}
+.dek{font-size:19px;color:#A5B5C4;max-width:66ch;font-style:italic;margin:0 0 26px}
+.who{font-family:var(--mo);font-size:12px;color:#6E7E8F;line-height:1.9;border-top:1px solid #2E3946;
+ padding-top:16px;max-width:66ch}
+.who b{color:#C4D1DD;font-weight:500}
+h2.sec{font-family:var(--ui);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);
+ margin:56px 0 4px;font-weight:600}
+h2.sec+p{margin:0 0 22px;color:var(--ink2);max-width:80ch;font-style:italic}
+.decks{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:20px}
+.deck{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:0;overflow:hidden;
+ text-decoration:none;display:flex;flex-direction:column;transition:.15s;position:relative}
+.deck:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(20,30,45,.14);border-color:var(--ink3)}
+.deck .top{height:5px}
+.deck .in{padding:22px 24px 20px;display:flex;flex-direction:column;flex:1}
+.deck .no{font-family:var(--mo);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600}
+.deck h3{font-family:var(--ui);font-size:22px;letter-spacing:-.02em;font-weight:650;margin:9px 0 10px;line-height:1.2}
+.deck p{margin:0 0 16px;font-size:15px;color:var(--ink2);line-height:1.55;flex:1}
+.deck .foot{display:flex;gap:16px;font-family:var(--mo);font-size:10.5px;color:var(--ink3);
+ letter-spacing:.06em;text-transform:uppercase;border-top:1px solid var(--rule2);padding-top:12px}
+.deck .foot b{color:var(--ink)}
+table.wk{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--rule);
+ border-radius:12px;overflow:hidden}
+table.wk th{font-family:var(--mo);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);
+ text-align:left;padding:14px 16px;border-bottom:2px solid var(--ink);font-weight:600;background:#F8FAFC}
+table.wk td{padding:14px 16px;border-bottom:1px solid var(--rule2);vertical-align:top;font-size:14.5px;color:var(--ink2)}
+table.wk tr:last-child td{border-bottom:none}
+table.wk tr:hover td{background:#F7FAFD}
+td.w{font-family:var(--mo);font-size:13px;color:var(--ink);font-weight:600;white-space:nowrap;width:52px}
+td.t{width:27%}
+td.t a{font-family:var(--ui);font-weight:650;font-size:15px;color:var(--ink);text-decoration:none;
+ border-bottom:2px solid transparent}
+td.t a:hover{border-bottom-color:currentColor}
+td.s{width:15%;font-family:var(--mo);font-size:11.5px;white-space:nowrap}
+.pill{display:inline-block;text-decoration:none;font-family:var(--mo);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+ padding:3px 8px;border-radius:3px;color:#fff;font-weight:600;margin:0 6px 4px 0;vertical-align:1px}
+.pill:hover{filter:brightness(1.18)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px 22px}
+.card h4{font-family:var(--ui);font-size:15.5px;font-weight:650;margin:0 0 8px}
+.card p{margin:0;font-size:14.5px;color:var(--ink2);line-height:1.55}
+.card ul{margin:8px 0 0;padding:0 0 0 18px;font-size:14px;color:var(--ink2)}
+.card li{margin-bottom:5px}
+kbd{font-family:var(--mo);font-size:11.5px;background:#EEF3F8;border:1px solid var(--rule);border-bottom-width:2px;
+ border-radius:4px;padding:2px 7px;color:var(--ink)}
+.long{background:#fff;border:1px solid var(--rule);border-left:4px solid #8A6A12;border-radius:0 12px 12px 0;
+ padding:20px 24px;margin-top:22px}
+.long h4{font-family:var(--ui);font-size:16px;font-weight:650;margin:0 0 6px}
+.long p{margin:0;font-size:14.5px;color:var(--ink2)}
+.long a{font-family:var(--mo);font-size:12.5px;color:#8A6A12;font-weight:600;text-decoration:none;
+ border-bottom:1px solid currentColor}
+.foot-note{margin:60px 0 70px;padding-top:22px;border-top:1px solid var(--rule);font-size:13.5px;color:var(--ink3);
+ max-width:86ch;line-height:1.7}
+.foot-note b{color:var(--ink2)}
+@media (max-width:760px){h1{font-size:32px}.wrap{padding:0 18px}td.t,td.s{width:auto}
+ table.wk thead{display:none}table.wk td{display:block;border:none;padding:4px 16px}
+ table.wk tr{display:block;border-bottom:1px solid var(--rule2);padding:10px 0}}
+</style></head><body>
+<header class="masthead"><div class="wrap">
+  <div class="eyebrow">Research Master · Data Science and Machine Learning</div>
+  <h1>Preparing data for downstream ML and AI tasks</h1>
+  <p class="dek">Five editable, interactive slide decks — 290 slides and 80 original figures covering the textbook
+  pipeline and the current research literature across tabular, text and image data.</p>
+  <div class="who"><b>Thanapong Intharah</b> &nbsp;·&nbsp; Visual Intelligence Laboratory &nbsp;·&nbsp; Department of Statistics, Khon Kaen University<br>
+  Every line of every slide is editable in the browser. Notes, edits and exports save locally.</div>
+</div></header>
+
+<div class="wrap">
+
+<h2 class="sec">The five chapters</h2>
+<p>Start with Chapter 0. The other three are technique catalogues that depend on its evaluation discipline.</p>
+<div class="decks"><a class="deck" href="ch0-cross-cutting-foundations.html"><div class="top" style="background:#A3384F"></div><div class="in"><div class="no" style="color:#A3384F">Chapter 0</div><h3>Cross-cutting foundations</h3><p>Everything that is true whether your data is a table, a corpus or a scan. Leakage, labels, reduction, synthetic data, privacy and documentation — the discipline the other three chapters need.</p><div class="foot"><span><b>63</b> slides</span><span><b>21</b> figures</span><span>weeks <b>1, 2, 12</b></span></div></div></a>
+<a class="deck" href="ch1-tabular-data.html"><div class="top" style="background:#2D5C8A"></div><div class="in"><div class="no" style="color:#2D5C8A">Chapter 1</div><h3>Classical and tabular data</h3><p>The oldest and most codified pipeline, and still where most applied health data science happens. Missingness, encoding, imbalance and calibration, tabular foundation models, longitudinal EHR cohorts.</p><div class="foot"><span><b>61</b> slides</span><span><b>16</b> figures</span><span>weeks <b>3 – 5</b></span></div></div></a>
+<a class="deck" href="ch2-text-and-llm-data.html"><div class="top" style="background:#6A4C93"></div><div class="in"><div class="no" style="color:#6A4C93">Chapter 2</div><h3>Text, NLP and LLM data</h3><p>Two eras stacked on top of each other. Classical preprocessing and Thai segmentation, subword tokenisation and its fairness cost, web-corpus filtering, deduplication, instruction data and RAG chunking.</p><div class="foot"><span><b>64</b> slides</span><span><b>18</b> figures</span><span>weeks <b>6 – 8</b></span></div></div></a>
+<a class="deck" href="ch3-image-and-video-data.html"><div class="top" style="background:#0F7A6A"></div><div class="in"><div class="no" style="color:#0F7A6A">Chapter 3</div><h3>Image and video data</h3><p>Where preprocessing is least separable from the model. DICOM and whole-slide handling, intensity and stain normalisation, augmentation policy, image–text curation, CCTV and medical imaging specifics.</p><div class="foot"><span><b>62</b> slides</span><span><b>17</b> figures</span><span>weeks <b>9 – 11</b></span></div></div></a>
+<a class="deck" href="ch4-teaching-scaffold.html"><div class="top" style="background:#8A6A12"></div><div class="in"><div class="no" style="color:#8A6A12">Chapter 4</div><h3>Labs, seminars and assessment</h3><p>Turning the map into a course: eleven labs, the seminar and critique track, the assessment rubric and the capstone brief.</p><div class="foot"><span><b>40</b> slides</span><span><b>8</b> figures</span><span>weeks <b>throughout</b></span></div></div></a></div>
+
+<h2 class="sec">The same material as a twelve-week plan</h2>
+<p>Each week names the sections to teach and the deck they live in. Click a week to open the deck at the right chapter.</p>
+<table class="wk"><thead><tr><th>Week</th><th>Topic</th><th>Deck</th><th>Sections</th><th>What it covers</th></tr></thead>
+<tbody><tr><td class="w">1</td><td class="t"><a href="ch0-cross-cutting-foundations.html">Foundations and the data-centric turn</a></td><td><a class="pill" href="ch0-cross-cutting-foundations.html" style="background:#A3384F">Ch 0</a></td><td class="s">§0.1 – §0.2</td><td>The data-centric turn, the three-goal decomposition, six quality dimensions as failing tests, profiling and schema contracts.</td></tr>
+<tr><td class="w">2</td><td class="t"><a href="ch0-cross-cutting-foundations.html">Leakage and evaluation discipline</a></td><td><a class="pill" href="ch0-cross-cutting-foundations.html" style="background:#A3384F">Ch 0</a></td><td class="s">§0.3</td><td>Split designs, cross-validation variants, the eight-type leakage taxonomy, fitting inside folds, temporal validity, model info sheets.</td></tr>
+<tr><td class="w">3</td><td class="t"><a href="ch0-cross-cutting-foundations.html">Cleaning, missingness and label quality</a></td><td><a class="pill" href="ch0-cross-cutting-foundations.html" style="background:#A3384F">Ch 0</a><a class="pill" href="ch1-tabular-data.html" style="background:#2D5C8A">Ch 1</a></td><td class="s">§0.4 · §1.1 – §1.3</td><td>Annotation protocols, agreement and confident learning; grain and joins, MCAR/MAR/MNAR, MICE and MissForest, outlier repair.</td></tr>
+<tr><td class="w">4</td><td class="t"><a href="ch1-tabular-data.html">Encoding, scaling and structure</a></td><td><a class="pill" href="ch1-tabular-data.html" style="background:#2D5C8A">Ch 1</a></td><td class="s">§1.4 – §1.6</td><td>Power and quantile transforms, target encoding done honestly, CatBoost's ordered fix, binning, weight of evidence, learned numerical embeddings.</td></tr>
+<tr><td class="w">5</td><td class="t"><a href="ch0-cross-cutting-foundations.html">Features, imbalance and synthesis</a></td><td><a class="pill" href="ch0-cross-cutting-foundations.html" style="background:#A3384F">Ch 0</a><a class="pill" href="ch1-tabular-data.html" style="background:#2D5C8A">Ch 1</a></td><td class="s">§0.6 · §1.7 – §1.10</td><td>Feature engineering and automated synthesis, selection inside CV, imbalance versus calibration, CTGAN and TabDDPM, the fidelity–utility–privacy trilemma.</td></tr>
+<tr><td class="w">6</td><td class="t"><a href="ch2-text-and-llm-data.html">Classical NLP to subword tokenisation</a></td><td><a class="pill" href="ch2-text-and-llm-data.html" style="background:#6A4C93">Ch 2</a></td><td class="s">§2.2 – §2.3</td><td>Tokenisation, Thai and other unsegmented scripts, BPE, WordPiece, SentencePiece, and tokenizer fairness across languages.</td></tr>
+<tr><td class="w">7</td><td class="t"><a href="ch2-text-and-llm-data.html">Web-scale corpus curation</a></td><td><a class="pill" href="ch2-text-and-llm-data.html" style="background:#6A4C93">Ch 2</a></td><td class="s">§2.4 – §2.6</td><td>Language identification, C4 and Gopher rules, perplexity and classifier filtering, MinHash and semantic deduplication.</td></tr>
+<tr><td class="w">8</td><td class="t"><a href="ch2-text-and-llm-data.html">Instruction data, RAG and annotation</a></td><td><a class="pill" href="ch2-text-and-llm-data.html" style="background:#6A4C93">Ch 2</a></td><td class="s">§2.9 – §2.10</td><td>Instruction-data selection, preference pairs, chunking strategies, index hygiene, and evaluating the preparation rather than the answer.</td></tr>
+<tr><td class="w">9</td><td class="t"><a href="ch3-image-and-video-data.html">Image preparation and domain shift</a></td><td><a class="pill" href="ch3-image-and-video-data.html" style="background:#0F7A6A">Ch 3</a></td><td class="s">§3.1 – §3.3</td><td>DICOM, NIfTI and whole-slide formats, resampling and registration, CT and MRI normalisation, stain normalisation.</td></tr>
+<tr><td class="w">10</td><td class="t"><a href="ch3-image-and-video-data.html">Augmentation, self-supervision and video</a></td><td><a class="pill" href="ch3-image-and-video-data.html" style="background:#0F7A6A">Ch 3</a></td><td class="s">§3.5 · §3.6 · §3.9</td><td>Geometric and photometric transforms, mixup, CutMix and copy-paste, RandAugment, SSL view construction, frame sampling and CCTV.</td></tr>
+<tr><td class="w">11</td><td class="t"><a href="ch0-cross-cutting-foundations.html">Vision curation, pruning and medical imaging</a></td><td><a class="pill" href="ch0-cross-cutting-foundations.html" style="background:#A3384F">Ch 0</a><a class="pill" href="ch3-image-and-video-data.html" style="background:#0F7A6A">Ch 3</a></td><td class="s">§0.5 · §3.4 · §3.7 · §3.10</td><td>Coresets and data pruning, dataset cleaning and duplicate detection, generative synthesis, the nnU-Net fingerprint, multi-site harmonisation.</td></tr>
+<tr><td class="w">12</td><td class="t"><a href="ch0-cross-cutting-foundations.html">Governance, privacy and fairness</a></td><td><a class="pill" href="ch0-cross-cutting-foundations.html" style="background:#A3384F">Ch 0</a></td><td class="s">§0.7 – §0.8</td><td>De-identification and differential privacy, bias entry points, the EU AI Act, datasheets and Croissant, versioning, the capstone brief.</td></tr></tbody></table>
+
+<div class="long"><h4>Teaching it in five classes instead?</h4>
+<p>A condensed edition cuts the same material to five three-hour sessions — two hours of lecture and a
+one-hour paper clinic each week, 178 slides —
+<a href="index-condensed.html">open the condensed course index</a>.</p></div>
+
+<h2 class="sec">Using the decks</h2>
+<p>The same controls work in every chapter.</p>
+<div class="cards">
+  <div class="card"><h4>Present</h4>
+    <ul><li><kbd>&larr;</kbd> <kbd>&rarr;</kbd> <kbd>Space</kbd> move between slides</li>
+    <li><kbd>O</kbd> opens the grid of every slide</li>
+    <li><kbd>F</kbd> fullscreen, <kbd>T</kbd> starts the lecture timer</li>
+    <li>Type a number then <kbd>Enter</kbd> to jump</li></ul></div>
+  <div class="card"><h4>Edit and annotate</h4>
+    <ul><li><kbd>E</kbd> turns on edit mode — click any heading, bullet, table cell, caption or reference and rewrite it</li>
+    <li><kbd>N</kbd> opens speaker notes, with the next slide title above them</li>
+    <li>Everything autosaves to this browser</li></ul></div>
+  <div class="card"><h4>Take it away</h4>
+    <ul><li><b>Export &rarr; Markdown</b> for a handout or your lecture prep</li>
+    <li><b>Export &rarr; JSON backup</b> to carry edits to another machine</li>
+    <li><kbd>P</kbd> prints one slide per page with your notes underneath</li></ul></div>
+  <div class="card"><h4>Find something</h4>
+    <ul><li><kbd>/</kbd> searches every slide, reference and note in the open deck</li>
+    <li>Section names appear in the toolbar and in the slide grid</li>
+    <li><kbd>?</kbd> shows the full key list</li></ul></div>
+</div>
+
+<p class="foot-note"><b>On the figures.</b> Every diagram in these decks was drawn for this course as inline vector
+graphics — nothing is copied from a published paper, so the decks can be shared, printed and adapted freely.
+Illustrative charts are labelled as such; where a figure carries real numbers, the source is named in its caption.
+<br><br><b>On the citations.</b> Sources appear as numbered footnotes on the slide that cites them, with a
+superscript marker at the mention, and again in full on each section's reference slide. Every footnote is derived
+from those reference lists, so nothing is invented — where a first author has more than one work in the course,
+the footnote is only shown when the year in the text identifies which one is meant. Work from the Visual
+Intelligence Laboratory is cited in the same form as everything else and marked in the slide kicker.
+<br><br><b>Keep a backup.</b> Edits live in this browser's storage. Before reinstalling, changing machine or clearing
+site data, use <b>Export &rarr; JSON backup</b> in each deck.</p>
+</div>
+</body></html>

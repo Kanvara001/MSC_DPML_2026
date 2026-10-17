@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Preparation for ML and AI — condensed, five three-hour classes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111823;--ink2:#41505F;--ink3:#78859A;--rule:#D8E0E9;--rule2:#EAEFF4;
+ --paper:#EDF1F6;--card:#fff;--shell:#171E28;
+ --ui:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+ --bd:"Spectral",Georgia,serif;--mo:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--bd);font-size:16px;line-height:1.6}
+a{color:inherit}
+.masthead{background:var(--shell);color:#E9EFF5;padding:54px 0 44px;position:relative;overflow:hidden}
+.masthead:after{content:"";position:absolute;right:-140px;top:-120px;width:440px;height:440px;
+ border:2px solid #8A6A12;border-radius:50%;opacity:.30}
+.masthead:before{content:"";position:absolute;right:-30px;top:-40px;width:440px;height:440px;
+ border:2px solid #0F7A6A;border-radius:50%;opacity:.20}
+.wrap{max-width:1160px;margin:0 auto;padding:0 34px;position:relative}
+.eyebrow{font-family:var(--mo);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#7E8E9E}
+h1{font-family:var(--ui);font-size:44px;line-height:1.08;letter-spacing:-.03em;font-weight:700;
+ margin:16px 0 14px;max-width:21ch;color:#fff}
+.dek{font-size:18.5px;color:#A5B5C4;max-width:68ch;font-style:italic;margin:0 0 24px}
+.who{font-family:var(--mo);font-size:12px;color:#6E7E8F;line-height:1.9;border-top:1px solid #2E3946;
+ padding-top:16px;max-width:68ch}
+.who b{color:#C4D1DD;font-weight:500}
+h2.sec{font-family:var(--ui);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);
+ margin:54px 0 4px;font-weight:600}
+h2.sec+p{margin:0 0 22px;color:var(--ink2);max-width:82ch;font-style:italic}
+.ses{display:flex;flex-direction:column;gap:14px}
+.s{background:var(--card);border:1px solid var(--rule);border-radius:12px;display:grid;
+ grid-template-columns:78px minmax(0,1fr) 300px;overflow:hidden;text-decoration:none;transition:.15s}
+.s:hover{box-shadow:0 10px 26px rgba(20,30,45,.13);border-color:var(--ink3);transform:translateY(-2px)}
+.s .n{display:flex;align-items:center;justify-content:center;font-family:var(--mo);font-size:26px;
+ font-weight:600;color:#fff;letter-spacing:-.02em}
+.s .m{padding:20px 24px}
+.s .m h3{font-family:var(--ui);font-size:21px;letter-spacing:-.02em;font-weight:650;margin:0 0 8px;line-height:1.2}
+.s .m p{margin:0 0 12px;font-size:15px;color:var(--ink2);line-height:1.55}
+.s .m .meta{font-family:var(--mo);font-size:10.5px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase}
+.s .m .meta b{color:var(--ink)}
+.s .c{padding:20px 22px;border-left:1px solid var(--rule2);background:#FAFCFD}
+.s .c .lb{font-family:var(--mo);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+ font-weight:600;margin-bottom:7px}
+.s .c p{margin:0;font-size:14px;color:var(--ink2);line-height:1.5}
+table.rs{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--rule);
+ border-radius:12px;overflow:hidden}
+table.rs th{font-family:var(--mo);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);
+ text-align:left;padding:13px 16px;border-bottom:2px solid var(--ink);font-weight:600;background:#F8FAFC}
+table.rs td{padding:13px 16px;border-bottom:1px solid var(--rule2);vertical-align:top;font-size:14.5px;color:var(--ink2)}
+table.rs tr:last-child td{border-bottom:none}
+td.cl{font-family:var(--mo);font-size:13px;color:var(--ink);font-weight:600;white-space:nowrap;width:120px}
+td.bk{width:150px;font-weight:600;color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px 22px}
+.card h4{font-family:var(--ui);font-size:15.5px;font-weight:650;margin:0 0 8px}
+.card ul{margin:8px 0 0;padding:0 0 0 18px;font-size:14px;color:var(--ink2)}
+.card li{margin-bottom:5px}
+.card p{margin:0;font-size:14.5px;color:var(--ink2);line-height:1.55}
+kbd{font-family:var(--mo);font-size:11.5px;background:#EEF3F8;border:1px solid var(--rule);border-bottom-width:2px;
+ border-radius:4px;padding:2px 7px;color:var(--ink)}
+.note{margin:56px 0 70px;padding-top:22px;border-top:1px solid var(--rule);font-size:13.5px;color:var(--ink3);
+ max-width:88ch;line-height:1.7}
+.note b{color:var(--ink2)}
+.long{background:#fff;border:1px solid var(--rule);border-left:4px solid #A3384F;border-radius:0 12px 12px 0;
+ padding:20px 24px;margin-top:14px}
+.long h4{font-family:var(--ui);font-size:16px;font-weight:650;margin:0 0 6px}
+.long p{margin:0;font-size:14.5px;color:var(--ink2)}
+.long a{font-family:var(--mo);font-size:12.5px;color:#A3384F;font-weight:600;text-decoration:none;
+ border-bottom:1px solid currentColor}
+@media (max-width:820px){h1{font-size:31px}.wrap{padding:0 18px}
+ .s{grid-template-columns:60px minmax(0,1fr)}.s .c{grid-column:1/-1;border-left:none;border-top:1px solid var(--rule2)}}
+</style></head><body>
+<header class="masthead"><div class="wrap">
+  <div class="eyebrow">Research Master · condensed edition</div>
+  <h1>Data preparation in five classes</h1>
+  <p class="dek">178 slides across five three-hour sessions — two hours of lecture and a one-hour
+  paper clinic each week. Cut from the full 291-slide edition, keeping the arguments that change what
+  students actually do.</p>
+  <div class="who"><b>Thanapong Intharah</b> &nbsp;·&nbsp; Visual Intelligence Laboratory &nbsp;·&nbsp; Department of Statistics, Khon Kaen University<br>
+  Every line is editable in the browser. Notes, edits and exports save locally.</div>
+</div></header>
+
+<div class="wrap">
+
+<h2 class="sec">The five sessions</h2>
+<p>Session 1 is the anchor — sessions 2 to 4 assume its evaluation discipline, and session 5 assumes all four.</p>
+<div class="ses"><a class="s" href="s1-getting-a-defensible-number.html"><div class="n" style="background:#A3384F">1</div><div class="m"><h3>A number you can defend</h3><p>Framing, data quality and the evaluation hygiene that decides whether anything in the next four sessions produced a real result. Split designs, the eight-type leakage taxonomy, fitting inside the fold, the optimism gap.</p><div class="meta"><b>32</b> slides &nbsp;·&nbsp; <b>11</b> figures &nbsp;·&nbsp; 2 h lecture + 1 h clinic &nbsp;·&nbsp; from Ch 0 · §0.1 – §0.3</div></div><div class="c"><div class="lb" style="color:#A3384F">Paper clinic</div><p>Find the leakage — each student brings a paper from their own field.</p></div></a>
+<a class="s" href="s2-tabular-data.html"><div class="n" style="background:#2D5C8A">2</div><div class="m"><h3>Tabular data</h3><p>The most codified pipeline, and the one whose most popular default is actively harmful in clinical prediction. Missingness mechanisms, encoding without leaking, imbalance versus calibration, tabular foundation models, EHR cohorts.</p><div class="meta"><b>37</b> slides &nbsp;·&nbsp; <b>14</b> figures &nbsp;·&nbsp; 2 h lecture + 1 h clinic &nbsp;·&nbsp; from Ch 1</div></div><div class="c"><div class="lb" style="color:#2D5C8A">Paper clinic</div><p>Read a clinical prediction model against TRIPOD+AI — is calibration reported at all?</p></div></a>
+<a class="s" href="s3-text-and-llm-data.html"><div class="n" style="background:#6A4C93">3</div><div class="m"><h3>Text and LLM data</h3><p>Two eras stacked on each other, plus a tokenizer decision that charges Thai several times more than English for the same sentence. Segmentation, BPE and fertility, the filter cascade, deduplication, instruction and RAG data.</p><div class="meta"><b>36</b> slides &nbsp;·&nbsp; <b>13</b> figures &nbsp;·&nbsp; 2 h lecture + 1 h clinic &nbsp;·&nbsp; from Ch 2</div></div><div class="c"><div class="lb" style="color:#6A4C93">Paper clinic</div><p>Audit a corpus paper — what was removed, in what order, and who disappeared?</p></div></a>
+<a class="s" href="s4-image-and-video-data.html"><div class="n" style="background:#0F7A6A">4</div><div class="m"><h3>Image and video data</h3><p>Where preprocessing is least separable from the model. DICOM and whole-slide handling, CT, MRI and stain normalisation, augmentation from real invariances, CCTV deployment, the nnU-Net fingerprint.</p><div class="meta"><b>37</b> slides &nbsp;·&nbsp; <b>14</b> figures &nbsp;·&nbsp; 2 h lecture + 1 h clinic &nbsp;·&nbsp; from Ch 3</div></div><div class="c"><div class="lb" style="color:#0F7A6A">Paper clinic</div><p>Could you reproduce the preprocessing from the paper's text alone?</p></div></a>
+<a class="s" href="s5-labels-reduction-and-governance.html"><div class="n" style="background:#8A6A12">5</div><div class="m"><h3>Labels and governance</h3><p>The label is a measurement with an error rate; every filter is a sampling decision. Annotation and label noise, coresets and the random baseline, the synthetic-data trilemma, privacy and fairness, datasheets and versioning.</p><div class="meta"><b>36</b> slides &nbsp;·&nbsp; <b>11</b> figures &nbsp;·&nbsp; 2 h lecture + 1 h clinic &nbsp;·&nbsp; from Ch 0 · §0.4 – §0.8  ·  Ch 4</div></div><div class="c"><div class="lb" style="color:#8A6A12">Paper clinic</div><p>Audit a release against the datasheet questionnaire, then argue an ethics case from the regulatory text.</p></div></a></div>
+
+<h2 class="sec">How each three hours runs</h2>
+<p>The same shape every week, so students know what to prepare.</p>
+<table class="rs"><thead><tr><th>Block</th><th>Clock</th><th>What happens</th></tr></thead><tbody>
+<tr><td class="bk">Lecture A</td><td class="cl">0:00 – 1:05</td><td>First half of the material. Roughly 15 slides with discussion — the deck's timer (<kbd>T</kbd>) keeps you honest.</td></tr>
+<tr><td class="bk">Break</td><td class="cl">1:05 – 1:20</td><td>Coffee. The second block is always the harder one.</td></tr>
+<tr><td class="bk">Lecture B</td><td class="cl">1:20 – 2:10</td><td>Second half, ending on the session's five takeaway sentences.</td></tr>
+<tr><td class="bk">Paper clinic</td><td class="cl">2:10 – 3:00</td><td>Students work on a real published paper against a structured prompt, then present. Each session's clinic slide has the full run-through and the take-home task.</td></tr>
+</tbody></table>
+
+<h2 class="sec">Using the decks</h2>
+<p>The same controls work in every session.</p>
+<div class="cards">
+  <div class="card"><h4>Present</h4>
+    <ul><li><kbd>&larr;</kbd> <kbd>&rarr;</kbd> <kbd>Space</kbd> move between slides</li>
+    <li><kbd>O</kbd> opens the grid of every slide</li>
+    <li><kbd>T</kbd> starts the lecture timer, <kbd>F</kbd> fullscreen</li></ul></div>
+  <div class="card"><h4>Edit and annotate</h4>
+    <ul><li><kbd>E</kbd> — click any heading, bullet, table cell, caption or reference and rewrite it</li>
+    <li><kbd>N</kbd> opens speaker notes, with the next slide title above them</li>
+    <li>Everything autosaves to this browser</li></ul></div>
+  <div class="card"><h4>Take it away</h4>
+    <ul><li><b>Export &rarr; Markdown</b> for a handout</li>
+    <li><b>Export &rarr; JSON backup</b> to move edits to another machine</li>
+    <li><kbd>P</kbd> prints one slide per page with your notes underneath</li></ul></div>
+  <div class="card"><h4>If you have more time</h4>
+    <p>Each session names the chapters it was cut from. The long edition expands every section, with full
+    reference lists and eleven laboratory briefs.</p></div>
+</div>
+
+<div class="long"><h4>The long-form edition</h4>
+<p>Five chapters, 291 slides, 79 figures, mapped to a twelve-week semester —
+<a href="index.html">open the full course index</a> (keep both editions in the same folder).</p></div>
+
+<p class="note"><b>What was cut, and why.</b> The condensed edition keeps every argument that changes what a
+student does: the grouping unit, fitting inside the fold, the imbalance–calibration trade-off, tokenizer
+fertility, patient- and site-level splits, the random baseline, and the subgroup table. It drops the
+technique catalogues that are better as reference than as lecture — contrast codings, the full outlier-detector
+zoo, mixing laws and sequence packing, text augmentation, self-supervised view construction, and most of the
+per-section reference slides. All of it survives in the long edition.
+<br><br><b>On the citations.</b> Sources appear as numbered footnotes at the foot of the slide that cites them,
+with a superscript marker at the mention. They are derived from the long edition's reference lists, so nothing is
+invented.
+<br><br><b>On the figures.</b> Every diagram was drawn for this course as inline vector graphics — nothing is
+copied from a published paper, so the decks can be shared, printed and adapted freely.
+<br><br><b>Keep a backup.</b> Edits live in this browser's storage. Before reinstalling, changing machine or
+clearing site data, use <b>Export &rarr; JSON backup</b> in each deck.</p>
+</div>
+</body></html>

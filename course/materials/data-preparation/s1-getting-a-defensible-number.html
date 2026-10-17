@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Preparation, condensed — Session 1: Getting a number you can defend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#A3384F;
+  --accent-soft:#FAEEF2;
+  --accent-ink:#7E2A3D;
+  --paper:#EDF1F6;
+  --card:#FFFFFF;
+  --ink:#111823;
+  --ink-2:#41505F;
+  --ink-3:#78859A;
+  --rule:#D3DCE6;
+  --rule-2:#E7EDF3;
+  --shell:#171E28;
+  --shell-2:#212A36;
+  --shell-3:#2E3946;
+  --ok:#0F7A6A;
+  --warn:#A3384F;
+  --f-ui:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --f-body:"Spectral",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --f-thai:"Noto Sans Thai","Archivo",sans-serif;
+  --W:1280px; --H:720px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--shell);color:var(--ink);font-family:var(--f-body);overflow:hidden;
+  -webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none;padding:0;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ============================ CHROME ============================ */
+.bar{
+  position:fixed;left:0;right:0;top:0;height:44px;z-index:40;
+  background:var(--shell-2);border-bottom:1px solid #000;
+  display:flex;align-items:center;gap:10px;padding:0 12px;color:#C6D1DD;
+}
+.bar .ch{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  background:var(--accent);color:#fff;padding:4px 8px;border-radius:4px;font-weight:600;flex:none;
+}
+.bar .tt{font-family:var(--f-ui);font-size:13px;font-weight:600;color:#EAF0F6;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.bar .sec{font-family:var(--f-mono);font-size:10.5px;color:#7C8C9C;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
+.bar .grp{display:flex;gap:4px;align-items:center;flex:none}
+.tb{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;padding:6px 9px;
+  border:1px solid var(--shell-3);border-radius:5px;color:#A9B7C5;background:transparent;white-space:nowrap;
+}
+.tb:hover{background:var(--shell-3);color:#fff}
+.tb[aria-pressed="true"]{background:#E9EEF3;color:var(--shell);border-color:#E9EEF3;font-weight:600}
+.tb.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.count{font-family:var(--f-mono);font-size:11px;color:#8FA0B0;padding:0 4px;flex:none}
+.count b{color:#fff}
+
+/* ============================ STAGE ============================ */
+.stage{
+  position:fixed;inset:44px 0 30px 0;display:grid;place-items:center;overflow:hidden;
+  background:var(--shell);
+}
+body.notes-on .stage{right:340px}
+.holder{width:var(--W);height:var(--H);transform-origin:center center;position:relative}
+.slide{
+  width:var(--W);height:var(--H);background:var(--card);position:relative;overflow:hidden;
+  box-shadow:0 12px 48px rgba(0,0,0,.45);display:flex;flex-direction:column;
+}
+
+/* progress */
+.prog{position:fixed;left:0;right:0;bottom:0;height:30px;z-index:40;background:var(--shell-2);
+  border-top:1px solid #000;display:flex;align-items:center;gap:10px;padding:0 12px}
+.track{flex:1;height:6px;background:#0D131A;border-radius:3px;position:relative;overflow:hidden;cursor:pointer}
+.fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:3px;transition:width .15s}
+.ticks{position:absolute;inset:0}
+.ticks i{position:absolute;top:0;bottom:0;width:1px;background:#33404E}
+.prog .hint{font-family:var(--f-mono);font-size:9.5px;color:#5F6E7D;letter-spacing:.05em;white-space:nowrap}
+.timer{font-family:var(--f-mono);font-size:11px;color:#8FA0B0;min-width:52px;text-align:right}
+
+/* ============================ SLIDE LAYOUTS ============================ */
+.pad{padding:52px 64px 46px}
+.slide{--k:1}
+.slide .kick{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:10px;
+}
+.slide .kick .dot{width:22px;height:2px;background:var(--accent);display:inline-block}
+.slide h2{
+  font-family:var(--f-ui);font-size:calc(37px * var(--k));line-height:1.14;letter-spacing:-.022em;
+  font-weight:650;margin:0 0 6px;color:var(--ink);
+}
+.slide h2.sm{font-size:calc(31px * var(--k))}
+.slide .lead{
+  font-size:calc(18.5px * var(--k));line-height:1.5;color:var(--ink-2);margin:calc(12px * var(--k)) 0 0;max-width:96ch;font-style:italic;
+}
+.slide .lead b{font-style:normal;color:var(--ink);font-weight:600}
+.rule{height:2px;background:var(--accent);width:64px;margin:calc(16px * var(--k)) 0 calc(20px * var(--k));flex:none}
+
+ul.bul{list-style:none;margin:0;padding:0}
+ul.bul>li{
+  position:relative;padding:0 0 0 24px;margin:0 0 calc(13px * var(--k));font-size:calc(17.5px * var(--k));line-height:1.48;color:var(--ink-2);
+}
+ul.bul>li:before{
+  content:"";position:absolute;left:3px;top:11px;width:9px;height:2px;background:var(--accent);
+}
+ul.bul>li b,ul.bul>li strong{color:var(--ink);font-weight:600}
+ul.bul>li em{font-style:italic;color:var(--ink)}
+ul.bul.tight>li{margin-bottom:calc(9px * var(--k));font-size:calc(16.5px * var(--k))}
+ul.bul.sm>li{font-size:calc(15.5px * var(--k));margin-bottom:calc(8px * var(--k));padding-left:20px}
+ul.bul.sm>li:before{width:7px;top:10px}
+.k{font-family:var(--f-mono);font-size:.86em;background:#EEF3F8;border:1px solid var(--rule-2);
+  border-radius:3px;padding:1px 5px;color:var(--ink)}
+.cite{font-family:var(--f-mono);font-size:.8em;color:var(--ink-3);letter-spacing:.01em;white-space:nowrap}
+.th{font-family:var(--f-thai)}
+
+/* two column body */
+.body{flex:1;min-height:0;display:flex;gap:34px}
+.body.v{flex-direction:column;gap:16px}
+.col{flex:1;min-width:0}
+.col.narrow{flex:0 0 40%}
+.col.wide{flex:0 0 58%}
+.figwrap{display:flex;flex-direction:column;justify-content:center;min-width:0;min-height:0;flex:1 1 auto}
+.figbox{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
+.figbox svg{width:100%;height:100%;max-height:100%;display:block}
+.figcap{
+  font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);margin-top:10px;line-height:1.45;
+  border-top:1px solid var(--rule-2);padding-top:8px;
+}
+.figcap b{color:var(--ink-2);font-weight:600}
+
+/* columns layout */
+.cols{display:grid;gap:18px;flex:1;min-height:0}
+.cols.n2{grid-template-columns:1fr 1fr}
+.cols.n3{grid-template-columns:1fr 1fr 1fr}
+.cols.n4{grid-template-columns:repeat(4,1fr)}
+.cbox{
+  border:1px solid var(--rule);border-radius:9px;padding:calc(16px * var(--k)) 17px;background:#FBFDFE;
+  display:flex;flex-direction:column;min-height:0;overflow:hidden;
+}
+.cbox.acc{border-color:var(--accent);background:var(--accent-soft)}
+.cbox h4{
+  font-family:var(--f-ui);font-size:calc(15px * var(--k));font-weight:650;margin:0 0 4px;letter-spacing:-.01em;color:var(--ink);
+}
+.cbox .sub{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent-ink);margin:0 0 9px;font-weight:600}
+.cbox p{margin:0 0 calc(8px * var(--k));font-size:calc(14.5px * var(--k));line-height:1.46;color:var(--ink-2)}
+.cbox ul.bul>li{font-size:calc(14.5px * var(--k));margin-bottom:calc(7px * var(--k));padding-left:18px}
+.cbox ul.bul>li:before{width:7px;top:9px}
+
+/* title slide */
+.slide.title{background:var(--shell);color:#E9EFF5;justify-content:center}
+.slide.title .pad{padding:0 78px}
+.slide.title .no{
+  font-family:var(--f-mono);font-size:13px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;margin:0 0 20px;
+}
+.slide.title h1{
+  font-family:var(--f-ui);font-size:60px;line-height:1.06;letter-spacing:-.03em;font-weight:700;
+  margin:0 0 20px;max-width:20ch;color:#fff;
+}
+.slide.title .dek{font-size:20px;line-height:1.5;color:#9DAEBE;max-width:62ch;margin:0 0 30px;font-style:italic}
+.slide.title .meta{
+  font-family:var(--f-mono);font-size:12px;color:#6F7F90;letter-spacing:.05em;line-height:1.9;
+  border-top:1px solid #303B48;padding-top:18px;max-width:62ch;
+}
+.slide.title .meta b{color:#C3D0DC;font-weight:500}
+.slide.title:after{
+  content:"";position:absolute;right:-120px;bottom:-160px;width:520px;height:520px;
+  border:2px solid var(--accent);border-radius:50%;opacity:.30;
+}
+.slide.title:before{
+  content:"";position:absolute;right:-40px;bottom:-240px;width:520px;height:520px;
+  border:2px solid var(--accent);border-radius:50%;opacity:.16;
+}
+
+/* divider */
+.slide.divider{background:var(--accent-soft);justify-content:center}
+.slide.divider .pad{padding:0 78px}
+.slide.divider .n{
+  font-family:var(--f-mono);font-size:96px;line-height:1;font-weight:600;letter-spacing:-.05em;
+  color:var(--accent);opacity:.30;margin:0 0 6px;
+}
+.slide.divider h2{font-size:46px;max-width:22ch;color:var(--accent-ink)}
+.slide.divider .lead{color:var(--ink-2);font-size:19px;max-width:70ch}
+.slide.divider .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px;max-width:84ch}
+.slide.divider .chips span{
+  font-family:var(--f-mono);font-size:11px;padding:5px 10px;border-radius:20px;
+  border:1px solid var(--accent);color:var(--accent-ink);background:rgba(255,255,255,.6);
+}
+
+/* refs */
+ol.refs{list-style:none;counter-reset:r;margin:0;padding:0;column-gap:34px}
+ol.refs.two{column-count:2}
+ol.refs>li{
+  counter-increment:r;position:relative;padding:0 0 0 30px;margin:0 0 11px;
+  font-size:calc(14.5px * var(--k));line-height:1.45;color:var(--ink-2);break-inside:avoid;
+}
+ol.refs>li:before{
+  content:counter(r);position:absolute;left:0;top:2px;font-family:var(--f-mono);font-size:10px;
+  font-weight:600;color:#fff;background:var(--accent);width:19px;height:19px;border-radius:4px;
+  display:grid;place-items:center;
+}
+ol.refs>li b{color:var(--ink);font-weight:600}
+ol.refs>li i{color:var(--ink-3);font-style:italic}
+
+/* callout / lab / vilab */
+.callout{
+  border-left:3px solid var(--accent);background:var(--accent-soft);padding:calc(14px * var(--k)) 18px;border-radius:0 8px 8px 0;
+  margin-top:calc(16px * var(--k));
+}
+.callout .h{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-ink);font-weight:600;margin-bottom:6px;
+}
+.callout p{margin:0;font-size:calc(15.5px * var(--k));line-height:1.5;color:var(--ink-2)}
+.slide.vilab{background:linear-gradient(180deg,#FBFDFE 0%,#F2F6FA 100%)}
+.slide.vilab .badge{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:10px;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#fff;background:var(--ink);
+  padding:5px 11px;border-radius:20px;margin-bottom:14px;
+}
+.slide.vilab .badge i{width:7px;height:7px;border-radius:50%;background:var(--accent);display:block}
+.slide.lab{background:#FCFBF6}
+.stat{display:flex;gap:calc(26px * var(--k));margin:calc(18px * var(--k)) 0 0;flex-wrap:wrap}
+.stat div{flex:0 0 auto}
+.stat .v{font-family:var(--f-ui);font-size:calc(34px * var(--k));font-weight:700;letter-spacing:-.03em;color:var(--accent);line-height:1}
+.stat .l{margin-top:calc(6px * var(--k))!important}
+.stat .l{font-family:var(--f-mono);font-size:calc(10px * var(--k));letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:6px;max-width:22ch;line-height:1.5}
+
+/* table */
+table.t{width:100%;border-collapse:collapse;font-size:14.5px}
+table.t th{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  text-align:left;padding:0 12px 9px;border-bottom:2px solid var(--accent);font-weight:600;
+}
+table.t td{padding:calc(10px * var(--k)) 12px;font-size:calc(14.5px * var(--k));border-bottom:1px solid var(--rule-2);color:var(--ink-2);vertical-align:top;line-height:1.42}
+table.t td:first-child{font-weight:600;color:var(--ink)}
+table.t tr:last-child td{border-bottom:none}
+
+/* per-slide citation footnotes */
+sup.fn{font-family:var(--f-mono);font-size:.62em;font-weight:600;color:var(--accent);
+  vertical-align:super;line-height:0;padding-left:1px}
+.cites{
+  flex:none;margin-top:calc(9px * var(--k));padding-top:6px;border-top:1px solid var(--rule-2);
+  display:flex;flex-direction:column;gap:calc(2px * var(--k));
+}
+.cites .c{
+  font-family:var(--f-ui);font-size:calc(10.5px * var(--k));line-height:1.42;color:var(--ink-3);
+  display:flex;gap:6px;align-items:baseline;
+}
+.cites .c b{color:var(--accent);font-weight:700;flex:none;font-family:var(--f-mono);font-size:.94em}
+.cites .c i{color:var(--ink-2);font-style:italic}
+.cites .c .ed{min-width:0}
+.slide.figure .cites,.slide.split .cites,.slide.splitr .cites{margin-top:calc(8px * var(--k))}
+
+/* slide footer */
+.foot{
+  position:absolute;left:64px;right:64px;bottom:16px;display:flex;align-items:center;gap:12px;
+  font-family:var(--f-mono);font-size:9.5px;color:#9FADBC;letter-spacing:.08em;text-transform:uppercase;
+  border-top:1px solid var(--rule-2);padding-top:9px;
+}
+.foot .sp{flex:1}
+.foot .tag{padding:2px 7px;border-radius:3px;border:1px solid var(--rule);letter-spacing:.09em}
+.foot .tag.frontier{color:var(--warn);border-color:#E4BCC4;background:#FDF2F4}
+.foot .tag.textbook{color:#3A4A57;border-color:#C3CCD4;background:#F2F5F7}
+.foot .tag.both{color:#8A6A12;border-color:#E0D0A4;background:#FDF8EA}
+.slide.title .foot,.slide.divider .foot{display:none}
+
+/* editing */
+body.edit .ed{border-radius:3px;cursor:text}
+body.edit .ed:hover{background:#F1F7FC;box-shadow:0 0 0 4px #F1F7FC}
+body.edit .ed:focus{background:#FFFBE6;box-shadow:0 0 0 4px #FFFBE6;outline:none}
+.slide.title .ed:hover,.slide.title .ed:focus{background:#2C3742!important;box-shadow:0 0 0 4px #2C3742!important}
+
+/* ============================ OVERVIEW ============================ */
+.ov{position:fixed;inset:44px 0 30px 0;z-index:35;background:#10161E;overflow-y:auto;display:none;padding:20px}
+body.ov-on .ov{display:block}
+body.ov-on .stage{visibility:hidden}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:16px;max-width:1500px;margin:0 auto}
+.ovc{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;background:#fff;
+  box-shadow:0 3px 12px rgba(0,0,0,.35);border:2px solid transparent}
+.ovc:hover{border-color:var(--accent)}
+.ovc.cur{border-color:#fff}
+.ovc .mini{width:var(--W);height:var(--H);transform-origin:top left;pointer-events:none}
+.ovc .shell{position:relative;overflow:hidden}
+.ovc .lb{position:absolute;left:0;bottom:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.82));
+  color:#fff;font-family:var(--f-mono);font-size:9.5px;padding:16px 8px 6px;letter-spacing:.05em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovc .no{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.65);color:#fff;
+  font-family:var(--f-mono);font-size:9.5px;padding:2px 6px;border-radius:3px}
+.ovsec{grid-column:1/-1;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:#7E8E9E;border-bottom:1px solid #29333F;padding:14px 0 7px;margin-top:6px}
+
+/* ============================ NOTES ============================ */
+.notes{
+  position:fixed;right:0;top:44px;bottom:30px;width:340px;z-index:38;background:#131A23;
+  border-left:1px solid #000;display:none;flex-direction:column;
+}
+body.notes-on .notes{display:flex}
+.notes .nh{padding:12px 14px;border-bottom:1px solid #262F3B;
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7E8E9E}
+.notes .nb{flex:1;overflow-y:auto;padding:12px 14px}
+.notes .nxt{background:#0D131A;border-radius:6px;padding:10px 12px;margin-bottom:12px}
+.notes .nxt .l{font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:#5D6C7B;margin-bottom:5px}
+.notes .nxt .t{font-family:var(--f-ui);font-size:13px;color:#C6D3DF;line-height:1.35}
+.notes textarea{
+  width:100%;min-height:280px;background:#0D131A;border:1px solid #262F3B;border-radius:6px;
+  color:#D2DCE6;padding:11px 12px;font-family:var(--f-body);font-size:14px;line-height:1.55;resize:vertical;
+}
+.notes textarea:focus{outline:none;border-color:var(--accent)}
+.notes .tip{font-family:var(--f-mono);font-size:9.5px;color:#4F5D6B;line-height:1.7;margin-top:12px}
+
+/* ============================ MODAL ============================ */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(8,12,17,.72);display:none;padding:26px}
+.modal.on{display:flex;align-items:center;justify-content:center}
+.sheet{background:#fff;border-radius:10px;width:min(940px,100%);max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.sheet header{padding:14px 18px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px}
+.sheet header h3{margin:0;font-family:var(--f-ui);font-size:15px;font-weight:650;flex:1}
+.sheet .mb{padding:0;flex:1;overflow:auto;min-height:0}
+.sheet textarea{width:100%;height:56vh;border:0;padding:16px 20px;font-family:var(--f-mono);font-size:11.5px;
+  line-height:1.6;resize:none;outline:none;background:#F7F9FB;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+.mbtn{font-family:var(--f-ui);font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:6px;
+  border:1px solid var(--rule);background:#fff;color:var(--ink)}
+.mbtn:hover{border-color:var(--ink-3)}
+.mbtn.pri{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.help{padding:6px 20px 20px}
+.help table{width:100%;border-collapse:collapse;font-size:13.5px}
+.help td{padding:7px 10px;border-bottom:1px solid var(--rule-2);color:var(--ink-2)}
+.help td:first-child{width:150px}
+.help kbd{font-family:var(--f-mono);font-size:11px;background:#EEF3F8;border:1px solid var(--rule);
+  border-bottom-width:2px;border-radius:4px;padding:2px 7px;color:var(--ink)}
+.help h4{font-family:var(--f-ui);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  margin:20px 0 6px}
+
+/* search */
+.srch{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:55;width:min(680px,92vw);display:none}
+body.srch-on .srch{display:block}
+.srch input{width:100%;padding:13px 16px;border-radius:9px;border:1px solid #33404E;background:#0D131A;
+  color:#E4EBF2;font-family:var(--f-ui);font-size:15px;box-shadow:0 14px 44px rgba(0,0,0,.55)}
+.srch input:focus{outline:none;border-color:var(--accent)}
+.sres{margin-top:6px;background:#131A23;border:1px solid #262F3B;border-radius:9px;max-height:52vh;
+  overflow-y:auto;box-shadow:0 14px 44px rgba(0,0,0,.55)}
+.sres button{display:block;width:100%;text-align:left;padding:9px 14px;border-bottom:1px solid #1E2732;color:#C0CDD9}
+.sres button:hover{background:#1C2530;color:#fff}
+.sres .n{font-family:var(--f-mono);font-size:9.5px;color:#5D6C7B;letter-spacing:.08em}
+.sres .t{font-family:var(--f-ui);font-size:13.5px;margin-top:2px}
+.sres mark{background:#5A4A16;color:#FFE8A3;border-radius:2px;padding:0 2px}
+
+#toast{position:fixed;left:50%;bottom:44px;transform:translate(-50%,14px);background:#0B1119;color:#fff;
+  padding:10px 18px;border-radius:8px;font-family:var(--f-ui);font-size:13px;opacity:0;pointer-events:none;
+  transition:.18s;z-index:70;box-shadow:0 8px 26px rgba(0,0,0,.5)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#err{display:none;position:fixed;left:0;right:0;bottom:0;z-index:99;background:#5A1020;color:#FFD9DF;
+  padding:12px 16px;font-family:var(--f-mono);font-size:11.5px;white-space:pre-wrap;line-height:1.5}
+
+/* ============================ PRINT ============================ */
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  body{background:#fff;overflow:visible}
+  .bar,.prog,.notes,.ov,.modal,.srch,#toast,.navbtn{display:none!important}
+  .stage{position:static;inset:auto;display:block;overflow:visible}
+  .holder{transform:none!important;width:auto;height:auto}
+  .print-all{display:block}
+  .slide{width:277mm;height:auto;min-height:180mm;box-shadow:none;border:1px solid #CCC;
+    break-after:page;page-break-after:always;margin:0 0 6mm}
+  .slide:last-child{break-after:auto;page-break-after:auto}
+  .slide.title,.slide.divider{color:#111;background:#fff!important}
+  .slide.title h1,.slide.title .no{color:#111}
+  .slide.title .dek,.slide.title .meta{color:#444}
+  .slide.title:after,.slide.title:before{display:none}
+  .cites{border-top:1px solid #CCC}
+  .pnotes{display:block!important;border-top:1px dashed #BBB;margin:10px 64px 0;padding:8px 0;
+    font-family:var(--f-mono);font-size:9.5px;color:#666;white-space:pre-wrap;line-height:1.55}
+}
+.pnotes{display:none}
+body.handout .slide{margin-bottom:18px}
+
+/* nav arrows */
+.navbtn{position:fixed;top:50%;transform:translateY(-50%);z-index:30;width:44px;height:64px;
+  display:grid;place-items:center;color:#4C5A69;border-radius:8px;background:rgba(0,0,0,.18)}
+.navbtn:hover{color:#fff;background:rgba(0,0,0,.42)}
+.navbtn.l{left:8px}
+.navbtn.r{right:8px}
+body.notes-on .navbtn.r{right:348px}
+body.ov-on .navbtn{display:none}
+@media (max-width:900px){.navbtn{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="err"></div>
+<div id="toast"></div>
+
+<div class="bar">
+  <span class="ch" id="chNo">SESSION 1</span>
+  <span class="tt" id="chTitle">Session 1 · A number you can defend</span>
+  <span class="sec" id="secNow"></span>
+  <span class="count" id="cnt"></span>
+  <span class="grp">
+    <button class="tb" data-act="ov" aria-pressed="false" title="Overview grid (O)">Overview</button>
+    <button class="tb" data-act="notes" aria-pressed="false" title="Speaker notes (N)">Notes</button>
+    <button class="tb" data-act="edit" aria-pressed="false" title="Edit mode (E)">Edit</button>
+    <button class="tb" data-act="search" title="Search (/)">Find</button>
+    <button class="tb" data-act="export" title="Export">Export</button>
+    <button class="tb" data-act="print" title="Print / PDF (P)">PDF</button>
+    <button class="tb" data-act="help" title="Keyboard help (?)">?</button>
+    <button class="tb pri" data-act="hub" title="Course index">Course index</button>
+  </span>
+</div>
+
+<button class="navbtn l" data-act="prev" aria-label="Previous slide">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
+<button class="navbtn r" data-act="next" aria-label="Next slide">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></button>
+
+<div class="stage"><div class="holder" id="holder"></div></div>
+
+<div class="ov"><div class="ovgrid" id="ovgrid"></div></div>
+
+<aside class="notes">
+  <div class="nh">Speaker notes</div>
+  <div class="nb">
+    <div class="nxt"><div class="l">Up next</div><div class="t" id="nxt"></div></div>
+    <textarea id="noteBox" placeholder="What you actually want to say on this slide: the example, the aside, the question to ask the room, the thing that goes wrong in practice."></textarea>
+    <div class="tip">Notes autosave. They are included in the Markdown export and printed under each slide in PDF mode.</div>
+  </div>
+</aside>
+
+<div class="srch">
+  <input type="search" id="q" placeholder="Search every slide, reference and note…" autocomplete="off">
+  <div class="sres" id="sres"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <header>
+      <h3 id="mTitle">Export</h3>
+      <span id="mSeg"></span>
+      <button class="mbtn" data-act="mcopy">Copy</button>
+      <button class="mbtn" data-act="mdl">Download</button>
+      <button class="mbtn" data-act="mload" style="display:none">Load backup</button>
+      <button class="mbtn" data-act="mclose">Close</button>
+    </header>
+    <div class="mb" id="mBody"><textarea id="mText" spellcheck="false"></textarea></div>
+  </div>
+</div>
+
+<script id="deckdata" type="application/json">{"meta": {"key": "s1", "title": "Data Preparation, condensed — Session 1: Getting a number you can defend", "short": "Session 1 · A number you can defend", "hub": "index-condensed.html"}, "secs": [], "figs": {"f_crisp": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><circle cx=\"300\" cy=\"232\" r=\"196\" fill=\"#F2F6FA\" stroke=\"none\" stroke-width=\"1.4\"/><circle cx=\"300.0\" cy=\"80.0\" r=\"46\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.8\"/><text x=\"300.0\" y=\"77.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Business</text><text x=\"300.0\" y=\"91.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">understanding</text><path d=\"M366.0304442438813 45.33457622538745 Q400.44401726007584 72.18034041712993 428.43015889335743 84.25335762835901\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M434.9 87.0 L428.3 79.4 L424.9 87.5 z\" fill=\"#8494A5\"/><circle cx=\"431.63586137523464\" cy=\"156.0\" r=\"46\" fill=\"#A3384F\" stroke=\"#A3384F\" stroke-width=\"1.8\"/><text x=\"431.63586137523464\" y=\"153.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\">Data</text><text x=\"431.63586137523464\" y=\"167.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\">understanding</text><path d=\"M494.67222111894284 195.85133025106683 Q493.8260462756911 242.07724081395324 493.15288113139786 269.3052897288742\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M493.0 276.3 L497.6 267.4 L488.8 267.2 z\" fill=\"#8494A5\"/><circle cx=\"431.6358613752347\" cy=\"308.0\" r=\"46\" fill=\"#A3384F\" stroke=\"#A3384F\" stroke-width=\"1.8\"/><text x=\"431.6358613752347\" y=\"305.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\">Data</text><text x=\"431.6358613752347\" y=\"319.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\">preparation</text><path d=\"M428.64177687506157 382.51675402567935 Q393.38202901561533 407.89690039682324 364.66690929715844 418.79353262543236\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M358.1 421.3 L368.1 422.2 L365.0 414.0 z\" fill=\"#8494A5\"/><circle cx=\"300.0\" cy=\"384.0\" r=\"46\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.8\"/><text x=\"300.0\" y=\"388.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Modelling</text><path d=\"M233.96955575611875 418.6654237746126 Q199.55598273992422 403.8196595828701 170.66167873998253 381.2794347912761\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M165.1 377.0 L169.5 386.0 L174.9 379.0 z\" fill=\"#8494A5\"/><circle cx=\"168.36413862476536\" cy=\"308.00000000000006\" r=\"46\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.8\"/><text x=\"168.36413862476536\" y=\"312.00000000000006\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Evaluation</text><path d=\"M105.32777888105721 268.14866974893323 Q106.17395372430892 233.9227591860468 106.89201358396599 194.6956761357498\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M107.0 187.7 L102.5 196.6 L111.3 196.8 z\" fill=\"#8494A5\"/><circle cx=\"168.36413862476533\" cy=\"156.0\" r=\"46\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.8\"/><text x=\"168.36413862476533\" y=\"160.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Deployment</text><path d=\"M171.35822312493843 81.4832459743206 Q206.6179709843846 68.10309960317673 236.1964534502297 46.81235704279438\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M241.9 42.7 L232.0 44.4 L237.1 51.6 z\" fill=\"#8494A5\"/><text x=\"300\" y=\"224\" font-size=\"17\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\">CRISP-DM</text><text x=\"300\" y=\"244\" font-size=\"11\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">1996 / 2000</text><text x=\"300\" y=\"34\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">The two highlighted phases are this entire course</text><rect x=\"40\" y=\"448\" width=\"520\" height=\"56\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"56\" y=\"472\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">What the loop does not model: labels as an object of study,</text><text x=\"56\" y=\"487\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">corpus-scale curation, and the fact that preparation choices</text><text x=\"56\" y=\"502\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">are now the main experimental variable.</text></svg>", "f_datacentric": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><rect x=\"16\" y=\"40\" width=\"552\" height=\"388\" rx=\"10\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"34\" y=\"67\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Model-centric</text><rect x=\"52\" y=\"92\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"147.0\" y=\"115.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Pick an</text><text x=\"147.0\" y=\"131.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">architecture</text><rect x=\"342\" y=\"92\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"437.0\" y=\"115.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Tune</text><text x=\"437.0\" y=\"131.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">hyper-parameters</text><rect x=\"342\" y=\"194\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"437.0\" y=\"217.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Train and</text><text x=\"437.0\" y=\"233.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">re-train</text><rect x=\"52\" y=\"194\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"147.0\" y=\"217.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Report the</text><text x=\"147.0\" y=\"233.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">benchmark number</text><path d=\"M248 119.0 L327.0 119.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M334.0 119.0 L325.0 114.6 L325.0 123.4 z\" fill=\"#8494A5\"/><path d=\"M437.0 152 L437.0 179.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M437.0 186.0 L441.4 177.0 L432.6 177.0 z\" fill=\"#8494A5\"/><path d=\"M336 221.0 L257.0 221.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M250.0 221.0 L259.0 225.4 L259.0 216.6 z\" fill=\"#8494A5\"/><path d=\"M147.0 188 L147.0 161.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M147.0 154.0 L142.6 163.0 L151.4 163.0 z\" fill=\"#8494A5\"/><rect x=\"52\" y=\"362\" width=\"480\" height=\"44\" rx=\"7\" fill=\"#EDF1F5\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-dasharray=\"6 5\"/><text x=\"292.0\" y=\"390\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">DATASET  —  held fixed, rarely inspected</text><rect x=\"582\" y=\"40\" width=\"552\" height=\"388\" rx=\"10\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"600\" y=\"67\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Data-centric</text><rect x=\"618\" y=\"92\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"713.0\" y=\"115.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Profile and audit</text><text x=\"713.0\" y=\"131.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">the data</text><rect x=\"908\" y=\"92\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"1003.0\" y=\"107.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Fix labels,</text><text x=\"1003.0\" y=\"123.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">filter,</text><text x=\"1003.0\" y=\"139.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">deduplicate</text><rect x=\"908\" y=\"194\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"1003.0\" y=\"217.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Select, augment,</text><text x=\"1003.0\" y=\"233.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">rebalance</text><rect x=\"618\" y=\"194\" width=\"190\" height=\"54\" rx=\"8\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"713.0\" y=\"217.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Ablate the data</text><text x=\"713.0\" y=\"233.0\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">change</text><path d=\"M814 119.0 L893.0 119.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M900.0 119.0 L891.0 114.6 L891.0 123.4 z\" fill=\"#8494A5\"/><path d=\"M1003.0 152 L1003.0 179.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M1003.0 186.0 L1007.4 177.0 L998.6 177.0 z\" fill=\"#8494A5\"/><path d=\"M902 221.0 L823.0 221.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M816.0 221.0 L825.0 225.4 L825.0 216.6 z\" fill=\"#8494A5\"/><path d=\"M713.0 188 L713.0 161.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M713.0 154.0 L708.6 163.0 L717.4 163.0 z\" fill=\"#8494A5\"/><rect x=\"618\" y=\"362\" width=\"480\" height=\"44\" rx=\"7\" fill=\"#EDF1F5\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-dasharray=\"6 5\"/><text x=\"858.0\" y=\"390\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">MODEL  —  held fixed, a measuring instrument</text><text x=\"575.0\" y=\"26\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Same compute budget, opposite thing held constant</text><text x=\"575.0\" y=\"452\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">The right-hand loop is what this course teaches. Its evaluation discipline is stricter, because the thing you changed is the thing you measure with.</text></svg>", "f_threegoal": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><rect x=\"16\" y=\"46\" width=\"347\" height=\"340\" rx=\"10\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"16\" y=\"46\" width=\"347\" height=\"5\" rx=\"2\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"34\" y=\"82\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Training-data development</text><circle cx=\"40\" cy=\"108\" r=\"3.4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"54\" y=\"112\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Collection and integration</text><circle cx=\"40\" cy=\"142\" r=\"3.4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"54\" y=\"146\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Labelling and label repair</text><circle cx=\"40\" cy=\"176\" r=\"3.4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"54\" y=\"180\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Cleaning, filtering, dedup</text><circle cx=\"40\" cy=\"210\" r=\"3.4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"54\" y=\"214\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Augmentation and synthesis</text><circle cx=\"40\" cy=\"244\" r=\"3.4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"54\" y=\"248\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Selection, pruning, mixing</text><line x1=\"34\" y1=\"300\" x2=\"345\" y2=\"300\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><text x=\"34\" y=\"320\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Metric: downstream task performance at</text><text x=\"34\" y=\"335\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">fixed compute</text><rect x=\"401\" y=\"46\" width=\"347\" height=\"340\" rx=\"10\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"401\" y=\"46\" width=\"347\" height=\"5\" rx=\"2\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"419\" y=\"82\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Inference-data development</text><circle cx=\"425\" cy=\"108\" r=\"3.4\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"439\" y=\"112\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">In-distribution evaluation sets</text><circle cx=\"425\" cy=\"142\" r=\"3.4\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"439\" y=\"146\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Slice and subgroup sets</text><circle cx=\"425\" cy=\"176\" r=\"3.4\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"439\" y=\"180\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Adversarial and stress sets</text><circle cx=\"425\" cy=\"210\" r=\"3.4\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"439\" y=\"214\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Prompt / query sets for RAG</text><circle cx=\"425\" cy=\"244\" r=\"3.4\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"439\" y=\"248\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Decontamination against training</text><line x1=\"419\" y1=\"300\" x2=\"730\" y2=\"300\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><text x=\"419\" y=\"320\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Metric: does the eval set answer the</text><text x=\"419\" y=\"335\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">question you are asking?</text><rect x=\"786\" y=\"46\" width=\"347\" height=\"340\" rx=\"10\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"786\" y=\"46\" width=\"347\" height=\"5\" rx=\"2\" fill=\"#0F7A6A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"804\" y=\"82\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Data maintenance</text><circle cx=\"810\" cy=\"108\" r=\"3.4\" fill=\"#0F7A6A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"824\" y=\"112\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Quality monitoring in production</text><circle cx=\"810\" cy=\"142\" r=\"3.4\" fill=\"#0F7A6A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"824\" y=\"146\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Drift detection and alerting</text><circle cx=\"810\" cy=\"176\" r=\"3.4\" fill=\"#0F7A6A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"824\" y=\"180\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Versioning, lineage, rollback</text><circle cx=\"810\" cy=\"210\" r=\"3.4\" fill=\"#0F7A6A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"824\" y=\"214\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Storage, cost and access control</text><circle cx=\"810\" cy=\"244\" r=\"3.4\" fill=\"#0F7A6A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"824\" y=\"248\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Deletion and consent propagation</text><line x1=\"804\" y1=\"300\" x2=\"1115\" y2=\"300\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><text x=\"804\" y=\"320\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Metric: time-to-detect and</text><text x=\"804\" y=\"335\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">time-to-repair</text><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Three engineering problems, three sets of metrics — do not let them collapse into one</text><text x=\"575.0\" y=\"428\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">Most published “data-centric” gains are training-data work evaluated on an inference set nobody audited. That is the failure mode worth naming in week 1.</text></svg>", "f_validgate": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"28\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">A validation gate is a contract, not a report</text><rect x=\"20\" y=\"62\" width=\"356\" height=\"48\" rx=\"7\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"40\" y=\"91\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\">Raw source</text><path d=\"M198 114 L198.0 131.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M198.0 138.0 L202.4 129.0 L193.6 129.0 z\" fill=\"#8494A5\"/><rect x=\"20\" y=\"142\" width=\"356\" height=\"48\" rx=\"7\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"40\" y=\"171\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\">Expectation suite</text><text x=\"360\" y=\"171\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">assert</text><line x1=\"376\" y1=\"150\" x2=\"376\" y2=\"182\" stroke=\"#A3384F\" stroke-width=\"2\" stroke-linecap=\"round\"/><text x=\"388\" y=\"158\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">types, ranges,</text><text x=\"388\" y=\"171\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">categories, row</text><text x=\"388\" y=\"184\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">counts, null rate per</text><text x=\"388\" y=\"197\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">column</text><path d=\"M198 194 L198.0 211.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M198.0 218.0 L202.4 209.0 L193.6 209.0 z\" fill=\"#8494A5\"/><rect x=\"20\" y=\"222\" width=\"356\" height=\"48\" rx=\"7\" fill=\"#F2F6FA\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"40\" y=\"251\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\">Transform</text><path d=\"M198 274 L198.0 291.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M198.0 298.0 L202.4 289.0 L193.6 289.0 z\" fill=\"#8494A5\"/><rect x=\"20\" y=\"302\" width=\"356\" height=\"48\" rx=\"7\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"40\" y=\"331\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\">Post-transform suite</text><text x=\"360\" y=\"331\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">assert</text><line x1=\"376\" y1=\"310\" x2=\"376\" y2=\"342\" stroke=\"#A3384F\" stroke-width=\"2\" stroke-linecap=\"round\"/><text x=\"388\" y=\"318\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">distribution shift</text><text x=\"388\" y=\"331\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">against the last</text><text x=\"388\" y=\"344\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">accepted release</text><path d=\"M198 354 L198.0 371.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M198.0 378.0 L202.4 369.0 L193.6 369.0 z\" fill=\"#8494A5\"/><rect x=\"20\" y=\"382\" width=\"356\" height=\"48\" rx=\"7\" fill=\"#E3F1EC\" stroke=\"#0F7A6A\" stroke-width=\"1.4\"/><text x=\"40\" y=\"411\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"600\">Training set</text><rect x=\"20\" y=\"446\" width=\"560\" height=\"64\" rx=\"8\" fill=\"#FBF0F2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"38\" y=\"470\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">FAIL  →  the pipeline stops and pages a human</text><text x=\"38\" y=\"488\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">It does not log a warning and carry on. That distinction is the whole point.</text></svg>", "f_quality": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><rect x=\"16\" y=\"42\" width=\"347\" height=\"176\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"16\" y=\"42\" width=\"5\" height=\"176\" rx=\"2\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"36\" y=\"74\" font-size=\"15\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Completeness</text><text x=\"36\" y=\"102\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">is anything missing that should be here?</text><line x1=\"36\" y1=\"158\" x2=\"343\" y2=\"158\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"3 4\"/><text x=\"36\" y=\"178\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1.4\">MEASURE IT AS</text><text x=\"36\" y=\"198\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">count of nulls per column, per subgroup</text><rect x=\"401\" y=\"42\" width=\"347\" height=\"176\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"401\" y=\"42\" width=\"5\" height=\"176\" rx=\"2\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"421\" y=\"74\" font-size=\"15\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Validity</text><text x=\"421\" y=\"102\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">does every value obey its declared type</text><text x=\"421\" y=\"119\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">and range?</text><line x1=\"421\" y1=\"158\" x2=\"728\" y2=\"158\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"3 4\"/><text x=\"421\" y=\"178\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1.4\">MEASURE IT AS</text><text x=\"421\" y=\"198\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">schema + constraint pass rate</text><rect x=\"786\" y=\"42\" width=\"347\" height=\"176\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"786\" y=\"42\" width=\"5\" height=\"176\" rx=\"2\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"806\" y=\"74\" font-size=\"15\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Accuracy</text><text x=\"806\" y=\"102\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">does the value match reality?</text><line x1=\"806\" y1=\"158\" x2=\"1113\" y2=\"158\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"3 4\"/><text x=\"806\" y=\"178\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1.4\">MEASURE IT AS</text><text x=\"806\" y=\"198\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">audit against a reference standard</text><rect x=\"16\" y=\"242\" width=\"347\" height=\"176\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"16\" y=\"242\" width=\"5\" height=\"176\" rx=\"2\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"36\" y=\"274\" font-size=\"15\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Consistency</text><text x=\"36\" y=\"302\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">do related fields agree with each other?</text><line x1=\"36\" y1=\"358\" x2=\"343\" y2=\"358\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"3 4\"/><text x=\"36\" y=\"378\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1.4\">MEASURE IT AS</text><text x=\"36\" y=\"398\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">cross-field rule violations</text><rect x=\"401\" y=\"242\" width=\"347\" height=\"176\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"401\" y=\"242\" width=\"5\" height=\"176\" rx=\"2\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"421\" y=\"274\" font-size=\"15\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Uniqueness</text><text x=\"421\" y=\"302\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">is each real-world entity represented</text><text x=\"421\" y=\"319\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">once?</text><line x1=\"421\" y1=\"358\" x2=\"728\" y2=\"358\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"3 4\"/><text x=\"421\" y=\"378\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1.4\">MEASURE IT AS</text><text x=\"421\" y=\"398\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">duplicate / linkage rate</text><rect x=\"786\" y=\"242\" width=\"347\" height=\"176\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><rect x=\"786\" y=\"242\" width=\"5\" height=\"176\" rx=\"2\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"806\" y=\"274\" font-size=\"15\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Timeliness</text><text x=\"806\" y=\"302\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">is the value current enough to act on?</text><line x1=\"806\" y1=\"358\" x2=\"1113\" y2=\"358\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-dasharray=\"3 4\"/><text x=\"806\" y=\"378\" font-size=\"10.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\" letter-spacing=\"1.4\">MEASURE IT AS</text><text x=\"806\" y=\"398\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">age distribution at prediction time</text><text x=\"575.0\" y=\"26\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">A dimension you cannot compute is an adjective, not a quality dimension</text></svg>", "f_drift": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Three shifts that look identical on a monitoring dashboard and demand different responses</text><rect x=\"16\" y=\"44\" width=\"347\" height=\"258\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"34\" y=\"72\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Covariate shift</text><text x=\"34\" y=\"92\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">P(x) changes, P(y|x) holds</text><line x1=\"42\" y1=\"242\" x2=\"337\" y2=\"242\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><path d=\"M42.0 242.0 L42.0 239.0 L46.6 237.8 L51.2 236.1 L55.8 234.0 L60.4 231.2 L65.0 227.6 L69.7 223.3 L74.3 218.0 L78.9 211.8 L83.5 204.6 L88.1 196.4 L92.7 187.4 L97.3 177.8 L101.9 167.7 L106.5 157.4 L111.1 147.4 L115.8 137.9 L120.4 129.4 L125.0 122.3 L129.6 116.9 L134.2 113.4 L138.8 112.0 L143.4 112.9 L148.0 115.8 L152.6 120.8 L157.2 127.6 L161.8 135.8 L166.5 145.0 L171.1 155.0 L175.7 165.2 L180.3 175.4 L184.9 185.2 L189.5 194.3 L194.1 202.7 L198.7 210.1 L203.3 216.6 L207.9 222.1 L212.5 226.7 L217.2 230.4 L221.8 233.4 L226.4 235.7 L231.0 237.4 L235.6 238.8 L240.2 239.8 L244.8 240.5 L249.4 241.0 L254.0 241.3 L258.6 241.6 L263.2 241.7 L267.9 241.8 L272.5 241.9 L277.1 241.9 L281.7 242.0 L286.3 242.0 L290.9 242.0 L295.5 242.0 L300.1 242.0 L304.7 242.0 L309.3 242.0 L314.0 242.0 L318.6 242.0 L323.2 242.0 L327.8 242.0 L332.4 242.0 L337.0 242.0 L337.0 242.0 z\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.2\"/><path d=\"M42.0 239.0 C44.3 239.0 44.3 237.8 46.6 237.8 C48.9 237.8 48.9 236.1 51.2 236.1 C53.5 236.1 53.5 234.0 55.8 234.0 C58.1 234.0 58.1 231.2 60.4 231.2 C62.7 231.2 62.7 227.6 65.0 227.6 C67.4 227.6 67.4 223.3 69.7 223.3 C72.0 223.3 72.0 218.0 74.3 218.0 C76.6 218.0 76.6 211.8 78.9 211.8 C81.2 211.8 81.2 204.6 83.5 204.6 C85.8 204.6 85.8 196.4 88.1 196.4 C90.4 196.4 90.4 187.4 92.7 187.4 C95.0 187.4 95.0 177.8 97.3 177.8 C99.6 177.8 99.6 167.7 101.9 167.7 C104.2 167.7 104.2 157.4 106.5 157.4 C108.8 157.4 108.8 147.4 111.1 147.4 C113.4 147.4 113.4 137.9 115.8 137.9 C118.1 137.9 118.1 129.4 120.4 129.4 C122.7 129.4 122.7 122.3 125.0 122.3 C127.3 122.3 127.3 116.9 129.6 116.9 C131.9 116.9 131.9 113.4 134.2 113.4 C136.5 113.4 136.5 112.0 138.8 112.0 C141.1 112.0 141.1 112.9 143.4 112.9 C145.7 112.9 145.7 115.8 148.0 115.8 C150.3 115.8 150.3 120.8 152.6 120.8 C154.9 120.8 154.9 127.6 157.2 127.6 C159.5 127.6 159.5 135.8 161.8 135.8 C164.1 135.8 164.1 145.0 166.5 145.0 C168.8 145.0 168.8 155.0 171.1 155.0 C173.4 155.0 173.4 165.2 175.7 165.2 C178.0 165.2 178.0 175.4 180.3 175.4 C182.6 175.4 182.6 185.2 184.9 185.2 C187.2 185.2 187.2 194.3 189.5 194.3 C191.8 194.3 191.8 202.7 194.1 202.7 C196.4 202.7 196.4 210.1 198.7 210.1 C201.0 210.1 201.0 216.6 203.3 216.6 C205.6 216.6 205.6 222.1 207.9 222.1 C210.2 222.1 210.2 226.7 212.5 226.7 C214.9 226.7 214.9 230.4 217.2 230.4 C219.5 230.4 219.5 233.4 221.8 233.4 C224.1 233.4 224.1 235.7 226.4 235.7 C228.7 235.7 228.7 237.4 231.0 237.4 C233.3 237.4 233.3 238.8 235.6 238.8 C237.9 238.8 237.9 239.8 240.2 239.8 C242.5 239.8 242.5 240.5 244.8 240.5 C247.1 240.5 247.1 241.0 249.4 241.0 C251.7 241.0 251.7 241.3 254.0 241.3 C256.3 241.3 256.3 241.6 258.6 241.6 C260.9 241.6 260.9 241.7 263.2 241.7 C265.6 241.7 265.6 241.8 267.9 241.8 C270.2 241.8 270.2 241.9 272.5 241.9 C274.8 241.9 274.8 241.9 277.1 241.9 C279.4 241.9 279.4 242.0 281.7 242.0 C284.0 242.0 284.0 242.0 286.3 242.0 C288.6 242.0 288.6 242.0 290.9 242.0 C293.2 242.0 293.2 242.0 295.5 242.0 C297.8 242.0 297.8 242.0 300.1 242.0 C302.4 242.0 302.4 242.0 304.7 242.0 C307.0 242.0 307.0 242.0 309.3 242.0 C311.6 242.0 311.6 242.0 314.0 242.0 C316.3 242.0 316.3 242.0 318.6 242.0 C320.9 242.0 320.9 242.0 323.2 242.0 C325.5 242.0 325.5 242.0 327.8 242.0 C330.1 242.0 330.1 242.0 332.4 242.0 C334.7 242.0 334.7 242.0 337.0 242.0\" fill=\"none\" stroke=\"#2D5C8A\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M42.0 242.0 L42.0 242.0 L46.6 242.0 L51.2 242.0 L55.8 242.0 L60.4 242.0 L65.0 242.0 L69.7 242.0 L74.3 242.0 L78.9 242.0 L83.5 242.0 L88.1 242.0 L92.7 242.0 L97.3 242.0 L101.9 242.0 L106.5 241.9 L111.1 241.9 L115.8 241.8 L120.4 241.7 L125.0 241.5 L129.6 241.2 L134.2 240.8 L138.8 240.2 L143.4 239.4 L148.0 238.3 L152.6 236.9 L157.2 234.9 L161.8 232.4 L166.5 229.1 L171.1 225.1 L175.7 220.2 L180.3 214.4 L184.9 207.6 L189.5 199.8 L194.1 191.1 L198.7 181.7 L203.3 171.7 L207.9 161.5 L212.5 151.3 L217.2 141.6 L221.8 132.7 L226.4 125.0 L231.0 118.8 L235.6 114.5 L240.2 112.3 L244.8 112.3 L249.4 114.4 L254.0 118.6 L258.6 124.7 L263.2 132.3 L267.9 141.2 L272.5 150.9 L277.1 161.1 L281.7 171.3 L286.3 181.3 L290.9 190.8 L295.5 199.5 L300.1 207.3 L304.7 214.1 L309.3 220.0 L314.0 224.9 L318.6 229.0 L323.2 232.2 L327.8 234.8 L332.4 236.8 L337.0 238.3 L337.0 242.0 z\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.18\"/><path d=\"M42.0 242.0 C44.3 242.0 44.3 242.0 46.6 242.0 C48.9 242.0 48.9 242.0 51.2 242.0 C53.5 242.0 53.5 242.0 55.8 242.0 C58.1 242.0 58.1 242.0 60.4 242.0 C62.7 242.0 62.7 242.0 65.0 242.0 C67.4 242.0 67.4 242.0 69.7 242.0 C72.0 242.0 72.0 242.0 74.3 242.0 C76.6 242.0 76.6 242.0 78.9 242.0 C81.2 242.0 81.2 242.0 83.5 242.0 C85.8 242.0 85.8 242.0 88.1 242.0 C90.4 242.0 90.4 242.0 92.7 242.0 C95.0 242.0 95.0 242.0 97.3 242.0 C99.6 242.0 99.6 242.0 101.9 242.0 C104.2 242.0 104.2 241.9 106.5 241.9 C108.8 241.9 108.8 241.9 111.1 241.9 C113.4 241.9 113.4 241.8 115.8 241.8 C118.1 241.8 118.1 241.7 120.4 241.7 C122.7 241.7 122.7 241.5 125.0 241.5 C127.3 241.5 127.3 241.2 129.6 241.2 C131.9 241.2 131.9 240.8 134.2 240.8 C136.5 240.8 136.5 240.2 138.8 240.2 C141.1 240.2 141.1 239.4 143.4 239.4 C145.7 239.4 145.7 238.3 148.0 238.3 C150.3 238.3 150.3 236.9 152.6 236.9 C154.9 236.9 154.9 234.9 157.2 234.9 C159.5 234.9 159.5 232.4 161.8 232.4 C164.1 232.4 164.1 229.1 166.5 229.1 C168.8 229.1 168.8 225.1 171.1 225.1 C173.4 225.1 173.4 220.2 175.7 220.2 C178.0 220.2 178.0 214.4 180.3 214.4 C182.6 214.4 182.6 207.6 184.9 207.6 C187.2 207.6 187.2 199.8 189.5 199.8 C191.8 199.8 191.8 191.1 194.1 191.1 C196.4 191.1 196.4 181.7 198.7 181.7 C201.0 181.7 201.0 171.7 203.3 171.7 C205.6 171.7 205.6 161.5 207.9 161.5 C210.2 161.5 210.2 151.3 212.5 151.3 C214.9 151.3 214.9 141.6 217.2 141.6 C219.5 141.6 219.5 132.7 221.8 132.7 C224.1 132.7 224.1 125.0 226.4 125.0 C228.7 125.0 228.7 118.8 231.0 118.8 C233.3 118.8 233.3 114.5 235.6 114.5 C237.9 114.5 237.9 112.3 240.2 112.3 C242.5 112.3 242.5 112.3 244.8 112.3 C247.1 112.3 247.1 114.4 249.4 114.4 C251.7 114.4 251.7 118.6 254.0 118.6 C256.3 118.6 256.3 124.7 258.6 124.7 C260.9 124.7 260.9 132.3 263.2 132.3 C265.6 132.3 265.6 141.2 267.9 141.2 C270.2 141.2 270.2 150.9 272.5 150.9 C274.8 150.9 274.8 161.1 277.1 161.1 C279.4 161.1 279.4 171.3 281.7 171.3 C284.0 171.3 284.0 181.3 286.3 181.3 C288.6 181.3 288.6 190.8 290.9 190.8 C293.2 190.8 293.2 199.5 295.5 199.5 C297.8 199.5 297.8 207.3 300.1 207.3 C302.4 207.3 302.4 214.1 304.7 214.1 C307.0 214.1 307.0 220.0 309.3 220.0 C311.6 220.0 311.6 224.9 314.0 224.9 C316.3 224.9 316.3 229.0 318.6 229.0 C320.9 229.0 320.9 232.2 323.2 232.2 C325.5 232.2 325.5 234.8 327.8 234.8 C330.1 234.8 330.1 236.8 332.4 236.8 C334.7 236.8 334.7 238.3 337.0 238.3\" fill=\"none\" stroke=\"#A3384F\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"6 4\"/><path d=\"M42 234 L337 134\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"4 4\"/><text x=\"333\" y=\"128\" font-size=\"9.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">decision boundary unchanged</text><text x=\"34\" y=\"330\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">New scanner, new camera angle, new patient</text><text x=\"34\" y=\"347\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">mix. The mapping is still valid — reweight or</text><text x=\"34\" y=\"364\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">recalibrate.</text><rect x=\"401\" y=\"44\" width=\"347\" height=\"258\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"419\" y=\"72\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Label / prior shift</text><text x=\"419\" y=\"92\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">P(y) changes, P(x|y) holds</text><line x1=\"427\" y1=\"242\" x2=\"722\" y2=\"242\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><rect x=\"441.0\" y=\"155.07999999999998\" width=\"34\" height=\"86.92\" rx=\"4\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><rect x=\"518.6666666666666\" y=\"222.92000000000002\" width=\"34\" height=\"19.08\" rx=\"4\" fill=\"#2D5C8A\" stroke=\"none\" stroke-width=\"1.4\"/><rect x=\"596.3333333333333\" y=\"210.2\" width=\"34\" height=\"31.799999999999997\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><rect x=\"674.0\" y=\"167.8\" width=\"34\" height=\"74.19999999999999\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"475\" y=\"258\" font-size=\"10\" text-anchor=\"middle\" fill=\"#2D5C8A\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">before</text><text x=\"674\" y=\"258\" font-size=\"10\" text-anchor=\"middle\" fill=\"#A3384F\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">after</text><text x=\"431\" y=\"124\" font-size=\"9.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">neg / pos base rate</text><text x=\"419\" y=\"330\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Screening moves from a referral clinic to a</text><text x=\"419\" y=\"347\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">village. Prevalence drops, thresholds must</text><text x=\"419\" y=\"364\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">move.</text><rect x=\"786\" y=\"44\" width=\"347\" height=\"258\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"804\" y=\"72\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Concept drift</text><text x=\"804\" y=\"92\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">P(y|x) itself changes</text><line x1=\"812\" y1=\"242\" x2=\"1107\" y2=\"242\" stroke=\"#8494A5\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><circle cx=\"842\" cy=\"142\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"865\" cy=\"183\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"888\" cy=\"144\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"911\" cy=\"185\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"844\" cy=\"146\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"867\" cy=\"187\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"890\" cy=\"148\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"913\" cy=\"189\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"846\" cy=\"150\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"869\" cy=\"191\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"892\" cy=\"152\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"997\" cy=\"136\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1026\" cy=\"173\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1055\" cy=\"210\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1084\" cy=\"161\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1023\" cy=\"198\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1052\" cy=\"149\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1081\" cy=\"186\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1020\" cy=\"137\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1049\" cy=\"174\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1078\" cy=\"211\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><circle cx=\"1017\" cy=\"162\" r=\"4\" fill=\"#2D5C8A\" opacity=\"0.75\"/><path d=\"M824 120 L1095 234\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"5 4\"/><path d=\"M824 234 L1095 120\" fill=\"none\" stroke=\"#A3384F\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"1103\" y=\"240\" font-size=\"9.5\" text-anchor=\"end\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">the rule moved</text><text x=\"804\" y=\"330\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Coding practice changes, a guideline is</text><text x=\"804\" y=\"347\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">revised, an attacker adapts. Retraining is</text><text x=\"804\" y=\"364\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">unavoidable.</text><text x=\"575.0\" y=\"442\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">The statistic that fires (PSI, KS, MMD, classifier two-sample) tells you something moved. It never tells you which of these three it was — that takes a hypothesis and a label.</text></svg>", "f_splits": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">The same 24 rows, split three ways — only one of them answers the question you are asking</text><rect x=\"16\" y=\"42\" width=\"347\" height=\"296\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"34\" y=\"70\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Random split</text><text x=\"34\" y=\"90\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">by image</text><rect x=\"36\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"52.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"36\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"52.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"36\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"52.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"72\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"88.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"72\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"88.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"72\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"88.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"108\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"124.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"108\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"124.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"108\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"124.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"144\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"160.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"144\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"160.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"144\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"160.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"180\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"196.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"180\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"196.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"180\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"196.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"216\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"232.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"216\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"232.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"216\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"232.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"252\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"268.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"252\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"268.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"252\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"268.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"288\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"304.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"288\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"304.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"288\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"304.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"36\" y=\"229\" width=\"11\" height=\"11\" rx=\"2.5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"53\" y=\"240\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">train</text><rect x=\"101.6\" y=\"229\" width=\"11\" height=\"11\" rx=\"2.5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"118.6\" y=\"240\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">test</text><text x=\"34\" y=\"266\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Same patient appears in train and test. The</text><text x=\"34\" y=\"282\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">model can memorise the patient, not the</text><text x=\"34\" y=\"298\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">disease.</text><rect x=\"401\" y=\"42\" width=\"347\" height=\"296\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"419\" y=\"70\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Grouped split</text><text x=\"419\" y=\"90\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">by patient</text><rect x=\"421\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"437.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"421\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"437.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"421\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"437.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"457\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"473.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"457\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"473.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"457\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"473.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"493\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"509.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"493\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"509.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"493\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"509.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"529\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"545.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"529\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"545.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"529\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"545.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"565\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"581.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"565\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"581.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"565\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"581.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"601\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"617.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"601\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"617.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"601\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"617.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"637\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"653.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"637\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"653.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"637\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"653.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"673\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"689.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"673\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"689.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"673\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"689.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"421\" y=\"229\" width=\"11\" height=\"11\" rx=\"2.5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"438\" y=\"240\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">train</text><rect x=\"486.6\" y=\"229\" width=\"11\" height=\"11\" rx=\"2.5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"503.6\" y=\"240\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">test</text><text x=\"419\" y=\"266\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Every image of a patient lands on one side.</text><text x=\"419\" y=\"282\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">This is the minimum for any clinical claim.</text><rect x=\"786\" y=\"42\" width=\"347\" height=\"296\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"804\" y=\"70\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Temporal split</text><text x=\"804\" y=\"90\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">by acquisition date</text><rect x=\"806\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"822.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"806\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"822.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"806\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"822.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">A</text><rect x=\"842\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"858.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"842\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"858.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"842\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"858.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">B</text><rect x=\"878\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"894.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"878\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"894.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"878\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"894.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">C</text><rect x=\"914\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"930.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"914\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"930.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"914\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"930.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">D</text><rect x=\"950\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"966.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"950\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"966.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"950\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"966.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">E</text><rect x=\"986\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1002.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"986\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1002.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"986\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1002.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">F</text><rect x=\"1022\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1038.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"1022\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1038.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"1022\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1038.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">G</text><rect x=\"1058\" y=\"106\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1074.0\" y=\"126.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"1058\" y=\"142\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1074.0\" y=\"162.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"1058\" y=\"178\" width=\"32\" height=\"32\" rx=\"4\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1074.0\" y=\"198.0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">H</text><rect x=\"806\" y=\"229\" width=\"11\" height=\"11\" rx=\"2.5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"823\" y=\"240\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">train</text><rect x=\"871.6\" y=\"229\" width=\"11\" height=\"11\" rx=\"2.5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"888.6\" y=\"240\" font-size=\"11\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">test</text><text x=\"804\" y=\"266\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Train on the past, test on the future. The</text><text x=\"804\" y=\"282\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">only design that matches how the model will be</text><text x=\"804\" y=\"298\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">used.</text><rect x=\"16\" y=\"352\" width=\"1118\" height=\"62\" rx=\"9\" fill=\"#FBF0F2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"36\" y=\"378\" font-size=\"13\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\">The tell:</text><text x=\"100\" y=\"378\" font-size=\"13\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">if held-out accuracy drops sharply when you move from the left panel to the middle one, the left panel was measuring patient identity.</text><text x=\"36\" y=\"400\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-style=\"italic\">Report both numbers in the paper. Reviewers who have read Kapoor and Narayanan will ask.</text><text x=\"575.0\" y=\"442\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#4B5A6B\" font-weight=\"400\" font-style=\"italic\">Grouping unit in our own work: patient for BiTNet ultrasound, test-kit specimen for OV-RDT, camera and session for CCTV.</text></svg>", "f_foldfit": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Where you fit the scaler, imputer, encoder or feature selector decides whether the number is real</text><rect x=\"16\" y=\"44\" width=\"546\" height=\"300\" rx=\"10\" fill=\"#FBF0F2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"36\" y=\"74\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Wrong: fit on everything, then split</text><rect x=\"42\" y=\"92\" width=\"494\" height=\"34\" rx=\"6\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"289\" y=\"114\" font-size=\"12\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">fit scaler / imputer / selector on ALL 100% of rows</text><path d=\"M289 128 L289.0 141.0\" fill=\"none\" stroke=\"#A3384F\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M289.0 148.0 L293.4 139.0 L284.6 139.0 z\" fill=\"#A3384F\"/><rect x=\"42\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"89\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"141\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"188\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"240\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"287\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"339\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"386\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"438\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"485\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"42\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"89\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"141\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"188\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"240\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"287\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"339\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"386\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"438\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"485\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"42\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"89\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"141\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"188\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"240\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"287\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"339\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"386\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"438\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"485\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"42\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"89\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"141\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"188\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"240\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"287\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"339\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"386\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"438\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"485\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"42\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"89\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"141\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"188\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"240\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"287\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"339\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#E9A8B4\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"386\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"438\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"485\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><text x=\"36\" y=\"334\" font-size=\"12\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">validation rows already influenced the transform</text><rect x=\"604\" y=\"44\" width=\"546\" height=\"300\" rx=\"10\" fill=\"#EDF6F3\" stroke=\"#0F7A6A\" stroke-width=\"1.4\"/><text x=\"624\" y=\"74\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Right: fit inside each training fold</text><rect x=\"630\" y=\"92\" width=\"494\" height=\"34\" rx=\"6\" fill=\"#D8EAE4\" stroke=\"#0F7A6A\" stroke-width=\"1.4\" stroke-dasharray=\"5 4\"/><text x=\"877\" y=\"114\" font-size=\"12\" text-anchor=\"middle\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">nothing is fit yet</text><path d=\"M877 128 L877.0 141.0\" fill=\"none\" stroke=\"#0F7A6A\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M877.0 148.0 L881.4 139.0 L872.6 139.0 z\" fill=\"#0F7A6A\"/><rect x=\"630\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"677\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"729\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"776\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"828\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"875\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"927\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"974\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"1026\" y=\"154\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1073\" y=\"172\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><text x=\"1132\" y=\"172\" font-size=\"9.5\" text-anchor=\"end\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">fit</text><rect x=\"630\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"677\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"729\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"776\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"828\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"875\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"927\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"974\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"1026\" y=\"187\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1073\" y=\"205\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><text x=\"1132\" y=\"205\" font-size=\"9.5\" text-anchor=\"end\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">fit</text><rect x=\"630\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"677\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"729\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"776\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"828\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"875\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"927\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"974\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"1026\" y=\"220\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1073\" y=\"238\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><text x=\"1132\" y=\"238\" font-size=\"9.5\" text-anchor=\"end\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">fit</text><rect x=\"630\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"677\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"729\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"776\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"828\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"875\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"927\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"974\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><rect x=\"1026\" y=\"253\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1073\" y=\"271\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><text x=\"1132\" y=\"271\" font-size=\"9.5\" text-anchor=\"end\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">fit</text><rect x=\"630\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"677\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"729\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"776\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"828\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"875\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"927\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#BEDCD3\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"974\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"1026\" y=\"286\" width=\"95\" height=\"27\" rx=\"4\" fill=\"#8494A5\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"1073\" y=\"304\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">val</text><text x=\"1132\" y=\"304\" font-size=\"9.5\" text-anchor=\"end\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">fit</text><text x=\"624\" y=\"334\" font-size=\"12\" text-anchor=\"start\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">validation rows are transformed, never fitted on</text><rect x=\"16\" y=\"360\" width=\"1118\" height=\"84\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"36\" y=\"388\" font-size=\"13\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Guarding it in code:</text><text x=\"190\" y=\"388\" font-size=\"13\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">wrap every stateful transform in a Pipeline / ColumnTransformer and pass the pipeline to cross_val_score — never the fitted array.</text><text x=\"36\" y=\"414\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\">Silent offenders: target encoding, SMOTE, feature screening by correlation with y, PCA on train+test, per-dataset z-scoring of images, quantile transforms.</text></svg>", "f_leakbars": "<svg viewBox=\"0 0 600 520\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"20\" y=\"26\" font-size=\"14.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">What leakage buys you</text><text x=\"20\" y=\"48\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Illustrative shape of the optimism gap, not measured values — run</text><text x=\"20\" y=\"62\" font-size=\"11\" text-anchor=\"start\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">it yourself in Lab 1.</text><line x1=\"74\" y1=\"163.0\" x2=\"544\" y2=\"163.0\" stroke=\"#D3DCE6\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-dasharray=\"3 5\" opacity=\"0.7\"/><line x1=\"74\" y1=\"230.0\" x2=\"544\" y2=\"230.0\" stroke=\"#D3DCE6\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-dasharray=\"3 5\" opacity=\"0.7\"/><line x1=\"74\" y1=\"297.0\" x2=\"544\" y2=\"297.0\" stroke=\"#D3DCE6\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-dasharray=\"3 5\" opacity=\"0.7\"/><line x1=\"74\" y1=\"364\" x2=\"544\" y2=\"364\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><line x1=\"74\" y1=\"96\" x2=\"74\" y2=\"364\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><g transform=\"translate(40,230.0) rotate(-90)\"><text x=\"0\" y=\"0\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">held-out AUC</text></g><text x=\"65\" y=\"368.0\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">0.5</text><text x=\"65\" y=\"314.4\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">0.6</text><text x=\"65\" y=\"260.8\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">0.7</text><text x=\"65\" y=\"207.2\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">0.8</text><text x=\"65\" y=\"153.6\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">0.9</text><text x=\"65\" y=\"100.0\" font-size=\"10.5\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">1.0</text><rect x=\"98\" y=\"117.44000000000003\" width=\"66\" height=\"246.55999999999997\" rx=\"5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"131.0\" y=\"107.44000000000003\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">0.96</text><text x=\"131.0\" y=\"384\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">No test set</text><text x=\"131.0\" y=\"397\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">at all</text><rect x=\"198\" y=\"144.23999999999998\" width=\"66\" height=\"219.76000000000002\" rx=\"5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"231.0\" y=\"134.23999999999998\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">0.91</text><text x=\"231.0\" y=\"384\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Preprocess on</text><text x=\"231.0\" y=\"397\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">full data</text><rect x=\"298\" y=\"181.76000000000002\" width=\"66\" height=\"182.23999999999998\" rx=\"5\" fill=\"#C87083\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"331.0\" y=\"171.76000000000002\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">0.84</text><text x=\"331.0\" y=\"384\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Screen features</text><text x=\"331.0\" y=\"397\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">on full data</text><rect x=\"398\" y=\"213.92\" width=\"66\" height=\"150.08\" rx=\"5\" fill=\"#D9A0AC\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"431.0\" y=\"203.92\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">0.78</text><text x=\"431.0\" y=\"384\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Duplicates across</text><text x=\"431.0\" y=\"397\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">the split</text><rect x=\"498\" y=\"219.28\" width=\"66\" height=\"144.72\" rx=\"5\" fill=\"#0F7A6A\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"531.0\" y=\"209.28\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">0.77</text><text x=\"531.0\" y=\"384\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Clean, grouped</text><text x=\"531.0\" y=\"397\" font-size=\"10\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">pipeline</text><line x1=\"74\" y1=\"219.28\" x2=\"544\" y2=\"219.28\" stroke=\"#0F7A6A\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-dasharray=\"6 5\"/><text x=\"80\" y=\"210.28\" font-size=\"11\" text-anchor=\"start\" fill=\"#0F7A6A\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">the honest number</text><rect x=\"20\" y=\"424\" width=\"560\" height=\"78\" rx=\"8\" fill=\"#FBF0F2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"38\" y=\"450\" font-size=\"12.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">Kapoor &amp; Narayanan, Patterns 2023</text><text x=\"38\" y=\"470\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Leakage found in 17 fields, affecting 294 papers across 22 reviews. In</text><text x=\"38\" y=\"484\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">their civil-war reproduction, once the errors are fixed, complex ML does</text><text x=\"38\" y=\"498\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">not beat decades-old logistic regression.</text></svg>", "f_ovrdt": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Preparation as a deployed model: the OV-RDT screening platform (Sci Rep 2025)</text><rect x=\"30\" y=\"74\" width=\"200\" height=\"70\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"130.0\" y=\"106.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Field photo</text><text x=\"130.0\" y=\"122.0\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">phone, variable light</text><path d=\"M233 109 L246.0 109.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M253.0 109.0 L244.0 104.6 L244.0 113.4 z\" fill=\"#8494A5\"/><rect x=\"258\" y=\"74\" width=\"200\" height=\"70\" rx=\"8\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"358.0\" y=\"106.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Capture QC</text><text x=\"358.0\" y=\"122.0\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">YOLOv5m detector</text><path d=\"M461 109 L474.0 109.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M481.0 109.0 L472.0 104.6 L472.0 113.4 z\" fill=\"#8494A5\"/><rect x=\"486\" y=\"74\" width=\"200\" height=\"70\" rx=\"8\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"586.0\" y=\"106.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Crop + normalise</text><text x=\"586.0\" y=\"122.0\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">test strip only</text><path d=\"M689 109 L702.0 109.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M709.0 109.0 L700.0 104.6 L700.0 113.4 z\" fill=\"#8494A5\"/><rect x=\"714\" y=\"74\" width=\"200\" height=\"70\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"814.0\" y=\"106.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Grading model</text><text x=\"814.0\" y=\"122.0\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">infection intensity</text><path d=\"M917 109 L930.0 109.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M937.0 109.0 L928.0 104.6 L928.0 113.4 z\" fill=\"#8494A5\"/><rect x=\"942\" y=\"74\" width=\"200\" height=\"70\" rx=\"8\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"1042.0\" y=\"106.0\" font-size=\"13.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Result</text><text x=\"1042.0\" y=\"122.0\" font-size=\"10.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">with a refusal option</text><path d=\"M236 152 q0.0 0 0.0 0.0 L236.0 152.0 q0.0 0 0.0 0.0 M236 152 q0.0 0 0.0 0.0 L236.0 152.0 q0.0 0 0.0 0.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><line x1=\"244\" y1=\"156\" x2=\"672\" y2=\"156\" stroke=\"#A3384F\" stroke-width=\"2\" stroke-linecap=\"round\"/><text x=\"458\" y=\"176\" font-size=\"12\" text-anchor=\"middle\" fill=\"#A3384F\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">data preparation, shipped as models, with their own metrics</text><rect x=\"30\" y=\"208\" width=\"356\" height=\"132\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"48\" y=\"236\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">The datasets behind it</text><text x=\"48\" y=\"262\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">8,624</text><text x=\"150\" y=\"262\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">expert-annotated images</text><text x=\"48\" y=\"282\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">6,900 / 1,724</text><text x=\"150\" y=\"282\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train / test, split first</text><text x=\"48\" y=\"302\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">574</text><text x=\"150\" y=\"302\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">images for the QC model</text><text x=\"48\" y=\"322\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\" font-family=\"IBM Plex Mono,monospace\">100 + 100</text><text x=\"150\" y=\"322\" font-size=\"11.5\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">good / failed, for QC eval</text><rect x=\"398\" y=\"208\" width=\"356\" height=\"132\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"416\" y=\"236\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Why QC is a separate model</text><text x=\"416\" y=\"260\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">A blurred or half-framed strip is not a hard</text><text x=\"416\" y=\"276\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">example, it is an un-answerable one. Rejecting</text><text x=\"416\" y=\"292\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">it at capture time is cheaper and safer than</text><text x=\"416\" y=\"308\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">asking the grading model to be robust to it.</text><rect x=\"766\" y=\"208\" width=\"356\" height=\"132\" rx=\"9\" fill=\"#FAEEF2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"784\" y=\"236\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\">The transferable lesson</text><text x=\"784\" y=\"260\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">In a field deployment, the largest quality</text><text x=\"784\" y=\"276\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">gains come from refusing bad input, not from a</text><text x=\"784\" y=\"292\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">better classifier. Budget annotation for the</text><text x=\"784\" y=\"308\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">gate, not only for the task.</text><text x=\"575.0\" y=\"380\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Junsawang, Techasen, Wiratchawa, Wanna, Wongphutorn, Worasith, Sithithaworn, Bulathwela &amp; Intharah, Scientific Reports 15:31062 (2025)</text><text x=\"575.0\" y=\"418\" font-size=\"13\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"600\">Ask the room: what is the equivalent “refuse to answer” gate in your project, and who currently plays that role?</text></svg>", "f_walkforward": "<svg viewBox=\"0 0 1150 460\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"Archivo,sans-serif\" role=\"img\"><text x=\"575.0\" y=\"24\" font-size=\"12.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">Temporal validation: walk forward, and cut a hole around the boundary</text><rect x=\"90\" y=\"60\" width=\"306.0\" height=\"38\" rx=\"5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"243.0\" y=\"84\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"396.0\" y=\"60\" width=\"40.5\" height=\"38\" rx=\"5\" fill=\"#F0E2C8\" stroke=\"#8A6A12\" stroke-width=\"1.4\" stroke-dasharray=\"4 3\"/><rect x=\"436.5\" y=\"60\" width=\"117.0\" height=\"38\" rx=\"5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"495.0\" y=\"84\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">test</text><rect x=\"553.5\" y=\"60\" width=\"436.4999999999999\" height=\"38\" rx=\"5\" fill=\"#F1F4F7\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-dasharray=\"4 4\"/><text x=\"76\" y=\"84\" font-size=\"11\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">fold 1</text><rect x=\"90\" y=\"122\" width=\"423.0\" height=\"38\" rx=\"5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"301.5\" y=\"146\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"513.0\" y=\"122\" width=\"40.5\" height=\"38\" rx=\"5\" fill=\"#F0E2C8\" stroke=\"#8A6A12\" stroke-width=\"1.4\" stroke-dasharray=\"4 3\"/><rect x=\"553.5\" y=\"122\" width=\"117.0\" height=\"38\" rx=\"5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"612.0\" y=\"146\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">test</text><rect x=\"670.5\" y=\"122\" width=\"319.50000000000006\" height=\"38\" rx=\"5\" fill=\"#F1F4F7\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-dasharray=\"4 4\"/><text x=\"76\" y=\"146\" font-size=\"11\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">fold 2</text><rect x=\"90\" y=\"184\" width=\"540.0000000000001\" height=\"38\" rx=\"5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"360.00000000000006\" y=\"208\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"630.0000000000001\" y=\"184\" width=\"40.5\" height=\"38\" rx=\"5\" fill=\"#F0E2C8\" stroke=\"#8A6A12\" stroke-width=\"1.4\" stroke-dasharray=\"4 3\"/><rect x=\"670.5000000000001\" y=\"184\" width=\"117.0\" height=\"38\" rx=\"5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"729.0000000000001\" y=\"208\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">test</text><rect x=\"787.5000000000001\" y=\"184\" width=\"202.49999999999994\" height=\"38\" rx=\"5\" fill=\"#F1F4F7\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-dasharray=\"4 4\"/><text x=\"76\" y=\"208\" font-size=\"11\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">fold 3</text><rect x=\"90\" y=\"246\" width=\"657.0\" height=\"38\" rx=\"5\" fill=\"#C6D3DF\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"418.5\" y=\"270\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#16202C\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">train</text><rect x=\"747.0\" y=\"246\" width=\"40.5\" height=\"38\" rx=\"5\" fill=\"#F0E2C8\" stroke=\"#8A6A12\" stroke-width=\"1.4\" stroke-dasharray=\"4 3\"/><rect x=\"787.5\" y=\"246\" width=\"117.0\" height=\"38\" rx=\"5\" fill=\"#A3384F\" stroke=\"none\" stroke-width=\"1.4\"/><text x=\"846.0\" y=\"270\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">test</text><rect x=\"904.5\" y=\"246\" width=\"85.50000000000003\" height=\"38\" rx=\"5\" fill=\"#F1F4F7\" stroke=\"#D3DCE6\" stroke-width=\"1.4\" stroke-dasharray=\"4 4\"/><text x=\"76\" y=\"270\" font-size=\"11\" text-anchor=\"end\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">fold 4</text><text x=\"414.0\" y=\"48\" font-size=\"11\" text-anchor=\"middle\" fill=\"#8A6A12\" font-weight=\"600\" font-family=\"IBM Plex Mono,monospace\">purge / embargo</text><path d=\"M414.0 54 L411.9578640911187 59.445695757016686\" fill=\"none\" stroke=\"#8A6A12\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M409.5 66.0 L416.8 59.1 L408.5 56.0 z\" fill=\"#8A6A12\"/><line x1=\"90\" y1=\"316\" x2=\"990\" y2=\"316\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\"/><path d=\"M970 316 L993.0 316.0\" fill=\"none\" stroke=\"#8494A5\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M1000.0 316.0 L991.0 311.6 L991.0 320.4 z\" fill=\"#8494A5\"/><text x=\"540.0\" y=\"338\" font-size=\"11.5\" text-anchor=\"middle\" fill=\"#8494A5\" font-weight=\"400\" font-family=\"IBM Plex Mono,monospace\">calendar time</text><rect x=\"16\" y=\"358\" width=\"552\" height=\"88\" rx=\"9\" fill=\"#FFFFFF\" stroke=\"#D3DCE6\" stroke-width=\"1.4\"/><text x=\"36\" y=\"386\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#16202C\" font-weight=\"700\">Why the gap exists</text><text x=\"36\" y=\"408\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">Any feature computed over a window that straddles the boundary — a</text><text x=\"36\" y=\"424\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">30-day rolling mean, a centred filter, a label defined by a future</text><text x=\"36\" y=\"440\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">event — leaks the test period into training.</text><rect x=\"582\" y=\"358\" width=\"552\" height=\"88\" rx=\"9\" fill=\"#FBF0F2\" stroke=\"#A3384F\" stroke-width=\"1.4\"/><text x=\"602\" y=\"386\" font-size=\"13.5\" text-anchor=\"start\" fill=\"#A3384F\" font-weight=\"700\">The two classic silent failures</text><text x=\"602\" y=\"408\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">A centred rolling window (uses the future by construction), and target</text><text x=\"602\" y=\"424\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">encoding computed over the whole series. Both look like ordinary</text><text x=\"602\" y=\"440\" font-size=\"12\" text-anchor=\"start\" fill=\"#4B5A6B\" font-weight=\"400\">feature engineering.</text></svg>"}, "slides": [{"kind": "title", "kick": "Condensed edition · five three-hour classes", "title": "Getting a number you can defend", "lead": "Framing, data quality, and the evaluation hygiene that decides whether anything you do in the next four sessions produced a real result.", "meta": "<b>Session 1 of 5</b> &nbsp;·&nbsp; Data Preparation for Machine Learning and AI<br>Thanapong Intharah &nbsp;·&nbsp; Visual Intelligence Laboratory &nbsp;·&nbsp; Khon Kaen University<br>2 h lecture + 1 h paper clinic &nbsp;·&nbsp; long-form reference: Chapter 0, §0.1–§0.3", "notes": "Open by asking how the room currently splits data. Almost everyone says random 80/20. Hold that answer — it will look different by the end of block B."}, {"kind": "cols", "kick": "Learning outcomes", "sm": true, "title": "What you should be able to do by the end of today", "cols": [{"sub": "Diagnose", "h": "Find the leak in someone else's pipeline", "b": ["Name the split design a claim requires, and say why", "Apply the eight-type leakage taxonomy to a published paper", "Spot preprocessing fitted outside the fold"]}, {"sub": "Measure", "h": "Put a number on data quality", "b": ["Turn the six quality dimensions into computable, failing tests", "Choose a drift statistic and state its caveat", "Audit a corpus instead of trusting its README"]}, {"sub": "Decide", "h": "Commit before you touch the data", "b": ["Fix the task, the unit of analysis, the metric and the deployment constraint", "Derive the split and the grain from that unit", "Report both the naive and the honest number"], "acc": true}, {"sub": "Defend", "h": "Write it down so a reviewer can check", "b": ["Fill in a model info sheet, per leakage type", "State what your validation gate asserts, and what makes it fail", "Carry these habits into sessions 2–4"]}], "notes": "These four verbs recur in every session and in the assessment rubric."}, {"kind": "table", "kick": "Run sheet", "title": "How the three hours run", "sm": true, "table": {"head": ["Block", "Clock", "What happens"], "rows": [["Lecture A", "0:00 – 1:05", "Framing and data quality — why preparation is now the experimental variable, and how to make quality computable"], ["Break", "1:05 – 1:20", "Coffee. Use it: the second block is the harder one."], ["Lecture B", "1:20 – 2:10", "Splitting and leakage — split designs, cross-validation, the eight leakage types, and the optimism gap"], ["Paper clinic", "2:10 – 3:00", "Find the leakage: each student brings one applied-ML paper from their own field."]]}, "callout": {"h": "Deck controls", "p": "<b>E</b> edit any line in place &nbsp;·&nbsp; <b>N</b> speaker notes &nbsp;·&nbsp; <b>O</b> slide grid &nbsp;·&nbsp; <b>T</b> timer &nbsp;·&nbsp; <b>/</b> search &nbsp;·&nbsp; <b>P</b> print a handout with notes underneath each slide."}, "notes": "Start the timer (T) at the top of the hour. The clinic is not optional padding — it is where the lecture material becomes a skill."}, {"kind": "split", "sec": "0.0", "secTitle": "Why this chapter comes first", "kick": "Orientation", "title": "Why this chapter comes first", "lead": "The tabular, text and image chapters are technique catalogues. This one is the discipline that decides whether any of those techniques produced a real number.", "b": ["Every later chapter has a step where a transform is fitted. <b>Where</b> you fit it is decided here.", "Every later chapter has labels. <b>How much you trust them</b> is decided here.", "Every later chapter reduces data — filtering, deduplication, pruning, resampling. Whether that reduction was a <b>sampling decision with a victim</b> is decided here.", "And every later chapter produces a claim someone will try to reproduce."], "fig": "f_crisp", "figcap": "<b>CRISP-DM, 1996/2000.</b> Still the best shared vocabulary for where preparation sits. Its blind spots are the reason this course exists.", "callout": {"h": "The organising claim", "p": "Curation choices now drive downstream performance at least as much as architecture — so they need the same evaluation rigour we already demand of models."}, "notes": "The two highlighted phases in the diagram are the whole course. Point out what CRISP-DM does NOT model: labels as an object of study, corpus-scale curation, and preparation as the main experimental variable.", "cites": ["Chapman et al. <i>CRISP-DM 1.0 Step-by-step data mining guide.</i> 2000."]}, {"kind": "divider", "sec": "0.1", "secTitle": "Framing: where preparation sits", "no": "0.1", "title": "Framing: where preparation sits", "lead": "Before any technique: what problem are we actually solving, and against what metric?", "chips": ["The data-centric turn", "Three-goal decomposition", "CRISP-DM and its limits", "The 80% folklore", "Task-first design", "DC-Check", "Automated preparation"]}, {"kind": "figure", "title": "The data-centric turn", "kick": "0.1.1", "tag": "frontier", "lead": "Same compute budget. The difference is which of the two things you hold constant.", "fig": "f_datacentric", "figcap": "Andrew Ng's framing, formalised in the data-centric AI surveys. The claim is not that architecture stopped mattering — it is that at a fixed model, systematic data improvement is now the higher-yield lever, and it is far less explored.", "notes": "Ask: in your last project, how many hours went to the left loop and how many to the right? Nearly everyone reports the left. That asymmetry is the opportunity.", "sec": "0.1", "secTitle": "Framing: where preparation sits"}, {"kind": "figure", "title": "Three goals that get collapsed into one", "kick": "0.1.2", "tag": "frontier", "lead": "Zha et al.<sup class=\"fn\">1</sup> split data work into three problems with three different success criteria. Keeping them apart is most of the discipline.", "fig": "f_threegoal", "figcap": "<b>Teaching use:</b> when a student says “I improved the data”, ask which of the three columns they mean, and which metric moved.", "notes": "The classic student failure: improve training data, evaluate on an inference set built from the same contaminated pool, and report a gain that is really an overlap.", "cites": ["Zha et al. <i>Data-centric Artificial Intelligence: A Survey.</i> ACM Computing Surveys, 2025."], "sec": "0.1", "secTitle": "Framing: where preparation sits"}, {"kind": "bullets", "title": "The “80% of the time” claim, and how to replace it", "kick": "0.1.3–0.1.4", "tag": "textbook", "lead": "The number is folklore repeated from industry surveys with small, self-selected samples. It is a useful conversation opener and a bad citation.", "b": ["<b>What it gets right:</b> preparation dominates the calendar in most applied projects, and it is undervalued in publication.", "<b>What it hides:</b> the fraction varies enormously by data family. A curated tabular benchmark is not a hospital PACS export.", "<b>Better move:</b> measure it in your own project. Log hours against CRISP-DM phases for one term and report your own number in the capstone.", "<b>Even better:</b> log <em>rework</em> hours separately — time spent redoing preparation after a downstream discovery. That is the number that motivates validation gates.", "This is also the honest answer when a reviewer asks why a data paper deserves a slot: because the effort is real and currently invisible."], "callout": {"h": "Habit to build", "p": "Whenever you meet a striking quantitative claim in this course, ask three questions: who measured it, on what sample, and were they the same people who benefit from the answer? Several claims in the later chapters are the dataset authors' own ablations."}, "notes": "This slide is where you set the epistemic tone for the whole module.", "cites": ["Chapman et al. <i>CRISP-DM 1.0 Step-by-step data mining guide.</i> 2000."], "sec": "0.1", "secTitle": "Framing: where preparation sits"}, {"kind": "cols", "title": "Task-first design, and DC-Check as a project gate", "kick": "0.1.5–0.1.6", "tag": "both", "sm": true, "lead": "Every transform should be traceable to a decision you already made about the task. If it is not, you are decorating.", "cols": [{"sub": "Decide first", "h": "Four commitments before you touch the data", "b": ["<b>Downstream task</b> — classification, ranking, segmentation, generation?", "<b>Unit of analysis</b> — patient, visit, image, camera-hour, document, chunk?", "<b>Evaluation metric</b> — and the decision it stands in for", "<b>Deployment constraint</b> — latency, device, who acts on the output"]}, {"sub": "Then derive", "h": "Each one constrains the preparation", "b": ["The unit of analysis fixes the <b>split design</b> and the join grain", "The metric fixes whether <b>calibration</b> matters or only ranking", "The deployment constraint fixes the <b>preprocessing budget</b> at inference", "The task fixes what counts as an <b>outlier</b> versus a rare event"], "acc": true}, {"sub": "Then check", "h": "DC-Check, stage by stage", "b": ["A data-centric checklist answered <em>before</em> building, not after", "Forces the uncomfortable questions early: provenance, subgroup coverage, drift plan", "Works well as the first deliverable of a research project", "Seedat<sup class=\"fn\">1</sup>, Imrie & van der Schaar, 2022"]}], "notes": "Make the four commitments a required section of the project proposal. Students who skip them produce the leakage you will diagnose in week 2.", "cites": ["Seedat & Imrie. <i>DC-Check: A Data-Centric AI Checklist to Guide the Development of Reliable Machine Learning….</i> 2022."], "sec": "0.1", "secTitle": "Framing: where preparation sits"}, {"kind": "split", "title": "Automated data preparation, and why it lags AutoML", "kick": "0.1.7", "tag": "frontier", "wide": "text", "lead": "Model search is largely solved as an engineering problem. Preparation search is not, and the reasons are instructive.", "b": ["<b>The search space is not closed.</b> A model space is a set of known architectures; a preparation space includes “construct a feature nobody has named yet”.", "<b>The objective is not scalar.</b> Fidelity, fairness, privacy and cost all move, and a single validation score hides three of them.", "<b>Order matters and is not commutative.</b> Impute-then-scale differs from scale-then-impute; filter ordering changes corpus composition.", "<b>Validation is fragile.</b> The thing being searched is the thing that leaks — so a naive AutoML loop over preprocessing overfits the validation set faster than model search does.", "<b>Where it works today:</b> constrained, well-typed pipelines with strong fold discipline. Treat published pipeline-search results with the same scepticism you apply to any tuned number."], "fig": "f_validgate", "figcap": "Any automated search is only as honest as the gate it must pass through.", "notes": "Good thesis territory: pipeline optimisation with a multi-objective criterion and nested validation.", "sec": "0.1", "secTitle": "Framing: where preparation sits"}, {"kind": "refs", "title": "Section 0.1 — references", "kick": "Reading", "sm": true, "refs": ["Zha, Bhat, Lai, Yang, Jiang, Zhong &amp; Hu. <b>Data-centric Artificial Intelligence: A Survey.</b> <i>ACM Computing Surveys</i>, 2025 (arXiv:2303.10158).", "Jakubik, Vössing, Kühl, Walk &amp; Satzger. <b>Data-centric Artificial Intelligence.</b> 2024 (arXiv:2212.11854).", "Seedat, Imrie &amp; van der Schaar. <b>DC-Check: A Data-Centric AI Checklist to Guide the Development of Reliable Machine Learning Systems.</b> 2022.", "Chapman et al. <b>CRISP-DM 1.0 Step-by-step data mining guide.</b> 2000; Fayyad, Piatetsky-Shapiro &amp; Smyth, <b>From Data Mining to Knowledge Discovery.</b> <i>AI Magazine</i>, 1996.", "Whang, Roh, Song &amp; Lee. <b>Data Collection and Quality Challenges in Deep Learning: A Data-Centric AI Perspective.</b> <i>VLDB Journal</i>, 2023.", "Mazumder et al. <b>DataPerf: Benchmarks for Data-Centric AI Development.</b> <i>NeurIPS Datasets &amp; Benchmarks</i>, 2023."], "sec": "0.1", "secTitle": "Framing: where preparation sits"}, {"kind": "divider", "sec": "0.2", "secTitle": "Data quality, profiling and validation", "no": "0.2", "title": "Quality, profiling and validation", "lead": "A quality dimension you cannot compute is an adjective. This section turns six adjectives into failing tests.", "chips": ["Six dimensions", "Profiling", "Schema contracts", "Unit tests for data", "Drift taxonomy", "Drift statistics", "Corpus auditing"]}, {"kind": "figure", "title": "Six quality dimensions, operationalised", "kick": "0.2.1", "tag": "textbook", "lead": "Wang &amp; Strong<sup class=\"fn\">1</sup>'s dimensions are forty years old and still the right list. The teaching move is to insist on the third line of each box.", "fig": "f_quality", "figcap": "Adapted from Wang &amp; Strong (1996) and Batini &amp; Scannapieco. The right-hand test column is the part students skip.", "notes": "Exercise, five minutes: pick any dataset in the room and write the six tests. Most groups stall on Accuracy — which is the point, because it needs a reference standard they have not defined.", "cites": ["Wang & Strong. <i>Beyond Accuracy: What Data Quality Means to Data Consumers.</i> JMIS, 1996."], "sec": "0.2", "secTitle": "Data quality, profiling and validation"}, {"kind": "bullets", "title": "Profiling: the first pass you never skip", "kick": "0.2.2", "tag": "textbook", "b": ["<b>Per column:</b> type, cardinality, null rate, min/max, distribution shape, top values, and how many values are impossible.", "<b>Per pair:</b> correlation, and the missingness co-occurrence map — columns that go missing together tell you about the collection process.", "<b>Per row:</b> duplicate rate, near-duplicate rate, and completeness profile.", "<b>Per group:</b> everything above, stratified by site, scanner, camera, clinician or time window. This is where site effects announce themselves.", "<b>Tooling:</b> <span class='k'>ydata-profiling</span>, <span class='k'>Sweetviz</span>, <span class='k'>pandas.describe</span> for a first look; <span class='k'>Great Expectations</span>, <span class='k'>TFDV</span>, <span class='k'>Deequ</span> once you know what to assert.", "The profiling report is <em>not</em> a deliverable. The assertions you write after reading it are."], "callout": {"h": "Teaching point", "p": "Tukey<sup class=\"fn\">1</sup>'s <i>Exploratory Data Analysis</i> (1977) argued for looking before modelling. The modern version of that argument is: look, then encode what you saw as a test that will fail next month when it stops being true."}, "notes": "Show a real ydata-profiling report on screen for two minutes. Then close it and ask what they would assert.", "cites": ["Tukey. <i>Exploratory Data Analysis. Addison-Wesley.</i> 1977."], "sec": "0.2", "secTitle": "Data quality, profiling and validation"}, {"kind": "split", "title": "Schema contracts and unit tests for data", "kick": "0.2.3–0.2.4", "tag": "both", "wide": "text", "b": ["<b>Declare the contract:</b> expected types, ranges, allowed categories, referential integrity, row-count bounds, and the acceptable null rate per column.", "<b>Assert twice:</b> once on the raw source, once after transformation. A transform that silently produces NaNs passes the first gate and fails the second.", "<b>Fail loudly.</b> A warning in a log is not a gate. The pipeline stops and a human is paged.", "<b>Treat data like code:</b> assertions, fixtures, golden files, and CI that runs on every data refresh — the ML Test Score framing (Breck et al.<sup class=\"fn\">1</sup>, 2017).", "<b>Version the contract</b> alongside the data. A relaxed threshold is a decision that should appear in a diff.", "<b>What to assert about distributions:</b> not equality, but bounded divergence from the previous accepted release."], "fig": "f_validgate", "figcap": "Two suites, not one: the raw gate catches upstream change, the post-transform gate catches your own bugs.", "notes": "War story worth telling: a unit change upstream (mg/dL to mmol/L) that passed every type check and silently halved a model's sensitivity for four months.", "cites": ["Breck et al. <i>The ML Test Score.</i> IEEE Big Data, 2017."], "sec": "0.2", "secTitle": "Data quality, profiling and validation"}, {"kind": "figure", "title": "Three shifts, three responses", "kick": "0.2.5", "tag": "textbook", "lead": "Covariate shift, prior shift and concept drift look identical on a dashboard. They demand different fixes.", "fig": "f_drift", "figcap": "Taxonomy after Quiñonero-Candela et al.<sup class=\"fn\">1</sup> (2009) and Moreno-Torres et al.<sup class=\"fn\">2</sup> (2012). The distinction matters because only the third one forces you to relabel.", "notes": "Concrete Thai examples: a new ultrasound machine at a district hospital is covariate shift; moving screening from a referral clinic to a village is prior shift; a revised diagnostic guideline is concept drift.", "cites": ["Quiñonero-Candela et al. <i>Dataset Shift in Machine Learning. MIT Press.</i> 2009.", "Moreno-Torres et al. <i>A unifying view on dataset shift.</i> Pattern Recognition, 2012."], "sec": "0.2", "secTitle": "Data quality, profiling and validation"}, {"kind": "table", "title": "Choosing a drift statistic — and its caveat", "kick": "0.2.6", "tag": "both", "sm": true, "table": {"head": ["Statistic", "What it compares", "Where it misleads"], "rows": [["PSI (population stability index)", "Binned marginal distributions", "Bin choice dominates the value; industry thresholds (0.1 / 0.25) are conventions, not theory"], ["Kolmogorov–Smirnov", "Empirical CDFs, one dimension", "Univariate only, and at n &gt; 10⁵ it flags differences far too small to matter"], ["Chi-square", "Categorical frequencies", "Sensitive to rare categories and to sample size in the same way"], ["MMD (kernel two-sample)", "Full multivariate distributions", "Kernel and bandwidth choice; expensive; hard to attribute to a column"], ["Classifier two-sample test", "Can a model tell old from new?", "The most interpretable — the classifier's importances name the drifting feature — but it needs its own honest split"]]}, "callout": {"h": "The caveat that matters most", "p": "Every one of these is a hypothesis test. With enough rows, everything is significant. Monitor <b>effect size and downstream metric impact</b>, not p-values — and always ask whether the change is one you should adapt to or one you should reject at the gate."}, "notes": "The classifier two-sample test is the one to teach in the lab: it is trivial to implement and it tells you WHICH feature moved.", "sec": "0.2", "secTitle": "Data quality, profiling and validation"}, {"kind": "bullets", "title": "Auditing what is actually in a corpus", "kick": "0.2.7", "tag": "frontier", "lead": "For anything web-scale, the README is a hypothesis. Treat it as one.", "b": ["<b>Search it, do not trust it.</b> Elazar et al.<sup class=\"fn\">1</sup>, <em>What's In My Big Data?</em> (ICLR 2024), built tooling precisely because nobody could answer basic questions about their own pretraining corpora.", "<b>Documented findings that should worry you:</b> benchmark contamination, large volumes of machine-generated and duplicated text, and PII sitting in supposedly public data.", "<b>Dodge et al.<sup class=\"fn\">2</sup> (2021)</b> did the same for C4 and found blocklist filtering removing whole registers of legitimate text along with the noise.", "<b>Minimum audit for any corpus you use:</b> sample 200 documents at random and read them. Yes, actually read them. It takes an afternoon and it changes every downstream decision.", "<b>Then quantify:</b> language mix, source-domain mix, duplication rate, date distribution, and overlap with every benchmark you intend to report."], "callout": {"h": "Seminar exercise", "p": "Hand each student a different public dataset and one instruction: “find three things in it that its documentation does not mention.” Nobody has ever come back empty-handed."}, "notes": "This is the highest-value-per-minute exercise in the whole module.", "cites": ["Elazar et al. <i>What's In My Big Data?.</i> ICLR, 2024.", "Dodge et al. <i>Documenting Large Webtext Corpora: A Case Study on the Colossal Clean Crawled Corpus.</i> EMNLP, 2021."], "sec": "0.2", "secTitle": "Data quality, profiling and validation"}, {"kind": "refs", "title": "Section 0.2 — references", "kick": "Reading", "sm": true, "refs": ["Wang &amp; Strong. <b>Beyond Accuracy: What Data Quality Means to Data Consumers.</b> <i>JMIS</i>, 1996.", "Breck, Cai, Nielsen, Salib &amp; Sculley. <b>The ML Test Score.</b> <i>IEEE Big Data</i>, 2017.", "Quiñonero-Candela, Sugiyama, Schwaighofer &amp; Lawrence. <b>Dataset Shift in Machine Learning.</b> MIT Press, 2009.", "Moreno-Torres, Raeder, Alaiz-Rodríguez, Chawla &amp; Herrera. <b>A unifying view on dataset shift.</b> <i>Pattern Recognition</i>, 2012.", "Elazar et al. <b>What's In My Big Data?</b> <i>ICLR</i>, 2024.", "Dodge et al. <b>Documenting Large Webtext Corpora: A Case Study on the Colossal Clean Crawled Corpus.</b> <i>EMNLP</i>, 2021.", "Tukey. <b>Exploratory Data Analysis.</b> Addison-Wesley, 1977.", "Tooling: Great Expectations, TensorFlow Data Validation, Amazon Deequ, ydata-profiling, Evidently, NannyML."], "sec": "0.2", "secTitle": "Data quality, profiling and validation"}, {"kind": "divider", "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene", "no": "0.3", "title": "Splitting, leakage and evaluation hygiene", "lead": "The anchor section of the whole module. If a student remembers one thing from this course, make it this.", "chips": ["Split designs", "Cross-validation", "Eight leakage types", "Fitting inside folds", "Duplicates", "Temporal validity", "Contamination", "Model info sheets"]}, {"kind": "figure", "title": "The same data, split three ways", "kick": "0.3.1", "tag": "textbook", "lead": "Only one of these designs answers the question a clinical or surveillance claim is actually making.", "fig": "f_splits", "figcap": "Eight patients, three images each. The grouping unit is a modelling decision, not a technicality — and it must be declared before the first experiment.", "notes": "This is the slide to slow down on. Ask each group to name the grouping unit for their own project and write it on the board. Disagreements within a group are the interesting part.", "cites": ["Intharah et al. <i>BiTNet: Hybrid deep convolutional model for ultrasound image analysis of human biliary tract….</i> Artificial Intelligence in Medicine, 2023.", "Kapoor & Narayanan. <i>Leakage and the Reproducibility Crisis in Machine-Learning-Based Science.</i> Patterns 4(9), 2023."], "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "split", "title": "Cross-validation, and the variant you probably need", "kick": "0.3.2", "tag": "textbook", "wide": "text", "b": ["<b>k-fold</b> — the default. Fine when rows are exchangeable and plentiful, which in health data they almost never are.", "<b>Stratified k-fold</b> — preserves class balance per fold. Mandatory under imbalance; still wrong if rows are grouped.", "<b>Group k-fold / leave-one-group-out</b> — the correct default for patients, sites, scanners, cameras and sessions.", "<b>Nested CV</b> — an inner loop for tuning, an outer loop for estimating. Without it, the reported score includes the model-selection search (Cawley &amp; Talbot<sup class=\"fn\">3</sup>, 2010).", "<b>Blocked / walk-forward</b> — for anything with a time index. Covered in 0.3.8.", "<b>Repeated CV</b> — reduces variance of the estimate; does <em>not</em> reduce bias from a wrong design. Repeating a leaky split just gives you a precise wrong number."], "fig": "f_foldfit", "figcap": "Whichever variant you pick, the transform must be fitted inside the training portion of every fold.", "callout": {"h": "The rule of thumb", "p": "Pick the split that makes the training set <em>least</em> like the test set among all designs that are still honest. Optimism comes from similarity you did not intend."}, "notes": "Varma & Simon (2006) is the cleanest demonstration that selecting features on all data then cross-validating gives near-zero error on pure noise.", "cites": ["Chawla et al. <i>SMOTE: Synthetic Minority Over-sampling Technique.</i> JAIR, 2002.", "Blagus & Lusa. <i>SMOTE for high-dimensional class-imbalanced data.</i> BMC Bioinformatics, 2013.", "Cawley & Talbot. <i>On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation.</i> JMLR, 2010."], "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "table", "title": "The eight-type leakage taxonomy", "kick": "0.3.3", "tag": "frontier", "sm": true, "lead": "Kapoor &amp; Narayanan<sup class=\"fn\">1</sup> surveyed 22 reviews and found leakage in 17 fields, collectively affecting 294 papers.", "table": {"head": ["#", "Type", "How it shows up in practice"], "rows": [["L1.1", "No test set at all", "The reported number is training performance, sometimes without the authors realising"], ["L1.2", "Pre-processing on the full dataset", "Scaler, imputer, encoder or PCA fitted before the split"], ["L1.3", "Feature selection on the full dataset", "Screening by correlation with y across all rows, then cross-validating what survives"], ["L1.4", "Duplicates across the split", "Exact or near-duplicate rows, images, frames or documents on both sides"], ["L2", "Illegitimate features", "A feature that is a proxy for the target, or is only recorded after the outcome is known"], ["L3.1", "Temporal leakage", "Training on data from after the prediction time; centred windows; future-looking aggregates"], ["L3.2", "Non-independence", "Same patient, site, device, author or session on both sides of the split"], ["L3.3", "Sampling bias in test", "The test set is not drawn from the population the claim is about"]]}, "callout": {"h": "The finding worth quoting", "p": "In their civil-war-prediction reproduction, once the leakage is corrected, complex ML models do <b>not</b> perform substantively better than decades-old logistic regression."}, "notes": "Print this table. It becomes the marking rubric for the paper-clinic seminar in Chapter 4.", "cites": ["Kapoor & Narayanan. <i>Leakage and the Reproducibility Crisis in Machine-Learning-Based Science.</i> Patterns 4(9), 2023."], "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "figure", "title": "Where you fit the transform", "kick": "0.3.5", "tag": "textbook", "lead": "The single most common leak in applied machine learning, and the easiest to prevent in code.", "fig": "f_foldfit", "figcap": "The guard is architectural: wrap every stateful transform in a <span class='k'>Pipeline</span> / <span class='k'>ColumnTransformer</span> and hand the pipeline — never a pre-fitted array — to the cross-validator.", "notes": "Ask them to name a stateful transform they have fitted outside a fold. Everyone has. The honest answer normalises the discussion and makes the lab less threatening.", "cites": ["Chawla et al. <i>SMOTE: Synthetic Minority Over-sampling Technique.</i> JAIR, 2002.", "Blagus & Lusa. <i>SMOTE for high-dimensional class-imbalanced data.</i> BMC Bioinformatics, 2013."], "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "split", "title": "The optimism gap, measured", "kick": "0.3.5", "tag": "frontier", "lead": "Leakage does not produce a small bias. It produces the difference between a publishable result and a real one.", "b": ["Every bar to the left of the dashed line is a <b>result someone has published</b>, in some field, in the last five years.", "The gap is largest exactly where data is scarcest and grouping is strongest — which is to say, in clinical research.", "<b>Lab 1 is built on this figure:</b> students fit the same model with transforms inside and outside the folds, then quantify their own gap.", "Writing it up against the eight-type taxonomy is the deliverable, not the number.", "<b>The professional habit:</b> report both numbers. “Random split 0.94, patient-grouped split 0.79” is a stronger paper than either number alone, because it demonstrates you knew to look."], "fig": "f_leakbars", "figcap": "Illustrative shape only — the point is the ordering and the size of the gap, not these specific values.", "notes": "Be explicit that the bar heights are illustrative. Students will otherwise cite them.", "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "split", "title": "Duplicates, and grouping in clinical and CCTV data", "kick": "0.3.6–0.3.7", "tag": "both", "wide": "text", "b": ["<b>Near-duplicates are the silent accuracy inflator.</b> Two frames one second apart, the same slide scanned twice, the same report copy-forwarded, the same web page under two URLs.", "<b>Detection:</b> exact hashing, then perceptual hashing or MinHash/LSH for the near cases, then embedding nearest-neighbours for the semantic ones. Cheap; do it before you split.", "<b>In clinical imaging</b> the grouping unit is the <b>patient</b> at minimum, and the <b>site or scanner</b> for any generalisation claim.", "<b>In video and CCTV</b> the unit is the <b>camera and the session</b> — never the frame. Frames within a clip are almost perfectly correlated.", "<b>In text</b> it is the <b>document or the author</b>, and for RAG evaluation it is the <b>source document</b>, not the chunk.", "<b>The test:</b> if two rows would still be in the dataset had you sampled one fewer patient, camera or document, they belong to the same group."], "fig": "f_ovrdt", "figcap": "In our own OV-RDT work the grouping unit is the specimen, and capture quality is handled by a separate model before grading — a preparation decision that carries its own dataset and its own metric.", "notes": "Cite: Junsawang et al., Sci Rep 15:31062 (2025). Emphasise that the QC detector needed its own 574-image annotated set — preparation work that would be invisible in a results table.", "cites": ["Junsawang et al. <i>AI-enhanced rapid diagnostic testing platform for mass opisthorchiasis screening.</i> Scientific Reports 15:31062, 2025."], "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "figure", "title": "Temporal validity: walk forward and cut a hole", "kick": "0.3.8", "tag": "textbook", "lead": "For anything with a time index, the only honest evaluation trains on the past and tests on the future.", "fig": "f_walkforward", "figcap": "The purge/embargo band exists because features and labels have width in time. López de Prado's treatment is the clearest, though the problem is not specific to finance.", "notes": "The clinical version: a label defined as 'died within 30 days' makes the last 30 days of the training window unusable, because the label is not yet knowable.", "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "cols", "title": "Contamination, test-set reuse, and the fix", "kick": "0.3.9–0.3.10", "tag": "frontier", "sm": true, "cols": [{"sub": "Benchmark contamination", "h": "The eval set is in the training corpus", "b": ["At web scale it is the default, not the exception", "Detect with n-gram overlap and embedding-based matching", "Decontaminate <em>before</em> training, and publish a contamination report", "Revisited in Chapter 2 for pretraining corpora"]}, {"sub": "Adaptive overfitting", "h": "A thousand papers tuned on one test set", "b": ["Each paper is honest; the community is not", "Recht et al.<sup class=\"fn\">2</sup> (2019) rebuilt CIFAR-10 and ImageNet test sets and saw accuracy drop across the board", "Reassuringly, the <em>ranking</em> largely survived — so relative claims aged better than absolute ones", "Argues for fresh held-out sets, not just bigger ones"]}, {"sub": "The fix", "h": "Model info sheets", "b": ["A fill-in template forcing authors to state, <b>per leakage type</b>, why their setup is clean", "Kapoor &amp; Narayanan<sup class=\"fn\">3</sup> propose it precisely because informal reporting failed", "Cheap to adopt: one page, eight rows", "<b>Make it a required appendix</b> in every project you supervise"], "acc": true}], "notes": "The model info sheet is the single highest-leverage thing you can impose on a research group.", "cites": ["Krizhevsky et al. <i>ImageNet Classification with Deep Convolutional Neural Networks.</i> NeurIPS, 2012.", "Recht et al. <i>Do ImageNet Classifiers Generalize to ImageNet?.</i> ICML, 2019.", "Kapoor & Narayanan. <i>Leakage and the Reproducibility Crisis in Machine-Learning-Based Science.</i> Patterns 4(9), 2023."], "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "refs", "title": "Section 0.3 — references", "kick": "Reading", "sm": true, "refs": ["<b>Kapoor &amp; Narayanan. Leakage and the Reproducibility Crisis in Machine-Learning-Based Science.</b> <i>Patterns</i> 4(9), 2023 (arXiv:2207.07048). <i>Anchor reading for the whole module.</i>", "Cawley &amp; Talbot. <b>On Over-fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation.</b> <i>JMLR</i>, 2010.", "Varma &amp; Simon. <b>Bias in error estimation when using cross-validation for model selection.</b> <i>BMC Bioinformatics</i>, 2006.", "Ambroise &amp; McLachlan. <b>Selection bias in gene extraction on the basis of microarray gene-expression data.</b> <i>PNAS</i>, 2002.", "Recht, Roelofs, Schmidt &amp; Shankar. <b>Do ImageNet Classifiers Generalize to ImageNet?</b> <i>ICML</i>, 2019.", "Hastie, Tibshirani &amp; Friedman. <b>The Elements of Statistical Learning</b>, ch. 7. 2009.", "López de Prado. <b>Advances in Financial Machine Learning</b>, ch. 7 (purging and embargo). 2018.", "Pedregosa et al. <b>Scikit-learn.</b> <i>JMLR</i>, 2011 — for <span class='k'>Pipeline</span> and <span class='k'>ColumnTransformer</span> semantics."], "sec": "0.3", "secTitle": "Splitting, leakage and evaluation hygiene"}, {"kind": "bullets", "kick": "Paper clinic · 50 minutes", "cls": "lab", "title": "Find the leakage", "tag": "frontier", "lead": "Bring one published applied-ML paper from your own field — ideally one you have cited, or one you were about to.", "b": ["<b>Ten minutes, alone.</b> Fill in a model info sheet: for each of the eight leakage types, state what the paper says, or that it says nothing.", "<b>Fifteen minutes, in pairs.</b> Swap papers. Your partner argues the case <em>for</em> the paper; you argue against. Then swap sides.", "<b>Twenty minutes, whole room.</b> Three presentations of three minutes: name the type, quote the sentence, say whether the headline result survives.", "<b>Five minutes.</b> Vote: how many of the papers in the room reported the grouping unit explicitly?", "<b>Ground rules:</b> be specific and be fair. “The split is unclear” is a finding; “this paper is bad” is not. Most of these authors made an ordinary mistake in a field-wide blind spot."], "callout": {"h": "Take home", "p": "Fill in the same sheet for <b>your own</b> current project before session 2. Bring the row you could not complete."}, "notes": "Have three or four spare papers printed for students who forget. Pick ones with a known grouping problem — clinical imaging without patient-level splits works every time.", "sec": "Close", "secTitle": "Clinic, takeaways and next steps"}, {"kind": "bullets", "kick": "Key takeaways", "title": "The five sentences from today", "b": ["<b>Curation is now the experimental variable.</b> At a fixed model, systematic data improvement is the higher-yield and far less explored lever.", "<b>A quality dimension you cannot compute is an adjective.</b> Write the assertion, make the pipeline stop when it fails.", "<b>The grouping unit is a modelling decision.</b> Declare it before the first experiment: patient, site, camera, session, document, author.", "<b>Fit every stateful transform inside the fold.</b> Enforce it architecturally, not by remembering.", "<b>Report both numbers.</b> “Random split 0.94, patient-grouped 0.79” is a stronger paper than either alone, because it shows you knew to look."], "callout": {"h": "On the board as they leave", "p": "The number in your abstract is a property of your split design, your label quality and your fold discipline at least as much as it is a property of your model."}, "notes": "If you are out of time, this slide is the one to keep.", "sec": "Close", "secTitle": "Clinic, takeaways and next steps"}, {"kind": "cols", "kick": "Next", "sm": true, "title": "Where this goes", "lead": "The next three sessions are technique catalogues. Today was the discipline that makes them mean something.", "cols": [{"sub": "Session 2", "h": "Tabular data", "p": "Missingness mechanisms, encoding, the imbalance-versus-calibration argument, tabular foundation models, EHR cohorts.", "b": ["Every transform today gets fitted inside a fold"]}, {"sub": "Session 3", "h": "Text and LLM data", "p": "Thai segmentation, subword tokenisation and its cost, web-corpus filtering, deduplication, instruction and RAG data.", "b": ["Deduplication is both a quality and a leakage control"]}, {"sub": "Session 4", "h": "Image and video data", "p": "DICOM and whole-slide handling, intensity and stain normalisation, augmentation policy, CCTV and medical imaging.", "b": ["Patient- and camera-level grouping, applied"]}, {"sub": "Session 5", "h": "Labels, reduction and governance", "p": "Annotation and label noise, coresets and pruning, synthetic data, privacy, fairness and documentation.", "b": ["Where the capstone brief is set"], "acc": true}], "notes": "Reading before session 2: Kapoor & Narayanan, Patterns 2023.", "sec": "Close", "secTitle": "Clinic, takeaways and next steps"}]}</script>
+<script>
+(function(){
+"use strict";
+function boom(e){
+  try{var b=document.getElementById("err");b.style.display="block";
+    b.textContent="Something broke: "+((e&&e.message)||e)+"\n"+((e&&e.stack)||"");}catch(_){}
+  if(window.console)console.error(e);
+}
+window.addEventListener("error",function(ev){boom(ev.error||ev.message);});
+
+try{
+
+var D      = JSON.parse(document.getElementById("deckdata").textContent);
+var SLIDES = D.slides, FIGS = D.figs, META = D.meta, SECS = D.secs || [];
+var KEY    = "dpslides-"+META.key+"-v1";
+var EDITS  = {}, NOTES = {};
+var cur = 0, editing = false, ovOn = false, notesOn = false;
+var t0 = null, tAcc = 0;
+
+/* ---------------- storage ---------------- */
+var Store = {
+  get:function(){
+    try{ if(window.storage&&window.storage.get)
+      return window.storage.get(KEY).then(function(r){return r&&r.value?r.value:null;}).catch(function(){return null;}); }catch(e){}
+    try{ return Promise.resolve(window.localStorage.getItem(KEY)); }catch(e){ return Promise.resolve(null); }
+  },
+  set:function(v){
+    try{ if(window.storage&&window.storage.set){ window.storage.set(KEY,v).catch(function(){}); return; } }catch(e){}
+    try{ window.localStorage.setItem(KEY,v); }catch(e){}
+  }
+};
+var svT=null;
+function save(){ clearTimeout(svT); svT=setTimeout(function(){
+  try{ Store.set(JSON.stringify({v:1,edits:EDITS,notes:NOTES})); }catch(e){} },350); }
+
+/* ---------------- helpers ---------------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+function txt(h){var d=document.createElement("div");d.innerHTML=h==null?"":h;return (d.textContent||"").trim();}
+function val(i,path,dflt){ var k=i+"."+path; return (k in EDITS)?EDITS[k]:dflt; }
+function ed(i,path,html,cls,tag){
+  tag=tag||"div";
+  return "<"+tag+' class="ed '+(cls||"")+'" data-k="'+i+"."+path+'">'+(val(i,path,html)||"")+"</"+tag+">";
+}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("on");
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("on");},1800);}
+
+/* ---------------- slide rendering ---------------- */
+function bullets(i,arr,key,cls){
+  if(!arr||!arr.length)return "";
+  var h='<ul class="bul '+(cls||"")+'">';
+  for(var j=0;j<arr.length;j++){
+    h+='<li class="ed" data-k="'+i+"."+key+"."+j+'">'+(val(i,key+"."+j,arr[j])||"")+"</li>";
+  }
+  return h+"</ul>";
+}
+function fig(s){
+  if(!s.fig)return "";
+  var svg=FIGS[s.fig]||'<svg viewBox="0 0 900 380"><rect width="900" height="380" fill="#F1F5F9"/><text x="450" y="195" text-anchor="middle" font-family="monospace" font-size="15" fill="#8A97A6">figure: '+esc(s.fig)+"</text></svg>";
+  return svg;
+}
+function figblock(i,s){
+  if(!s.fig)return "";
+  return '<div class="figwrap col"><div class="figbox">'+fig(s)+"</div>"+
+    (s.figcap?'<div class="figcap ed" data-k="'+i+'.figcap">'+val(i,"figcap",s.figcap)+"</div>":"")+"</div>";
+}
+function head(i,s,small){
+  var h="";
+  if(s.kick)h+='<p class="kick"><span class="dot"></span><span class="ed" data-k="'+i+'.kick">'+val(i,"kick",s.kick)+"</span></p>";
+  if(s.title)h+=ed(i,"title",s.title,small?"sm":"","h2");
+  if(s.lead)h+=ed(i,"lead",s.lead,"lead","p");
+  return h;
+}
+function citesHTML(i,s){
+  if(!s.cites||!s.cites.length)return "";
+  var h='<div class="cites">';
+  for(var j=0;j<s.cites.length;j++)
+    h+='<span class="c"><b>'+(j+1)+'</b><span class="ed" data-k="'+i+".cites."+j+'">'+
+       val(i,"cites."+j,s.cites[j])+"</span></span>";
+  return h+"</div>";
+}
+function foot(i,s){
+  var sec=s.sec?("&sect; "+s.sec+(s.secTitle?" &nbsp;"+s.secTitle:"")):META.title;
+  return '<div class="foot"><span>'+esc(META.short)+"</span><span>"+sec+'</span><span class="sp"></span>'+
+    (s.tag?'<span class="tag '+s.tag+'">'+s.tag+"</span>":"")+
+    "<span>"+(i+1)+" / "+SLIDES.length+"</span></div>";
+}
+function colsHTML(i,s){
+  var n=s.cols.length,h='<div class="cols n'+n+'">';
+  for(var j=0;j<n;j++){
+    var c=s.cols[j];
+    h+='<div class="cbox'+(c.acc?" acc":"")+'">';
+    if(c.sub)h+='<div class="sub ed" data-k="'+i+".cols."+j+'.sub">'+val(i,"cols."+j+".sub",c.sub)+"</div>";
+    if(c.h)h+='<h4 class="ed" data-k="'+i+".cols."+j+'.h">'+val(i,"cols."+j+".h",c.h)+"</h4>";
+    if(c.p)h+='<p class="ed" data-k="'+i+".cols."+j+'.p">'+val(i,"cols."+j+".p",c.p)+"</p>";
+    if(c.b&&c.b.length){
+      h+='<ul class="bul">';
+      for(var m=0;m<c.b.length;m++)
+        h+='<li class="ed" data-k="'+i+".cols."+j+".b."+m+'">'+val(i,"cols."+j+".b."+m,c.b[m])+"</li>";
+      h+="</ul>";
+    }
+    h+="</div>";
+  }
+  return h+"</div>";
+}
+function tableHTML(i,s){
+  var h='<table class="t"><thead><tr>';
+  s.table.head.forEach(function(x){h+="<th>"+x+"</th>";});
+  h+="</tr></thead><tbody>";
+  s.table.rows.forEach(function(r,ri){
+    h+="<tr>";
+    r.forEach(function(c,ci){h+='<td class="ed" data-k="'+i+".table."+ri+"."+ci+'">'+val(i,"table."+ri+"."+ci,c)+"</td>";});
+    h+="</tr>";
+  });
+  return h+"</tbody></table>";
+}
+function statHTML(i,s){
+  var h='<div class="stat">';
+  s.stats.forEach(function(x,j){
+    h+='<div><div class="v ed" data-k="'+i+".stats."+j+'.v">'+val(i,"stats."+j+".v",x.v)+"</div>"+
+       '<div class="l ed" data-k="'+i+".stats."+j+'.l">'+val(i,"stats."+j+".l",x.l)+"</div></div>";
+  });
+  return h+"</div>";
+}
+function refsHTML(i,s){
+  var h='<ol class="refs'+(s.refs.length>7?" two":"")+'">';
+  for(var j=0;j<s.refs.length;j++)
+    h+='<li class="ed" data-k="'+i+".refs."+j+'">'+val(i,"refs."+j,s.refs[j])+"</li>";
+  return h+"</ol>";
+}
+function calloutHTML(i,s){
+  return '<div class="callout"><div class="h">'+esc(s.callout.h||"Teaching point")+"</div>"+
+    '<p class="ed" data-k="'+i+'.callout.p">'+val(i,"callout.p",s.callout.p)+"</p></div>";
+}
+
+function slideHTML(i){
+  var s=SLIDES[i],k=s.kind||"bullets",h="";
+  var cls="slide "+k+(s.cls?" "+s.cls:"");
+
+  if(k==="title"){
+    h='<div class="pad">'+
+      '<p class="no ed" data-k="'+i+'.kick">'+val(i,"kick",s.kick||"")+"</p>"+
+      ed(i,"title",s.title,"","h1")+
+      (s.lead?ed(i,"lead",s.lead,"dek","p"):"")+
+      (s.meta?'<div class="meta ed" data-k="'+i+'.meta">'+val(i,"meta",s.meta)+"</div>":"")+
+      "</div>";
+  }else if(k==="divider"){
+    h='<div class="pad">'+
+      '<div class="n">'+esc(s.no||"")+"</div>"+
+      ed(i,"title",s.title,"","h2")+
+      (s.lead?ed(i,"lead",s.lead,"lead","p"):"")+
+      (s.chips&&s.chips.length?'<div class="chips">'+s.chips.map(function(c){return "<span>"+esc(c)+"</span>";}).join("")+"</div>":"")+
+      "</div>";
+  }else{
+    var inner="";
+    if(k==="figure"){
+      inner='<div class="body v">'+figblock(i,s).replace('class="figwrap col"','class="figwrap"')+
+            (s.callout?calloutHTML(i,s):"")+"</div>";
+    }else if(k==="split"||k==="splitr"){
+      var left='<div class="col '+(s.wide==="text"?"wide":"")+'">'+bullets(i,s.b,"b")+
+        (s.callout?calloutHTML(i,s):"")+(s.stats?statHTML(i,s):"")+"</div>";
+      var right=figblock(i,s);
+      if(s.wide==="text")right=right.replace('class="figwrap col"','class="figwrap col narrow"');
+      inner='<div class="body">'+(k==="splitr"?right+left:left+right)+"</div>";
+    }else if(k==="cols"){
+      inner=colsHTML(i,s)+(s.callout?calloutHTML(i,s):"");
+    }else if(k==="refs"){
+      inner='<div class="body v">'+refsHTML(i,s)+"</div>";
+    }else if(k==="table"){
+      inner='<div class="body v">'+tableHTML(i,s)+(s.callout?calloutHTML(i,s):"")+"</div>";
+    }else{
+      inner='<div class="body v">'+bullets(i,s.b,"b",s.b&&s.b.length>6?"tight":"")+
+        (s.stats?statHTML(i,s):"")+(s.callout?calloutHTML(i,s):"")+"</div>";
+    }
+    h='<div class="pad" style="flex:1;display:flex;flex-direction:column;min-height:0">'+
+      head(i,s,s.sm)+'<div class="rule"></div>'+inner+citesHTML(i,s)+"</div>"+foot(i,s);
+  }
+  return '<section class="'+cls+'" data-i="'+i+'">'+h+
+    '<div class="pnotes">'+esc(NOTES[i]||s.notes||"")+"</div></section>";
+}
+
+/* ---------------- shrink-to-fit ---------------- */
+function autofit(sl){
+  try{
+    if(!sl)return;
+    var box=sl.querySelector(".body")||sl.querySelector(".cols");
+    if(!box)return;
+    var foot=sl.querySelector(".foot"),cit=sl.querySelector(".cites");
+    sl.style.setProperty("--k","1");
+    for(var i=0;i<9;i++){
+      var lim=cit?cit.getBoundingClientRect().top
+              :(foot?foot.getBoundingClientRect().top:sl.getBoundingClientRect().bottom);
+      var over=(box.scrollHeight>box.clientHeight+1)||(box.getBoundingClientRect().bottom>lim+1);
+      var kid=false;
+      var cbs=sl.querySelectorAll(".cbox");
+      for(var j=0;j<cbs.length;j++)if(cbs[j].scrollHeight>cbs[j].clientHeight+1){kid=true;break;}
+      if(!over&&!kid)break;
+      sl.style.setProperty("--k",(1-0.035*(i+1)).toFixed(3));
+    }
+  }catch(e){}
+}
+
+/* ---------------- layout / scale ---------------- */
+function fit(){
+  var st=document.querySelector(".stage"),ho=document.getElementById("holder");
+  if(!st)return;
+  var pad=26;
+  var sc=Math.min((st.clientWidth-pad*2)/1280,(st.clientHeight-pad*2)/720);
+  if(!isFinite(sc)||sc<=0)sc=.5;
+  ho.style.transform="scale("+sc+")";
+}
+window.addEventListener("resize",fit);
+
+/* ---------------- render current ---------------- */
+function render(){
+  var ho=document.getElementById("holder");
+  ho.innerHTML=slideHTML(cur);
+  applyEdit();
+  autofit(ho.querySelector(".slide"));
+  fit();
+  var s=SLIDES[cur];
+  document.getElementById("secNow").innerHTML=s.sec?("&sect; "+s.sec+" &nbsp;"+(s.secTitle||"")):"";
+  document.getElementById("cnt").innerHTML="<b>"+(cur+1)+"</b> / "+SLIDES.length;
+  var f=document.querySelector(".fill");
+  if(f)f.style.width=((cur+1)/SLIDES.length*100)+"%";
+  var nb=document.getElementById("noteBox");
+  if(nb)nb.value=NOTES[cur]!=null?NOTES[cur]:(SLIDES[cur].notes||"");
+  var nx=document.getElementById("nxt");
+  if(nx)nx.textContent=cur+1<SLIDES.length?txt(val(cur+1,"title",SLIDES[cur+1].title||"—")):"End of deck";
+  if(ovOn)markOv();
+  if(location.hash!=="#"+(cur+1))history.replaceState(null,"","#"+(cur+1));
+}
+function go(i){
+  i=Math.max(0,Math.min(SLIDES.length-1,i));
+  if(i===cur){render();return;}
+  cur=i;render();
+}
+function applyEdit(){
+  var els=document.querySelectorAll("#holder .ed");
+  for(var i=0;i<els.length;i++){
+    if(editing)els[i].setAttribute("contenteditable","true");
+    else els[i].removeAttribute("contenteditable");
+  }
+}
+
+/* ---------------- overview ---------------- */
+function buildOv(){
+  var g=document.getElementById("ovgrid"),h="",lastSec=null;
+  for(var i=0;i<SLIDES.length;i++){
+    var s=SLIDES[i];
+    var sk=(s.sec||"")+"|"+(s.secTitle||"");
+    if(sk!==lastSec){
+      lastSec=sk;
+      h+='<div class="ovsec">'+(s.sec?esc(s.sec)+" &nbsp; "+esc(s.secTitle||""):esc(META.short))+"</div>";
+    }
+    h+='<div class="ovc" data-go="'+i+'"><div class="shell" data-shell><div class="mini" data-mini>'+
+      slideHTML(i)+'</div></div><div class="no">'+(i+1)+'</div><div class="lb">'+
+      esc(txt(val(i,"title",s.title||""))||(s.kind==="divider"?"Section":"Slide"))+"</div></div>";
+  }
+  g.innerHTML=h;
+  var ms=g.querySelectorAll(".mini .slide");
+  for(var q=0;q<ms.length;q++)autofit(ms[q]);
+  // scale minis
+  var cards=g.querySelectorAll(".ovc");
+  for(var j=0;j<cards.length;j++){
+    var shell=cards[j].querySelector("[data-shell]"),mini=cards[j].querySelector("[data-mini]");
+    var w=cards[j].clientWidth||232,sc=w/1280;
+    mini.style.transform="scale("+sc+")";
+    shell.style.height=(720*sc)+"px";
+  }
+  markOv();
+}
+function markOv(){
+  var cards=document.querySelectorAll(".ovc");
+  for(var i=0;i<cards.length;i++)cards[i].classList.toggle("cur",+cards[i].getAttribute("data-go")===cur);
+  var c=document.querySelector(".ovc.cur");
+  if(c)c.scrollIntoView({block:"nearest"});
+}
+
+/* ---------------- export ---------------- */
+function toMarkdown(){
+  var L=[];
+  L.push("# "+META.title);
+  L.push("");
+  L.push("_"+META.short+" · "+SLIDES.length+" slides · exported from the editable HTML deck._");
+  L.push("");
+  var lastSec=null;
+  for(var i=0;i<SLIDES.length;i++){
+    var s=SLIDES[i];
+    if(s.sec&&s.sec!==lastSec){lastSec=s.sec;L.push("");L.push("## "+s.sec+" "+(s.secTitle||""));L.push("");}
+    var t=txt(val(i,"title",s.title||""));
+    L.push("### ["+(i+1)+"] "+(t||"(untitled)"));
+    var ld=txt(val(i,"lead",s.lead||""));
+    if(ld)L.push("");
+    if(ld)L.push("_"+ld+"_");
+    if(s.b&&s.b.length){L.push("");for(var j=0;j<s.b.length;j++)L.push("- "+txt(val(i,"b."+j,s.b[j])));}
+    if(s.cols)s.cols.forEach(function(c,j){
+      L.push("");L.push("**"+txt(val(i,"cols."+j+".h",c.h||""))+"**");
+      var p=txt(val(i,"cols."+j+".p",c.p||""));if(p)L.push(p);
+      (c.b||[]).forEach(function(x,m){L.push("- "+txt(val(i,"cols."+j+".b."+m,x)));});
+    });
+    if(s.table){L.push("");L.push("| "+s.table.head.join(" | ")+" |");
+      L.push("|"+s.table.head.map(function(){return "---";}).join("|")+"|");
+      s.table.rows.forEach(function(r,ri){L.push("| "+r.map(function(c,ci){
+        return txt(val(i,"table."+ri+"."+ci,c));}).join(" | ")+" |");});}
+    if(s.stats){L.push("");s.stats.forEach(function(x,j){
+      L.push("- **"+txt(val(i,"stats."+j+".v",x.v))+"** — "+txt(val(i,"stats."+j+".l",x.l)));});}
+    if(s.callout){L.push("");L.push("> **"+(s.callout.h||"Teaching point")+".** "+txt(val(i,"callout.p",s.callout.p)));}
+    if(s.figcap){L.push("");L.push("_Figure: "+txt(val(i,"figcap",s.figcap))+"_");}
+    if(s.refs){L.push("");s.refs.forEach(function(r,j){L.push((j+1)+". "+txt(val(i,"refs."+j,r)));});}
+    if(s.cites&&s.cites.length){L.push("");
+      L.push("_Sources: "+s.cites.map(function(c,j){
+        return "["+(j+1)+"] "+txt(val(i,"cites."+j,c));}).join(" · ")+"_");}
+    var nt=(NOTES[i]!=null?NOTES[i]:(s.notes||"")).trim();
+    if(nt){L.push("");L.push("> **Speaker notes.** "+nt.replace(/\n/g," "));}
+    L.push("");
+  }
+  return L.join("\n");
+}
+function openModal(title,text,name,mode){
+  var m=document.getElementById("modal");
+  document.getElementById("mTitle").textContent=title;
+  var body=document.getElementById("mBody");
+  if(mode==="help"){ body.innerHTML=HELP; }
+  else{
+    body.innerHTML='<textarea id="mText" spellcheck="false"></textarea>';
+    var ta=document.getElementById("mText");ta.value=text;ta.setAttribute("data-name",name||"export.txt");
+  }
+  document.querySelector('[data-act="mcopy"]').style.display=mode==="help"?"none":"";
+  document.querySelector('[data-act="mdl"]').style.display=mode==="help"?"none":"";
+  document.querySelector('[data-act="mload"]').style.display=mode==="import"?"":"none";
+  m.classList.add("on");
+}
+var HELP='<div class="help"><h4>Moving around</h4><table>'+
+  '<tr><td><kbd>&rarr;</kbd> <kbd>&larr;</kbd> <kbd>Space</kbd></td><td>Next / previous slide</td></tr>'+
+  '<tr><td><kbd>Home</kbd> <kbd>End</kbd></td><td>First / last slide</td></tr>'+
+  '<tr><td><kbd>O</kbd></td><td>Overview grid of every slide, click one to jump</td></tr>'+
+  '<tr><td><kbd>/</kbd></td><td>Search titles, bullets, references and your notes</td></tr>'+
+  '<tr><td>number then <kbd>Enter</kbd></td><td>Jump to that slide</td></tr>'+
+  '<tr><td><kbd>F</kbd></td><td>Fullscreen</td></tr></table>'+
+  '<h4>Teaching and editing</h4><table>'+
+  '<tr><td><kbd>E</kbd></td><td>Edit mode: click any heading, bullet, caption, table cell or reference and rewrite it</td></tr>'+
+  '<tr><td><kbd>N</kbd></td><td>Speaker-notes panel, with the next slide title shown above it</td></tr>'+
+  '<tr><td><kbd>T</kbd></td><td>Start / pause the lecture timer</td></tr>'+
+  '<tr><td><kbd>P</kbd></td><td>Print or save as PDF, one slide per page with notes underneath</td></tr>'+
+  '</table><h4>Keeping your work</h4><table>'+
+  '<tr><td>Autosave</td><td>Edits and notes save to this browser automatically</td></tr>'+
+  '<tr><td>Export</td><td>Markdown for handouts and lecture prep, JSON as a portable backup</td></tr>'+
+  '<tr><td>Import</td><td>Paste a JSON backup to move your edits to another machine</td></tr>'+
+  '</table></div>';
+
+/* ---------------- search ---------------- */
+function slideText(i){
+  var s=SLIDES[i],parts=[txt(val(i,"title",s.title||"")),txt(val(i,"lead",s.lead||""))];
+  (s.b||[]).forEach(function(x,j){parts.push(txt(val(i,"b."+j,x)));});
+  (s.refs||[]).forEach(function(x,j){parts.push(txt(val(i,"refs."+j,x)));});
+  (s.cols||[]).forEach(function(c,j){parts.push(txt(val(i,"cols."+j+".h",c.h||"")));
+    parts.push(txt(val(i,"cols."+j+".p",c.p||"")));
+    (c.b||[]).forEach(function(x,m){parts.push(txt(val(i,"cols."+j+".b."+m,x)));});});
+  if(s.table)s.table.rows.forEach(function(r,ri){r.forEach(function(c,ci){
+    parts.push(txt(val(i,"table."+ri+"."+ci,c)));});});
+  if(s.figcap)parts.push(txt(val(i,"figcap",s.figcap)));
+  (s.cites||[]).forEach(function(c,j){parts.push(txt(val(i,"cites."+j,c)));});
+  if(s.callout)parts.push(txt(val(i,"callout.p",s.callout.p)));
+  parts.push(NOTES[i]||s.notes||"");
+  parts.push(s.sec||"",s.secTitle||"");
+  return parts.join("  ");
+}
+function doSearch(q){
+  var box=document.getElementById("sres");
+  q=(q||"").trim();
+  if(q.length<2){box.innerHTML="";return;}
+  var lq=q.toLowerCase(),h="",n=0;
+  for(var i=0;i<SLIDES.length&&n<40;i++){
+    var t=slideText(i),p=t.toLowerCase().indexOf(lq);
+    if(p<0)continue;
+    n++;
+    var a=Math.max(0,p-46),snip=esc(t.slice(a,p))+"<mark>"+esc(t.slice(p,p+q.length))+"</mark>"+esc(t.slice(p+q.length,p+q.length+80));
+    h+='<button data-go="'+i+'"><span class="n">slide '+(i+1)+(SLIDES[i].sec?" &nbsp;&sect; "+esc(SLIDES[i].sec):"")+
+       '</span><div class="t">'+esc(txt(val(i,"title",SLIDES[i].title||"")))+'</div><div class="n" style="margin-top:3px">'+
+       (a>0?"…":"")+snip+"…</div></button>";
+  }
+  box.innerHTML=h||'<button style="cursor:default"><span class="n">no match</span></button>';
+}
+
+/* ---------------- timer ---------------- */
+function tick(){
+  var el=document.querySelector(".timer");if(!el)return;
+  var ms=tAcc+(t0?(Date.now()-t0):0),s=Math.floor(ms/1000);
+  el.textContent=(t0?"":"⏸ ")+String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+}
+setInterval(tick,500);
+
+/* ---------------- events ---------------- */
+document.addEventListener("click",function(ev){
+try{
+  var t=ev.target;
+  var g=t.closest?t.closest("[data-go]"):null;
+  if(g){ go(+g.getAttribute("data-go"));
+    if(ovOn)setOv(false);
+    document.body.classList.remove("srch-on");
+    return; }
+  var b=t.closest?t.closest("[data-act]"):null;
+  if(!b)return;
+  var a=b.getAttribute("data-act");
+  if(a==="next"){go(cur+1);return;}
+  if(a==="prev"){go(cur-1);return;}
+  if(a==="ov"){setOv(!ovOn);return;}
+  if(a==="notes"){notesOn=!notesOn;document.body.classList.toggle("notes-on",notesOn);
+    b.setAttribute("aria-pressed",String(notesOn));fit();return;}
+  if(a==="edit"){editing=!editing;document.body.classList.toggle("edit",editing);
+    b.setAttribute("aria-pressed",String(editing));applyEdit();
+    toast(editing?"Edit mode on — click any text to rewrite it":"Edit mode off");return;}
+  if(a==="search"){document.body.classList.toggle("srch-on");
+    if(document.body.classList.contains("srch-on"))document.getElementById("q").focus();return;}
+  if(a==="print"){printAll();return;}
+  if(a==="help"){openModal("Keyboard and features","","","help");return;}
+  if(a==="hub"){window.location.href=META.hub;return;}
+  if(a==="export"){
+    openModal("Export — Markdown",toMarkdown(),META.key+"-slides.md");
+    document.getElementById("mSeg").innerHTML=
+      '<button class="mbtn" data-act="expmd">Markdown</button>'+
+      '<button class="mbtn" data-act="expjson">JSON backup</button>'+
+      '<button class="mbtn" data-act="expimp">Import…</button>';
+    return;}
+  if(a==="expmd"){document.getElementById("mTitle").textContent="Export — Markdown";
+    var t1=document.getElementById("mText");if(t1){t1.value=toMarkdown();t1.setAttribute("data-name",META.key+"-slides.md");}
+    document.querySelector('[data-act="mload"]').style.display="none";return;}
+  if(a==="expjson"){document.getElementById("mTitle").textContent="Export — JSON backup";
+    var t2=document.getElementById("mText");if(t2){t2.value=JSON.stringify({v:1,edits:EDITS,notes:NOTES},null,2);
+      t2.setAttribute("data-name",META.key+"-backup.json");}
+    document.querySelector('[data-act="mload"]').style.display="none";return;}
+  if(a==="expimp"){document.getElementById("mTitle").textContent="Import — paste a JSON backup, then Load";
+    var t3=document.getElementById("mText");if(t3)t3.value="";
+    document.querySelector('[data-act="mload"]').style.display="";return;}
+  if(a==="mload"){
+    try{ var o=JSON.parse(document.getElementById("mText").value);
+      EDITS=o.edits||{};NOTES=o.notes||{};save();render();
+      document.getElementById("modal").classList.remove("on");toast("Backup loaded");
+    }catch(e){toast("That is not valid JSON");}
+    return;}
+  if(a==="mclose"){document.getElementById("modal").classList.remove("on");return;}
+  if(a==="mcopy"){var ta=document.getElementById("mText");if(!ta)return;
+    ta.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}
+    if(!ok&&navigator.clipboard)navigator.clipboard.writeText(ta.value).then(function(){toast("Copied");},function(){toast("Select and copy manually");});
+    else toast(ok?"Copied to clipboard":"Select and copy manually");return;}
+  if(a==="mdl"){var ta2=document.getElementById("mText");if(!ta2)return;
+    var nm=ta2.getAttribute("data-name")||"export.txt";
+    var bl=new Blob([ta2.value],{type:"text/plain;charset=utf-8"});
+    var A=document.createElement("a");A.href=URL.createObjectURL(bl);A.download=nm;
+    document.body.appendChild(A);A.click();A.remove();toast("Downloaded "+nm);return;}
+}catch(e){boom(e);}
+},false);
+
+function setOv(on){
+  ovOn=on;document.body.classList.toggle("ov-on",on);
+  var b=document.querySelector('[data-act="ov"]');if(b)b.setAttribute("aria-pressed",String(on));
+  if(on)buildOv();
+}
+function printAll(){
+  var ho=document.getElementById("holder"),h="";
+  for(var i=0;i<SLIDES.length;i++)h+=slideHTML(i);
+  ho.innerHTML=h;ho.style.transform="none";
+  var ps=ho.querySelectorAll(".slide");
+  for(var q=0;q<ps.length;q++)autofit(ps[q]);
+  document.body.classList.add("handout");
+  window.print();
+  setTimeout(function(){document.body.classList.remove("handout");render();},400);
+}
+
+/* progress bar click */
+document.addEventListener("mousedown",function(ev){
+  var tr=ev.target.closest?ev.target.closest(".track"):null;
+  if(!tr)return;
+  var r=tr.getBoundingClientRect();
+  go(Math.round((ev.clientX-r.left)/r.width*(SLIDES.length-1)));
+});
+
+/* edits */
+document.addEventListener("focusout",function(ev){
+  try{
+    var t=ev.target;
+    if(t&&t.classList&&t.classList.contains("ed")&&t.isContentEditable){
+      var k=t.getAttribute("data-k");
+      if(k){EDITS[k]=t.innerHTML.trim();save();}
+    }
+  }catch(e){boom(e);}
+},true);
+document.addEventListener("input",function(ev){
+  var t=ev.target;
+  if(t.id==="noteBox"){NOTES[cur]=t.value;save();return;}
+  if(t.id==="q"){doSearch(t.value);return;}
+});
+document.addEventListener("paste",function(ev){
+  var t=ev.target;
+  if(t&&t.classList&&t.classList.contains("ed")&&t.isContentEditable){
+    ev.preventDefault();
+    var s=(ev.clipboardData||window.clipboardData).getData("text/plain");
+    document.execCommand("insertText",false,s);
+  }
+});
+
+/* keys */
+var numBuf="";
+document.addEventListener("keydown",function(ev){
+try{
+  var tag=(ev.target.tagName||"").toLowerCase();
+  var typing=ev.target.isContentEditable||tag==="input"||tag==="textarea";
+  if(ev.key==="Escape"){
+    document.getElementById("modal").classList.remove("on");
+    document.body.classList.remove("srch-on");
+    if(ovOn)setOv(false);
+    if(ev.target.isContentEditable)ev.target.blur();
+    return;
+  }
+  if(typing){
+    if(ev.target.id==="q"&&ev.key==="Enter"){
+      var f=document.querySelector("#sres [data-go]");
+      if(f){go(+f.getAttribute("data-go"));document.body.classList.remove("srch-on");}
+      ev.preventDefault();
+    }
+    return;
+  }
+  if(ev.key==="ArrowRight"||ev.key==="PageDown"||ev.key===" "){ev.preventDefault();go(cur+1);return;}
+  if(ev.key==="ArrowLeft"||ev.key==="PageUp"){ev.preventDefault();go(cur-1);return;}
+  if(ev.key==="ArrowDown"){ev.preventDefault();go(cur+1);return;}
+  if(ev.key==="ArrowUp"){ev.preventDefault();go(cur-1);return;}
+  if(ev.key==="Home"){ev.preventDefault();go(0);return;}
+  if(ev.key==="End"){ev.preventDefault();go(SLIDES.length-1);return;}
+  if(ev.key>="0"&&ev.key<="9"){numBuf+=ev.key;return;}
+  if(ev.key==="Enter"&&numBuf){go(parseInt(numBuf,10)-1);numBuf="";return;}
+  var k=ev.key.toLowerCase();
+  numBuf="";
+  if(k==="o"){setOv(!ovOn);return;}
+  if(k==="n"){document.querySelector('[data-act="notes"]').click();return;}
+  if(k==="e"){document.querySelector('[data-act="edit"]').click();return;}
+  if(k==="p"){ev.preventDefault();printAll();return;}
+  if(k==="/"||k==="?"){ev.preventDefault();
+    if(ev.key==="?"){openModal("Keyboard and features","","","help");return;}
+    document.body.classList.add("srch-on");document.getElementById("q").focus();return;}
+  if(k==="t"){ if(t0){tAcc+=Date.now()-t0;t0=null;}else{t0=Date.now();} tick(); return;}
+  if(k==="f"){ if(document.fullscreenElement)document.exitFullscreen();
+    else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); return;}
+}catch(e){boom(e);}
+},false);
+
+/* progress bar dom */
+(function(){
+  var p=document.createElement("div");p.className="prog";
+  var ticks="";
+  for(var i=0;i<SLIDES.length;i++){
+    if(SLIDES[i].kind==="divider")ticks+='<i style="left:'+(i/(SLIDES.length-1)*100)+'%"></i>';
+  }
+  p.innerHTML='<span class="hint">&larr;/&rarr; move &nbsp;·&nbsp; O overview &nbsp;·&nbsp; E edit &nbsp;·&nbsp; N notes &nbsp;·&nbsp; T timer &nbsp;·&nbsp; ? help</span>'+
+    '<div class="track"><div class="ticks">'+ticks+'</div><div class="fill"></div></div>'+
+    '<span class="timer">⏸ 00:00</span>';
+  document.body.appendChild(p);
+})();
+
+/* boot */
+Store.get().then(function(raw){
+  try{ if(raw){var o=JSON.parse(raw);EDITS=o.edits||{};NOTES=o.notes||{};} }catch(e){}
+  var h=parseInt((location.hash||"").replace("#",""),10);
+  if(h>0&&h<=SLIDES.length)cur=h-1;
+  render();
+  if(raw)toast("Your saved edits and notes are back");
+}).catch(function(){render();});
+
+}catch(e){boom(e);}
+})();
+</script>
+</body>
+</html>

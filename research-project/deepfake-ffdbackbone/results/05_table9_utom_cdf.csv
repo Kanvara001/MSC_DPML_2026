@@ -1,0 +1,4 @@
+model,tau_0.5,tau_ot,tau_UTOM,lambda_auto
+paper,83.20,83.78,85.33,
+author_checkpoint,82.82,83.20,85.33,0.0236
+ours_cfb_full,71.04,79.15,81.85,

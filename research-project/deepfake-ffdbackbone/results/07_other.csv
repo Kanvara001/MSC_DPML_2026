@@ -1,0 +1,11 @@
+item,value
+CDF ours TNR (real acc at 0.5),87.64
+CDF ours TPR (fake acc at 0.5),62.35
+CDF test videos,518 (real 178 / fake 340)
+WDF test sequences,806 (real 396 / fake 410)
+WDF RetinaFace realign success,99.4%
+FF++ prepared frames,39999 / 40000
+FF++ test videos,700 (real 140 / fake 560)
+3b training time,~98 min (10 epochs, T4 x2 DDP, AMP fp16)
+3b best val AUC (fused head),96.45
+3b test AUC (fused head),96.72

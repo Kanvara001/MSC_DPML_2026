@@ -1,0 +1,8 @@
+model,dataset,AUC,CI_low,CI_high
+author_checkpoint,FF++,99.24,98.74,99.67
+author_checkpoint,CDF,90.05,87.38,92.83
+author_checkpoint,WDF,89.78,87.61,91.69
+ours_cfb_full,FF++,96.57,95.26,97.66
+ours_cfb_full,CDF,84.97,81.51,88.17
+ours_cfb_full,WDF,84.44,81.63,86.96
+fb_ce,CDF,87.92,84.78,90.71

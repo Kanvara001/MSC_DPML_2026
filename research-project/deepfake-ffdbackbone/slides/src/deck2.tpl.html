@@ -1,0 +1,1221 @@
+<title>FFDBackbone CRISP-DM Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: academic 16:9 slides on a neutral desk; in-slide header with section + CRISP-DM miniframe, citation footer. Deliberately light-only, like printed slides. */
+:root{
+  color-scheme:light;
+  --desk:#d8d5cf; --paper:#ffffff; --ink:#1c1b1f; --muted:#5f5a54; --rule:#d8d2c9; --wash:#f6f3ef;
+  --accent:#7a1f22; --accent-mid:#b77a74; --accent-soft:#f5ecea;
+  --real:#6aa58e; --f1:#c9773f; --f2:#d8915e; --f3:#e4ad84; --f4:#efcaab; --base:#b7b0a7;
+  --serif:"Noto Serif Thai","Noto Serif",Georgia,"Times New Roman",serif;
+  --sans:"Sarabun","Leelawadee UI","Tahoma",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+html,body{height:100%;background:var(--desk)}
+body{color:var(--ink);font-family:var(--sans);font-size:19px;line-height:1.5;overflow:hidden}
+*{box-sizing:border-box}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.viewport{position:fixed;inset:0 0 46px 0;display:grid;place-items:center}
+.deck{width:1280px;height:720px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.12),0 8px 30px rgba(0,0,0,.08);display:none;grid-template-rows:auto 1fr auto;overflow:hidden}
+.slide.on{display:grid}
+
+/* header */
+.hd{padding:26px 60px 14px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
+.hd .row{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.sec{font:600 13px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.mini{display:flex;gap:4px}
+.mini button{font:500 11px/1 var(--mono);letter-spacing:.04em;border:1px solid var(--rule);background:var(--paper);color:var(--muted);padding:4px 6px;cursor:pointer;border-radius:2px}
+.mini button.past{background:var(--wash);color:var(--ink)}
+.mini button.cur{background:var(--accent);border-color:var(--accent);color:#fff}
+h1,h2,h3{font-family:var(--serif);margin:0;text-wrap:balance;color:var(--ink)}
+h2{font-size:30px;font-weight:600;line-height:1.3}
+h3{font-size:20px;font-weight:600;line-height:1.35}
+
+/* body */
+.bd{padding:24px 60px 18px;display:flex;flex-direction:column;justify-content:center;gap:20px;min-height:0}
+.ft{padding:9px 60px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.ft .pg{font-family:var(--mono)}
+
+p{margin:0}
+ul,ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:8px}
+li::marker{color:var(--accent)}
+b,strong{font-weight:600}
+.muted{color:var(--muted)}
+.sm{font-size:16px}
+.xs{font-size:14px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:.88em}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.grow{flex:1;min-height:0}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:36px;min-height:0}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;min-height:0}
+.g64{display:grid;grid-template-columns:1.55fr 1fr;gap:36px;min-height:0}
+.g46{display:grid;grid-template-columns:1fr 1.45fr;gap:36px;min-height:0}
+.g2>*,.g3>*,.g64>*,.g46>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:14px;min-height:0}
+.fill{height:100%}
+
+/* blocks */
+.blk{border-top:2px solid var(--accent);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.blk .lab{font:600 13px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.note{background:var(--wash);border-left:3px solid var(--accent);padding:12px 18px;font-size:17px}
+.key{background:var(--accent-soft);padding:14px 20px;font-size:18px}
+.key b{color:var(--accent)}
+
+table{border-collapse:collapse;width:100%;font-size:16.5px}
+table.scope td{padding:5px 10px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top}
+thead th{font-weight:600;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:2px solid var(--ink);border-bottom:1px solid var(--ink)}
+tbody tr:last-child td{border-bottom:2px solid var(--ink)}
+tbody td{border-bottom:1px solid var(--rule)}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums lining-nums}
+tr.hl td{background:var(--accent-soft);font-weight:600}
+table.big{font-size:18.5px}table.big td{padding:15px 14px}table.big thead th{padding:10px 14px}
+.flow.big .s{padding:18px 16px}.flow.big .t{font-size:19px}.flow.big .d{font-size:15.5px}
+td.wait{color:var(--accent-mid);font-style:italic;text-align:right}
+.tw{overflow-x:auto}
+
+.fig{margin:0;display:flex;flex-direction:column;gap:8px;min-height:0}
+.fig .im{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--rule);padding:10px;background:#fff}
+.fig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+figcaption{font-size:14px;color:var(--muted)}
+figcaption b{color:var(--ink)}
+
+/* pending-result placeholder */
+.ph{border:1.5px dashed var(--accent-mid);background:repeating-linear-gradient(135deg,var(--wash) 0 10px,#fff 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:18px;color:var(--muted);min-height:120px}
+.ph .t{font-weight:600;color:var(--accent);font-size:16px}
+.ph .d{font-size:14.5px}
+
+.eq{font-family:"Cambria Math","STIX Two Math","Noto Serif",Georgia,serif;font-size:21px;text-align:center;padding:10px 0}
+.eq i{font-style:italic}
+.eq sub,.eq sup{font-size:.68em}
+
+.metric{display:flex;flex-direction:column}
+.metric .v{font-family:var(--serif);font-size:44px;font-weight:600;line-height:1.1;color:var(--accent);font-variant-numeric:lining-nums}
+.metric .l{font-size:14px;color:var(--muted)}
+
+/* code blocks */
+pre.code{font:12.6px/1.5 var(--mono);background:#faf8f5;border:1px solid var(--rule);border-left:3px solid var(--accent);padding:10px 14px;margin:0;white-space:pre;overflow:hidden;color:var(--ink);tab-size:4}
+pre.code .c{color:#8a8278;font-style:italic}
+pre.code .k{color:var(--accent);font-weight:500}
+pre.code .h{background:#f3e3e0;display:inline-block;width:calc(100% + 28px);margin:0 -14px;padding:0 14px}
+pre.code sub,pre.code sup{font-size:.72em;line-height:0}
+.codehd{font:500 12px var(--mono);color:var(--muted)}
+/* flow */
+.flow{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:26px;position:relative}
+.flow .s{border:1px solid var(--rule);padding:12px 14px;position:relative;background:#fff;display:flex;flex-direction:column;gap:2px}
+.flow .s:not(:last-child)::after{content:"";position:absolute;right:-20px;top:50%;width:14px;height:14px;border-top:2px solid var(--accent);border-right:2px solid var(--accent);transform:translateY(-50%) rotate(45deg)}
+.flow .k{font:500 12px var(--mono);color:var(--accent)}
+.flow .t{font-weight:600;font-size:17px;line-height:1.3}
+.flow .d{font-size:14px;color:var(--muted)}
+.flow .s.io{background:var(--wash)}
+
+/* timeline */
+.tl{display:grid;grid-template-columns:repeat(5,1fr);position:relative;margin-top:6px}
+.tl::before{content:"";position:absolute;left:10%;right:10%;top:7px;height:2px;background:var(--rule)}
+.tl div{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;position:relative}
+.tl i{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent)}
+.tl div.x i{background:var(--accent)}
+.tl b{font-size:14px}
+.tl span{font-size:13.5px;color:var(--muted)}
+
+.cite{font-family:var(--serif);font-size:17px;line-height:1.6;padding:16px 20px;border:1px solid var(--rule);background:var(--wash)}
+
+/* charts */
+.chart text{font-family:var(--sans)}
+.chart .lb{font-size:16px;fill:var(--ink)}
+.chart .vl{font-size:15px;fill:var(--ink);font-variant-numeric:tabular-nums}
+.chart .tk{font-size:13px;fill:var(--muted)}
+.chart .sb{font-size:14px;fill:var(--ink);font-weight:600}
+.chart .g{stroke:var(--rule);stroke-width:1}
+.chart .m0{stroke:var(--base)} .chart .m0f{fill:var(--base)}
+.chart .m1{stroke:var(--accent-mid)} .chart .m1f{fill:var(--accent-mid)}
+.chart .m2{stroke:var(--accent)} .chart .m2f{fill:var(--accent)}
+.chart .cr{fill:var(--real)} .chart .cf1{fill:var(--f1)} .chart .cf2{fill:var(--f2)} .chart .cf3{fill:var(--f3)} .chart .cf4{fill:var(--f4)}
+.lg{display:flex;gap:16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.lg i{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px}
+
+/* cycle */
+.cyc text{font-family:var(--sans)}
+.cyc g.n{cursor:pointer}
+.cyc g.n rect{fill:#fff;stroke:var(--accent);stroke-width:1.5}
+.cyc g.n:hover rect{fill:var(--accent-soft)}
+.cyc .nt{font-size:14.5px;font-weight:600;fill:var(--ink)}
+.cyc .nk{font-size:12px;fill:var(--accent);font-family:var(--mono)}
+
+/* title slide */
+.title{grid-template-rows:1fr auto!important}
+.title .tb{padding:64px 72px 36px;display:flex;flex-direction:column;justify-content:center;gap:22px;border-left:10px solid var(--accent)}
+.title h1{font-size:42px;font-weight:700;line-height:1.25;max-width:26ch}
+.title .th{font-family:var(--serif);font-size:21px;color:var(--muted);font-weight:500;max-width:52ch}
+.title .au{font-size:19px}
+.title .au sup{color:var(--accent);font-size:.7em}
+.title .ven{font-size:16px;color:var(--muted);font-style:italic}
+.title .bot{padding:18px 72px;background:var(--wash);border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:16px}
+
+/* controls outside slides */
+.ctl{position:fixed;inset:auto 0 0 0;height:46px;display:flex;align-items:center;justify-content:center;gap:12px;padding:0 16px env(safe-area-inset-bottom,0px);font:14px var(--mono);color:#4a4640}
+.ctl button{font:500 14px var(--mono);border:1px solid #b9b3aa;background:#f2f0ec;color:var(--ink);padding:5px 12px;cursor:pointer;border-radius:3px}
+.overview{position:fixed;inset:0 0 46px 0;z-index:8;background:var(--desk);overflow:auto;padding:24px 16px}
+.overview .gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;max-width:1280px;margin:0 auto}
+.overview button{text-align:left;border:1px solid var(--rule);background:#fff;color:var(--ink);padding:12px 14px;cursor:pointer;font:15px/1.4 var(--sans);display:flex;flex-direction:column;gap:4px}
+.overview button.cur{outline:2px solid var(--accent)}
+.overview .k{font:500 12px var(--mono);color:var(--accent);letter-spacing:.05em}
+
+@media (max-width:760px){
+  body{overflow:auto;font-size:16px}
+  .viewport{position:static;display:block;padding:16px 16px 70px}
+  .deck{width:auto;height:auto;transform:none!important}
+  .slide{position:relative;display:grid;margin-bottom:16px}
+  .hd,.bd,.ft{padding-left:18px;padding-right:18px}
+  .mini{display:none}
+  h2{font-size:22px} .title h1{font-size:27px} .title .tb{padding:28px 20px} .title .bot{padding:14px 20px;flex-direction:column;align-items:flex-start}
+  .g2,.g3,.g64,.g46{grid-template-columns:1fr;gap:20px}
+  .flow{grid-auto-flow:row}.flow .s:not(:last-child)::after{display:none}
+  .tl{grid-template-columns:1fr 1fr}.tl::before{display:none}
+  .ctl{position:fixed;background:var(--desk)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<main class="viewport" id="vp"><div class="deck" id="deck">
+
+<!-- ============ TITLE ============ -->
+<section class="slide title" data-ph="x" data-t="Title">
+  <div class="tb">
+    <div class="sec">Research Paper Presentation · MSC DPML 2026</div>
+    <h1>Revisiting Face Forgery Detection: From Facial Representation to Forgery Detection</h1>
+    <p class="th">การทบทวนการตรวจจับใบหน้าปลอม: จากการเรียนรู้ลักษณะใบหน้าสู่การตรวจจับการปลอมแปลง</p>
+    <p class="au">Zonghui Guo<sup>1</sup>, Yingjie Liu<sup>1</sup>, Jie Zhang<sup>2</sup>, Haiyong Zheng<sup>1,*</sup>, Shiguang Shan<sup>2,*</sup></p>
+    <p class="xs"><sup>1</sup> Ocean University of China &nbsp;·&nbsp; <sup>2</sup> State Key Laboratory of AI Safety, Institute of Computing Technology, CAS &nbsp;·&nbsp; <sup>*</sup> Corresponding authors</p>
+    <p class="ven">IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 48, no. 8, pp. 9228–9244, Aug. 2026</p>
+  </div>
+  <div class="bot">
+    <span><b>ผู้นำเสนอ</b> &nbsp;นางสาวกัญญ์วรา ถาวโรฤทธิ์ &nbsp;<span class="muted">รหัสนักศึกษา 695020018-8</span></span>
+    <span class="muted">มหาวิทยาลัยขอนแก่น</span>
+  </div>
+</section>
+
+<!-- ============ PROFILE ============ -->
+<section class="slide" data-ph="x" data-t="Paper profile">
+  <header class="hd"><div class="row"><span class="sec">ข้อมูลบทความ</span><span class="mini"></span></div><h2>แหล่งตีพิมพ์: IEEE TPAMI วารสาร Q1 ระดับ 99th percentile</h2></header>
+  <div class="bd"><div class="g2 grow">
+    <div class="stack" style="justify-content:space-between">
+      <div class="blk"><span class="lab">Citation</span>
+        <p class="cite">Z. Guo, Y. Liu, J. Zhang, H. Zheng, and S. Shan, “Revisiting Face Forgery Detection: From Facial Representation to Forgery Detection,” <i>IEEE Trans. Pattern Anal. Mach. Intell.</i>, vol. 48, no. 8, pp. 9228–9244, Aug. 2026, doi: 10.1109/TPAMI.2026.3675018.</p>
+      </div>
+      <div class="blk"><span class="lab">Publication history</span>
+        <div class="tl">
+          <div><i></i><b>Received</b><span>29 Jun 2025</span></div>
+          <div><i></i><b>Revised</b><span>14 Feb 2026</span></div>
+          <div><i></i><b>Accepted</b><span>15 Mar 2026</span></div>
+          <div><i></i><b>Online</b><span>17 Mar 2026</span></div>
+          <div class="x"><i></i><b>Issue</b><span>Aug 2026</span></div>
+        </div>
+      </div>
+      <p class="sm">Source code &amp; models: <span class="mono">github.com/zhenglab/FFDBackbone</span></p>
+    </div>
+    <div class="stack" style="justify-content:space-between">
+      <div class="blk"><span class="lab">Scopus metrics 2025 · IEEE Computer Society</span>
+        <div style="display:flex;gap:44px">
+          <div class="metric"><span class="v">41.1</span><span class="l">CiteScore</span></div>
+          <div class="metric"><span class="v">4.829</span><span class="l">SJR</span></div>
+          <div class="metric"><span class="v">6.155</span><span class="l">SNIP</span></div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>ASJC category</th><th>Quartile</th><th class="r">Rank</th></tr></thead>
+        <tbody>
+          <tr class="hl"><td>Computer Vision and Pattern Recognition</td><td>Q1</td><td class="r">2 / 183</td></tr>
+          <tr class="hl"><td>Artificial Intelligence</td><td>Q1</td><td class="r">5 / 570</td></tr>
+          <tr><td>Applied Mathematics</td><td>Q1</td><td class="r">1 / 680</td></tr>
+          <tr><td>Computational Theory and Mathematics</td><td>Q1</td><td class="r">1 / 203</td></tr>
+          <tr><td>Software</td><td>Q1</td><td class="r">3 / 503</td></tr>
+        </tbody>
+      </table>
+      <p class="xs">ทุกหมวดอยู่ที่ 99th percentile · ที่มา: <a href="https://www.scopus.com/pages/publications/105033393779?origin=resultslist" target="_blank" rel="noopener">Scopus</a></p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<!-- ============ OUTLINE ============ -->
+<section class="slide" data-ph="x" data-t="Outline">
+  <header class="hd"><div class="row"><span class="sec">โครงร่างการนำเสนอ</span><span class="mini"></span></div><h2>นำเสนอตามกระบวนการ CRISP-DM</h2></header>
+  <div class="bd"><div class="g46 grow" style="align-items:center">
+    <svg class="cyc" viewBox="0 0 460 460" width="100%" style="max-height:470px" role="img" aria-label="CRISP-DM cycle">
+      <circle cx="230" cy="230" r="165" fill="none" stroke="var(--rule)" stroke-width="2"/>
+      <g fill="var(--accent)">
+        <path d="M-7,-6 L7,0 L-7,6Z" transform="translate(312.5,87.1) rotate(30)"/>
+        <path d="M-7,-6 L7,0 L-7,6Z" transform="translate(395,230) rotate(90)"/>
+        <path d="M-7,-6 L7,0 L-7,6Z" transform="translate(312.5,372.9) rotate(150)"/>
+        <path d="M-7,-6 L7,0 L-7,6Z" transform="translate(147.5,372.9) rotate(210)"/>
+        <path d="M-7,-6 L7,0 L-7,6Z" transform="translate(65,230) rotate(270)"/>
+        <path d="M-7,-6 L7,0 L-7,6Z" transform="translate(147.5,87.1) rotate(330)"/>
+      </g>
+      <circle cx="230" cy="230" r="62" fill="var(--wash)" stroke="var(--rule)"/>
+      <text x="230" y="224" text-anchor="middle" style="font-family:var(--serif);font-size:20px;font-weight:600;fill:var(--ink)">Data</text>
+      <text x="230" y="248" text-anchor="middle" style="font-size:13px;fill:var(--muted)">FF++ · Celeb-DF</text>
+      <g class="n" data-go="bu" tabindex="0"><rect x="160" y="40" width="140" height="50" rx="3"/><text class="nk" x="230" y="58" text-anchor="middle">01</text><text class="nt" x="230" y="79" text-anchor="middle">Business</text></g>
+      <g class="n" data-go="du" tabindex="0"><rect x="302.9" y="122.5" width="140" height="50" rx="3"/><text class="nk" x="372.9" y="140.5" text-anchor="middle">02</text><text class="nt" x="372.9" y="161.5" text-anchor="middle">Data Underst.</text></g>
+      <g class="n" data-go="dp" tabindex="0"><rect x="302.9" y="287.5" width="140" height="50" rx="3"/><text class="nk" x="372.9" y="305.5" text-anchor="middle">03</text><text class="nt" x="372.9" y="326.5" text-anchor="middle">Data Prep.</text></g>
+      <g class="n" data-go="mo" tabindex="0"><rect x="160" y="370" width="140" height="50" rx="3"/><text class="nk" x="230" y="388" text-anchor="middle">04</text><text class="nt" x="230" y="409" text-anchor="middle">Modeling</text></g>
+      <g class="n" data-go="ev" tabindex="0"><rect x="17.1" y="287.5" width="140" height="50" rx="3"/><text class="nk" x="87.1" y="305.5" text-anchor="middle">05</text><text class="nt" x="87.1" y="326.5" text-anchor="middle">Evaluation</text></g>
+      <g class="n" data-go="de" tabindex="0"><rect x="17.1" y="122.5" width="140" height="50" rx="3"/><text class="nk" x="87.1" y="140.5" text-anchor="middle">06</text><text class="nt" x="87.1" y="161.5" text-anchor="middle">Deployment</text></g>
+    </svg>
+    <table>
+      <thead><tr><th>ขั้นตอน</th><th>เนื้อหา</th></tr></thead>
+      <tbody>
+        <tr><td><b>1 Business Understanding</b></td><td>ปัญหา ช่องว่างงานวิจัย และคำถามวิจัย</td></tr>
+        <tr><td><b>2 Data Understanding</b></td><td>ชุดข้อมูลแต่ละขั้น และลักษณะร่องรอยการปลอม</td></tr>
+        <tr><td><b>3 Data Preparation</b></td><td>การสุ่ม frame การตัดใบหน้า และการแบ่งชุดข้อมูล</td></tr>
+        <tr><td><b>4 Modeling</b></td><td>Pre-training (FB) และ fine-tuning (CFB)</td></tr>
+        <tr><td><b>5 Evaluation</b></td><td>ผลข้าม dataset, ablation, UTOM และผลการทำซ้ำ</td></tr>
+        <tr><td><b>6 Deployment</b></td><td>การใช้งานจริง ข้อจำกัด และงานในอนาคต</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<!-- ============ 1 BU ============ -->
+<section class="slide" data-ph="bu" data-t="Problem">
+  <header class="hd"><div class="row"><span class="sec">1 · Business Understanding</span><span class="mini"></span></div><h2>ปัญหา: โมเดลตรวจจับ deepfake ไม่สามารถ generalize ไปยังวิธีปลอมใหม่</h2></header>
+  <div class="bd">
+    <figure class="fig" style="height:205px"><div class="im"><img src="{{FIG3TOP}}" alt="Traditional FFD pipeline: SL on ImageNet backbone, existing FFD fine-tuning modules, empirical threshold 0.5"></div>
+      <figcaption><b>Traditional FFD pipeline</b> (ปรับจาก Fig. 3 ของบทความ)</figcaption></figure>
+    <div class="g3">
+      <div class="blk"><span class="lab">Pre-training</span><p>Backbone เรียนรู้แบบ supervised บน ImageNet จึงไม่มีความรู้เฉพาะเรื่องใบหน้า</p></div>
+      <div class="blk"><span class="lab">Fine-tuning</span><p>งานเดิมเพิ่มโมดูล (attention, temporal, frequency) แต่ไม่ได้พัฒนาตัว backbone</p></div>
+      <div class="blk"><span class="lab">Inference</span><p>ใช้ threshold 0.5 ตายตัว แม้การกระจายของ score จะต่างกันในแต่ละ dataset</p></div>
+    </div>
+    <p class="key">ผลที่ตามมา: โมเดล overfit รูปแบบการปลอมของชุด train และ <b>AUC ลดลงมาก</b>เมื่อทดสอบกับ dataset ที่ไม่เคยเห็น</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="bu" data-t="Research questions">
+  <header class="hd"><div class="row"><span class="sec">1 · Business Understanding</span><span class="mini"></span></div><h2>วัตถุประสงค์และคำถามวิจัย</h2></header>
+  <div class="bd">
+    <table class="big">
+      <thead><tr><th style="width:16%">ขั้น</th><th>คำถามวิจัย</th><th style="width:34%">แนวทางที่บทความเสนอ</th></tr></thead>
+      <tbody>
+        <tr><td><b>Pre-training</b></td><td>RQ1: backbone แบบใดเหมาะกับการตรวจจับใบหน้าปลอมที่สุด</td><td><b>FaceBEiT (FB)</b>: SSL บนใบหน้าจริง</td></tr>
+        <tr><td><b>Fine-tuning</b></td><td>RQ2: จะ fine-tune อย่างไรให้ backbone ค้นพบร่องรอยการปลอมที่ซ่อนอยู่</td><td><b>Competitive Backbone (CFB)</b>: 2 branch แข่งกันเรียนรู้</td></tr>
+        <tr><td><b>Inference</b></td><td>RQ3: จะกำหนด threshold อย่างไรเมื่อไม่มี label ของข้อมูลใหม่</td><td><b>UTOM</b>: ใช้ uncertainty ช่วยหา threshold</td></tr>
+      </tbody>
+    </table>
+    <div class="g2" style="margin-top:28px">
+      <div class="blk"><span class="lab">เกณฑ์ความสำเร็จ · video-level AUC ของ CFB</span>
+        <div style="display:flex;gap:34px;flex-wrap:wrap">
+          <div class="metric"><span class="v">99.36</span><span class="l">FF++ (in-domain)</span></div>
+          <div class="metric"><span class="v">90.46</span><span class="l">Celeb-DF</span></div>
+          <div class="metric"><span class="v">84.90</span><span class="l">DFDC</span></div>
+          <div class="metric"><span class="v">90.97</span><span class="l">FFIW</span></div>
+        </div></div>
+      <div class="blk"><span class="lab">ขอบเขตการทำซ้ำของเรา</span>
+        <ul class="sm"><li>เตรียมข้อมูล FF++ c23 → fine-tune CFB → ablation (Table VI) → UTOM (Table IX)</li><li>ทดสอบบน FF++, Celeb-DF v2 และ WildDeepfake (ทดสอบเพิ่ม)</li><li>ใช้ pre-trained weight ของผู้เขียน · รันบน Kaggle (T4 ×2) · รายละเอียดในสไลด์ “ขอบเขตการทำซ้ำ”</li></ul></div>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="bu" data-t="Input / Output">
+  <header class="hd"><div class="row"><span class="sec">1 · Business Understanding</span><span class="mini"></span></div><h2>Input และ Output ของงานวิจัย</h2></header>
+  <div class="bd" style="gap:26px">
+    <div class="flow big">
+      <div class="s io"><span class="k">INPUT</span><span class="t">ภาพหรือวิดีโอใบหน้า</span><span class="d">crop 224×224 · 8 frame ต่อวิดีโอ</span></div>
+      <div class="s"><span class="k">MODEL</span><span class="t">CFB (main branch)</span><span class="d">ViT-B/16 ที่ fine-tune แล้ว</span></div>
+      <div class="s"><span class="k">FRAME-LEVEL</span><span class="t"><i>p</i> และ <i>u</i></span><span class="d">ความน่าจะเป็นที่เป็น fake และ uncertainty</span></div>
+      <div class="s"><span class="k">VIDEO-LEVEL</span><span class="t">Video score</span><span class="d">เฉลี่ย <i>p</i> ของ 8 frame</span></div>
+      <div class="s io"><span class="k">OUTPUT</span><span class="t">Real / Fake</span><span class="d">ตัดสินด้วย τ จาก UTOM</span></div>
+    </div>
+    <table>
+      <thead><tr><th style="width:17%">ขั้น</th><th style="width:38%">Input</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td><b>Pre-training</b></td><td>ใบหน้าจริง 550k ภาพ (ไม่มี label)</td><td>Backbone weight <b>FaceBEiT (FB)</b></td></tr>
+        <tr><td><b>Data preparation</b></td><td>วิดีโอ FF++ c23 และ Celeb-DF v2</td><td>ภาพใบหน้า 224×224 พร้อม label และ split train / val / test</td></tr>
+        <tr><td><b>Fine-tuning</b></td><td>ภาพใบหน้า + label, weight FB</td><td>Checkpoint <b>CFB</b> (main + auxiliary branch)</td></tr>
+        <tr><td><b>Inference</b></td><td>ภาพใบหน้าที่ไม่มี label</td><td><i>p</i>, <i>u</i>, score ที่ปรับแล้ว <i>p</i>′ และผล <b>real / fake</b></td></tr>
+        <tr><td><b>Evaluation</b></td><td>Score ระดับวิดีโอ + label จริง</td><td><b>AUC</b> (หลัก), ACC และ threshold τ ที่เหมาะสม</td></tr>
+      </tbody>
+    </table>
+    <p class="note sm">Output ของการทำซ้ำ: checkpoint ที่ฝึกเอง (<span class="mono">best.pth</span>), ประวัติการฝึก (<span class="mono">history.json</span>), score บน test set และตารางเทียบ AUC กับบทความ</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<!-- ============ 2 DU ============ -->
+<section class="slide" data-ph="du" data-t="Datasets">
+  <header class="hd"><div class="row"><span class="sec">2 · Data Understanding</span><span class="mini"></span></div><h2>ชุดข้อมูลที่ใช้ในแต่ละขั้นของงานวิจัย</h2></header>
+  <div class="bd">
+    <table class="big">
+      <thead><tr><th>ขั้น</th><th>ชุดข้อมูล</th><th>ขนาด</th><th>Label</th><th>วัตถุประสงค์</th></tr></thead>
+      <tbody>
+        <tr><td><b>Pre-training</b></td><td>CelebA + CelebV-Text + FFHQ</td><td class="num">550k ภาพใบหน้าจริง</td><td>ไม่มี</td><td>เรียนรู้ลักษณะใบหน้า (SSL)</td></tr>
+        <tr><td><b>Fine-tuning</b></td><td>FaceForensics++ (c23)</td><td class="num">1,000 real + 4,000 fake</td><td>real / fake</td><td>Train / val / test</td></tr>
+        <tr><td rowspan="4"><b>Evaluation</b></td><td>Celeb-DF v2</td><td class="num">518 วิดีโอ (test)</td><td>real / fake</td><td>Cross-dataset</td></tr>
+        <tr><td>DFDC · FFIW · DFDCP · DFD</td><td class="num">5k · 10k · 5k · 3k+ วิดีโอ</td><td>real / fake</td><td>Cross-dataset</td></tr>
+        <tr><td>DF40 + 9 ชุดใหม่ (GAN, Diffusion)</td><td class="num">5k + 5k ภาพต่อชุด</td><td>real / fake</td><td>วิธีปลอมรุ่นใหม่</td></tr>
+        <tr class="hl"><td>WildDeepfake <span class="xs">(ทดสอบเพิ่ม นอกบทความ)</span></td><td class="num">806 sequence (test)</td><td>real / fake</td><td>Deepfake จากอินเทอร์เน็ต</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:16px">ข้อมูลแต่ละขั้นแยกจากกันชัดเจน ชุด evaluation ไม่ถูกใช้ในการฝึก จึงวัด <b>generalization</b> ได้จริง</div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="du" data-t="Data composition">
+  <header class="hd"><div class="row"><span class="sec">2 · Data Understanding</span><span class="mini"></span></div><h2>องค์ประกอบของข้อมูล: fake มากกว่า real ทั้งสองชุด</h2></header>
+  <div class="bd"><div class="g64 grow">
+    <div class="stack" style="gap:30px;justify-content:center">
+      <div class="stack" style="gap:8px"><h3>FaceForensics++ c23 · 5,000 วิดีโอ</h3>{{FFPP}}
+        <div class="lg"><span><i style="background:var(--real)"></i>Real</span><span><i style="background:var(--f1)"></i>Face swap: Deepfakes, FaceSwap</span><span><i style="background:var(--f2)"></i>Reenactment: Face2Face, NeuralTextures</span></div></div>
+      <div class="stack" style="gap:8px"><h3>Celeb-DF v2 test · 518 วิดีโอ</h3>{{CDF}}</div>
+    </div>
+    <div class="stack" style="justify-content:center;gap:22px">
+      <div class="blk"><span class="lab">Class imbalance</span><p>FF++ มี real : fake = <b>1 : 4</b> จึงใช้ <b>AUC</b> เป็นตัวชี้วัดหลักเพราะไม่ขึ้นกับ threshold</p></div>
+      <div class="blk"><span class="lab">Compression</span><p>c23 คือการบีบอัดระดับกลาง ทำให้ร่องรอยระดับ pixel จางลง</p></div>
+      <div class="blk"><span class="lab">Domain shift</span><p>Celeb-DF สร้างด้วยกระบวนการที่ปรับปรุงแล้ว ภาพเนียนกว่า FF++</p></div>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="du" data-t="Forgery cues">
+  <header class="hd"><div class="row"><span class="sec">2 · Data Understanding</span><span class="mini"></span></div><h2>ร่องรอยการปลอมปรากฏที่ส่วนประกอบของใบหน้า</h2></header>
+  <div class="bd"><div class="g64 grow" style="grid-template-columns:1.75fr 1fr;align-items:center">
+    <figure class="fig"><div class="im"><img src="{{FIG4}}" alt="ตัวอย่างใบหน้าปลอม 6 ประเภท: Repeat, Distortion, Overlap, Missing, Artifacts, Brightness"></div>
+      <figcaption><b>Fig. 4</b> ตัวอย่างใบหน้าปลอมและตำแหน่งร่องรอย (กรอบแดง)</figcaption></figure>
+    <div class="stack" style="justify-content:center;gap:22px">
+      <table>
+        <thead><tr><th>ประเภท</th><th>ลักษณะ</th></tr></thead>
+        <tbody>
+          <tr><td>Repeat / Missing</td><td>ส่วนประกอบซ้ำหรือหาย</td></tr>
+          <tr><td>Distortion / Overlap</td><td>รูปร่างบิดเบี้ยวหรือซ้อนกัน</td></tr>
+          <tr><td>Artifacts / Brightness</td><td>รอย blend สีและแสงไม่ต่อเนื่อง</td></tr>
+        </tbody>
+      </table>
+      <p class="key">ร่องรอยมีทั้งระดับ <b>low-level</b> และ <b>semantic</b> จึงต้องการ backbone ที่เข้าใจใบหน้าในระดับ patch</p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<!-- ============ 3 DP ============ -->
+<section class="slide" data-ph="dp" data-t="Preprocessing">
+  <header class="hd"><div class="row"><span class="sec">3 · Data Preparation</span><span class="mini"></span></div><h2>ขั้นตอนการเตรียมข้อมูล: จากวิดีโอสู่ภาพใบหน้า 224×224</h2></header>
+  <div class="bd" style="gap:30px">
+    <div class="flow big">
+      <div class="s io"><span class="k">INPUT</span><span class="t">Video</span><span class="d">FF++ c23 (.mp4)</span></div>
+      <div class="s"><span class="k">STEP 1</span><span class="t">Frame sampling</span><span class="d">8 frame ระยะเท่ากัน</span></div>
+      <div class="s"><span class="k">STEP 2</span><span class="t">Face detection</span><span class="d">RetinaFace</span></div>
+      <div class="s"><span class="k">STEP 3</span><span class="t">Align &amp; crop</span><span class="d">เลือกใบหน้าหลัก</span></div>
+      <div class="s"><span class="k">STEP 4</span><span class="t">Resize</span><span class="d">224 × 224</span></div>
+      <div class="s io"><span class="k">OUTPUT</span><span class="t">Frames + label</span><span class="d">real = 0 · fake = 1</span></div>
+    </div>
+    <div class="g2">
+      <div class="blk"><span class="lab">Official FF++ split (แบ่งตาม identity pair)</span>
+        <table class="big">
+          <thead><tr><th>Split</th><th class="r">Pairs</th><th class="r">Videos</th><th class="r">สัดส่วน</th><th class="r">อัตราส่วน</th></tr></thead>
+          <tbody>
+            <tr><td>Train</td><td class="r">360</td><td class="r">3,600</td><td class="r">72%</td><td class="r">5.14</td></tr>
+            <tr><td>Validation</td><td class="r">70</td><td class="r">700</td><td class="r">14%</td><td class="r">1</td></tr>
+            <tr><td>Test</td><td class="r">70</td><td class="r">700</td><td class="r">14%</td><td class="r">1</td></tr>
+          </tbody>
+        </table></div>
+      <div class="blk"><span class="lab">การตัดสินใจในการออกแบบ</span>
+        <ul style="gap:14px">
+          <li><b>Train : Val : Test = 36 : 7 : 7 ≈ 5 : 1 : 1</b> เป็น hold-out ชุดเดียวที่กำหนดไว้ ไม่ใช่ k-fold</li>
+          <li><b>แบ่งตาม identity</b> เพื่อป้องกัน data leakage</li>
+          <li><b>Augmentation เฉพาะตอนฝึก</b> (จากโค้ด · บทความไม่ระบุ): RGBShift, HSV, Brightness/Contrast, JPEG q40–100, HFlip, Gray (p=.01) + Cutout · ไม่ใช้ random crop</li>
+          <li><b>Label ระดับวิดีโอ</b> ทุก frame ได้ label ตามวิดีโอต้นทาง</li>
+        </ul></div>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="dp" data-t="Split distribution">
+  <header class="hd"><div class="row"><span class="sec">3 · Data Preparation · การแบ่งข้อมูล</span><span class="mini"></span></div><h2>Distribution ก่อนและหลังการแบ่งข้อมูล: ทุก split มีสัดส่วนเท่ากัน</h2></header>
+  <div class="bd"><div class="g64 grow" style="align-items:center">
+    <div class="stack" style="gap:18px">
+      <div class="stack" style="gap:6px"><h3>ก่อนแบ่ง · FF++ c23 จำนวน 5,000 วิดีโอ</h3>{{SPLIT_BEFORE}}</div>
+      <div class="stack" style="gap:6px"><h3>หลังแบ่ง · ความยาวแท่งตามจำนวนวิดีโอจริง</h3>{{SPLIT_AFTER}}</div>
+      <div class="lg"><span><i style="background:var(--real)"></i>Real</span><span><i style="background:var(--f1)"></i>Deepfakes</span><span><i style="background:var(--f2)"></i>Face2Face</span><span><i style="background:var(--f3)"></i>FaceSwap</span><span><i style="background:var(--f4)"></i>NeuralTextures</span></div>
+    </div>
+    <div class="stack" style="gap:16px">
+      <table>
+        <thead><tr><th>Split</th><th class="r">Real</th><th class="r">Fake</th><th class="r">Frames*</th></tr></thead>
+        <tbody>
+          <tr><td>ก่อนแบ่ง</td><td class="r">20%</td><td class="r">80%</td><td class="r">39,999</td></tr>
+          <tr><td>Train</td><td class="r">20%</td><td class="r">80%</td><td class="r">28,799</td></tr>
+          <tr><td>Validation</td><td class="r">20%</td><td class="r">80%</td><td class="r">5,600</td></tr>
+          <tr><td>Test</td><td class="r">20%</td><td class="r">80%</td><td class="r">5,600</td></tr>
+        </tbody>
+      </table>
+      <p class="xs">* จำนวน frame จริงหลังการเตรียมข้อมูล (8 frame ต่อวิดีโอ มี 1 วิดีโอใน train ที่ได้ 7 frame)</p>
+      <p class="key">1 pair (A, B) ให้ real 2 วิดีโอ และ fake 2 วิดีโอต่อ method (A→B, B→A) ทุก split จึงมี <b>real : fake = 1 : 4</b> และแต่ละ method <b>20%</b> เท่ากัน</p>
+      <p class="note sm">Distribution ไม่เปลี่ยนหลังการแบ่ง จึงเทียบผลระหว่าง split ได้ตรง แต่ class imbalance ยังอยู่ จึงใช้ AUC เป็นตัวชี้วัดหลัก</p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="dp" data-t="Our preparation">
+  <header class="hd"><div class="row"><span class="sec">3 · Data Preparation · การทำซ้ำ</span><span class="mini"></span></div><h2>ผลการเตรียมข้อมูล: ได้ภาพใบหน้า 39,999 frame จาก 5,000 วิดีโอ</h2></header>
+  <div class="bd" style="gap:24px">
+    <figure class="fig" style="gap:6px">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+        <div class="stack" style="gap:4px;align-items:center"><img src="{{CROP0}}" alt="original 071" style="width:100%;border:3px solid var(--real)"><span class="sm"><b>Real</b> · 071</span></div>
+        <div class="stack" style="gap:4px;align-items:center"><img src="{{CROP1}}" alt="Deepfakes 071_054" style="width:100%;border:3px solid var(--f1)"><span class="sm"><b>Deepfakes</b></span></div>
+        <div class="stack" style="gap:4px;align-items:center"><img src="{{CROP2}}" alt="Face2Face 071_054" style="width:100%;border:3px solid var(--f2)"><span class="sm"><b>Face2Face</b></span></div>
+        <div class="stack" style="gap:4px;align-items:center"><img src="{{CROP3}}" alt="FaceSwap 071_054" style="width:100%;border:3px solid var(--f3)"><span class="sm"><b>FaceSwap</b></span></div>
+        <div class="stack" style="gap:4px;align-items:center"><img src="{{CROP4}}" alt="NeuralTextures 071_054" style="width:100%;border:3px solid var(--f4)"><span class="sm"><b>NeuralTextures</b></span></div>
+      </div>
+      <figcaption>ภาพใบหน้า 224×224 หลังการ crop จากวิดีโอต้นฉบับ 071 และวิดีโอปลอม 071_054 ทั้ง 4 วิธี</figcaption>
+    </figure>
+    <div class="g2">
+      <table>
+        <thead><tr><th>สถิติการเตรียมข้อมูล</th><th class="r">ค่า</th></tr></thead>
+        <tbody>
+          <tr><td>วิดีโอที่ประมวลผลได้</td><td class="r">5,000 / 5,000</td></tr>
+          <tr><td>จำนวน frame ที่ได้</td><td class="r">39,999 / 40,000 (99.99%)</td></tr>
+          <tr><td>Frame ที่ตรวจไม่พบใบหน้า</td><td class="r">1 frame (train · Deepfakes 569_921)</td></tr>
+          <tr><td>WildDeepfake test (ทดสอบเพิ่ม)</td><td class="r">806 seq. (real 396 · fake 410) · realign 99.4%</td></tr>
+        </tbody>
+      </table>
+      <div class="blk"><span class="lab">ความแตกต่างจากต้นฉบับ</span>
+        <ul class="sm"><li>Repo มีโมดูล tracking ที่คัดลอกจาก FTCN แต่ไม่มีสคริปต์ประมวลผล FF++ ครบขั้นตอน จึงตรวจหน้าเฉพาะ 8 frame และใช้ <b>IoU tracking</b></li><li>ตรวจแล้วว่ารายชื่อวิดีโอตรงกับ repo และไม่มี identity ซ้ำข้าม split</li></ul></div>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<!-- ============ 4 MO ============ -->
+<section class="slide" data-ph="mo" data-t="Pre-training">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Stage 1 Pre-training</span><span class="mini"></span></div><h2>การ pre-train แบบ self-supervised บนใบหน้าจริงให้ผลดีที่สุด</h2></header>
+  <div class="bd"><div class="g64 grow">
+    <figure class="fig" style="justify-content:center">{{PRE}}
+      <figcaption><b>Table I</b> AUC เฉลี่ยบน Celeb-DF, DFDC และ FFIW (backbone ViT-B)</figcaption></figure>
+    <div class="stack" style="justify-content:center;gap:22px">
+      <div class="blk"><span class="lab">ข้อค้นพบ</span>
+        <ul><li>SSL ดีกว่า SL</li><li>ViT ดีกว่า CNN</li><li>ใบหน้าจริงดีกว่า ImageNet</li></ul></div>
+      <div class="blk"><span class="lab">เหตุผลที่เลือก BEiT v2</span>
+        <p>Masked image modeling เรียนรู้ visual token ราย patch จึงแยกความผิดปกติเฉพาะส่วนของใบหน้าได้ดี</p></div>
+      <p class="note sm">ViT-B/16 · BEiT v2 · ImageNet-1K → ใบหน้า 550k ภาพ · A100 ×4</p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Pre-training in replication">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Stage 1 ในการทำซ้ำ</span><span class="mini"></span></div><h2>ใช้ weight ที่ผู้เขียน pre-train แล้ว แทนการ pre-train เอง</h2></header>
+  <div class="bd"><div class="g3 grow" style="align-items:center">
+    <div class="blk"><span class="lab">สิ่งที่ผู้เขียนทำ</span>
+      <ul style="gap:12px">
+        <li>เริ่มจาก ViT-B/16 ที่ pre-train ด้วย BEiT v2 บน ImageNet-1K</li>
+        <li>Pre-train ต่อแบบ self-supervised บนใบหน้าจริง 550k ภาพ (CelebA, CelebV-Text, FFHQ) ไม่ใช้ label และไม่มีภาพปลอม</li>
+        <li>ใช้ A100 ×4 จน converge ได้ FaceBEiT (FB)</li>
+        <li>เผยแพร่ weight ในชื่อ <span class="mono">BEiT-1k-Face-55w.tar</span></li>
+      </ul></div>
+    <div class="blk"><span class="lab">สิ่งที่ไม่ได้เผยแพร่</span>
+      <ul style="gap:12px">
+        <li>สคริปต์เทรนและ visual tokenizer (มีเพียงนิยามโมเดล <span class="mono">modeling_pretrain.py</span>)</li>
+        <li>Config: จำนวน epoch, learning rate, mask ratio</li>
+        <li>รายชื่อภาพทั้ง 550k ภาพ และสัดส่วนของแต่ละ dataset</li>
+        <li>บทความและ supplementary ระบุเพียง “until full convergence”</li>
+      </ul></div>
+    <div class="blk"><span class="lab">ทรัพยากรที่ต้องใช้ (ประมาณการ)</span>
+      <table class="big">
+        <tbody>
+          <tr><td>ความเร็วที่วัดได้จริง (3b)</td><td class="r">49 ภาพ/วินาที</td></tr>
+          <tr><td>ประมาณการ pre-train</td><td class="r">~1.5 ชม./epoch</td></tr>
+          <tr><td>ถ้าใช้ 300 epoch</td><td class="r">~450 ชม. GPU</td></tr>
+        </tbody>
+      </table>
+      <p class="xs">คำนวณจาก 550k ภาพ ÷ ~100 ภาพ/วินาที บน T4 ×2 · 300 epoch เป็นค่าสมมติจาก BEiT v2</p></div>
+  </div>
+  <p class="key">จึงนำ weight FB ของผู้เขียนมา fine-tune ต่อด้วยโค้ดที่ผู้เขียนเผยแพร่ (<span class="mono">train_dualbranch.py</span>, <span class="mono">DBBF.yaml</span>) · ใน log ยืนยันว่าโหลด weight ครบทุก layer (missing 0)</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+
+<section class="slide" data-ph="mo" data-t="Framework">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · ภาพรวม</span><span class="mini"></span></div><h2>Pipeline ที่เสนอ: FB → CFB → UTOM</h2></header>
+  <div class="bd">
+    <figure class="fig grow"><div class="im"><img src="{{FIG3}}" alt="Fig. 3 เปรียบเทียบ traditional FFD pipeline กับ revitalized pipeline ทั้ง 3 ขั้น"></div>
+      <figcaption><b>Fig. 3</b> เปรียบเทียบ pipeline แบบดั้งเดิม (บน) กับ pipeline ที่เสนอ (ล่าง)</figcaption></figure>
+    <div class="g3">
+      <div class="blk"><span class="lab">1 · Pre-training</span><p class="sm">SSL บนใบหน้าจริง ได้ <b>FaceBEiT (FB)</b></p></div>
+      <div class="blk"><span class="lab">2 · Fine-tuning</span><p class="sm">Main และ auxiliary branch แข่งกันเรียนรู้ ได้ <b>CFB</b></p></div>
+      <div class="blk"><span class="lab">3 · Inference</span><p class="sm">ใช้เฉพาะ main branch และเลือก threshold ด้วย <b>UTOM</b></p></div>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="CFB">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Stage 2 Fine-tuning</span><span class="mini"></span></div><h2>Competitive Backbone Framework (CFB)</h2></header>
+  <div class="bd">
+    <div class="g2">
+      <div class="blk"><span class="lab">Decorrelation constraint</span>
+        <p class="eq" style="font-size:26px;padding:18px 0"><i>L</i><sub>dec</sub> = Pearson(<i>f</i><sub>M</sub>, <i>f</i><sub>A</sub>)</p>
+        <ul style="gap:12px">
+          <li><i>f</i><sub>M</sub>, <i>f</i><sub>A</sub> คือ [CLS] token ของ main และ auxiliary branch</li>
+          <li>ลด correlation ทำให้ 2 branch เรียนรู้ร่องรอยการปลอมคนละแบบ</li>
+          <li>ใช้ <b>stop-gradient</b> ที่ main branch ทำให้ <i>L</i><sub>dec</sub> ปรับเฉพาะ auxiliary</li>
+        </ul></div>
+      <div class="blk"><span class="lab">Uncertainty-based fusion module (UFM)</span>
+        <figure class="fig" style="height:200px"><div class="im"><img src="{{FIG5}}" alt="Fig. 5 uncertainty-based fusion module"></div></figure>
+        <p class="eq" style="font-size:18px;padding:4px 0"><i>u</i> = <i>K</i> / <i>S</i>, &nbsp; <i>w</i><sub>M</sub>, <i>w</i><sub>A</sub> = softmax(−<i>u</i><sub>M</sub>, −<i>u</i><sub>A</sub>)</p>
+        <p>Branch ที่มี uncertainty ต่ำกว่าได้น้ำหนักมากกว่าใน <i>F</i> = <i>w</i><sub>M</sub><i>f</i><sub>M</sub> + <i>w</i><sub>A</sub><i>f</i><sub>A</sub></p></div>
+    </div>
+    <div class="key" style="margin-top:14px;display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+      <span class="sm" style="font-weight:600;color:var(--accent);letter-spacing:.08em">LOSS (EQ. 9)</span>
+      <span class="eq" style="padding:0;font-size:22px"><i>L</i> = <i>L</i><sup>M</sup><sub>EDU</sub> + <i>L</i><sup>A</sup><sub>EDU</sub> + <i>L</i><sup>F</sup><sub>ce</sub> + <i>L</i><sub>dec</sub></span>
+      <span class="sm muted"><i>L</i><sub>EDU</sub> = <i>L</i><sub>EDL</sub> + <i>L</i><sub>EUC</sub> (evidential + calibration)</span>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Algorithm overview">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Algorithm</span><span class="mini"></span></div><h2>Algorithm ทั้งหมดในรูป pseudo-code และไฟล์ใน repo ที่ implement แต่ละส่วน</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.12fr 1fr;align-items:center">
+    <div class="stack" style="gap:6px"><span class="codehd">Algorithm 1 · Fine-tune CFB และ inference (ย่อจาก repo)</span>
+<pre class="code"><span class="k">Input</span>: θ<sub>FB</sub> (BEiT-1k-Face-55w), FF++ c23 · T = 8 frame, E = 10
+θ<sub>M</sub> ← θ<sub>FB</sub> ;  θ<sub>A</sub> ← θ<sub>FB</sub> ;  h = LayerNorm + Linear(768→2) <span class="c"># ใช้ร่วมกัน</span>
+<span class="k">for</span> t = 0 … E−1:   λ<sub>t</sub> = 0.01<sup>1 − t/E</sup>                 <span class="c"># annealing</span>
+  <span class="k">for</span> (x, y) <span class="k">in</span> loader:       x ∈ ℝ<sup>B×T×3×224×224</sup>
+    f<sub>M</sub> = ViT<sub>M</sub>(x),  f<sub>A</sub> = ViT<sub>A</sub>(x)         <span class="c"># [CLS] 768 มิติ</span>
+    r  = Pearson(<b>sg</b>(f<sub>M</sub>), f<sub>A</sub>)                <span class="c"># L_dec  Eq. 5</span>
+    z<sub>i</sub> = h(f<sub>i</sub>);  u<sub>i</sub> = 2 / Σ(e<sup>z<sub>i</sub></sup> + 1)           <span class="c"># Eq. 3–4</span>
+    w  = softmax(−10 · [u<sub>M</sub>, u<sub>A</sub>])            <span class="c"># UFM</span>
+    z<sub>F</sub> = h(w<sub>M</sub> f<sub>M</sub> + w<sub>A</sub> f<sub>A</sub>)
+    L  = CE(z<sub>F</sub>) + EDU(z<sub>M</sub>, λ<sub>t</sub>) + EDU(z<sub>A</sub>, λ<sub>t</sub>) + r  <span class="c"># Eq. 9</span>
+    θ ← Lamb(θ, ∇L)    <span class="c"># lr 5e-5 cosine · layer decay 0.75</span>
+<span class="k">Inference</span>: 8 frame → p = softmax(h(ViT<sub>M</sub>(x)))<sub>fake</sub> → mean
+           p′ = tanh(λp / 2(u+ε)) ;  FAKE ⇔ p′ ≥ τ<sub>UTOM</sub></pre></div>
+    <table style="font-size:14.5px">
+      <thead><tr><th>ส่วน</th><th>ไฟล์ · บรรทัด</th><th>บทความ</th></tr></thead>
+      <tbody>
+        <tr><td style="white-space:nowrap">MIM pre-train</td><td class="mono">BEiT_v2/modeling_pretrain.py · 104–137</td><td style="white-space:nowrap">Sec. III-B</td></tr>
+        <tr><td style="white-space:nowrap">ViT-B/16</td><td class="mono">BEiT_v2/modeling_finetune.py · 373–408</td><td>—</td></tr>
+        <tr><td style="white-space:nowrap">CFB + UFM</td><td class="mono">models/custom.py · 25–42</td><td style="white-space:nowrap">Fig. 4–5</td></tr>
+        <tr><td style="white-space:nowrap"><i>L</i><sub>dec</sub></td><td class="mono">models/custom.py · 55–68</td><td>Eq. 5</td></tr>
+        <tr><td style="white-space:nowrap">evidence, <i>u</i></td><td class="mono">models/custom.py · 71–79</td><td style="white-space:nowrap">Eq. 3–4</td></tr>
+        <tr><td style="white-space:nowrap"><i>L</i><sub>EDU</sub></td><td class="mono">losses/edl_loss.py · 110–145</td><td style="white-space:nowrap">Eq. 6–8</td></tr>
+        <tr><td style="white-space:nowrap">Loss รวม</td><td class="mono">engine_finetune.py · 140</td><td>Eq. 9</td></tr>
+        <tr><td style="white-space:nowrap">Inference</td><td class="mono">inference.py · 13–40</td><td style="white-space:nowrap">Sec. III-D</td></tr>
+        <tr class="hl"><td>UTOM</td><td>ไม่มีใน repo · เขียนเองใน 3e</td><td style="white-space:nowrap">Eq. 10–11</td></tr>
+      </tbody>
+    </table>
+  </div><p class="xs" style="margin-top:-6px">BEiT_v2/ = models/lib/BEiT_v2/ · losses/ = common/losses/ · sg = stop-gradient (<span class="mono">.detach()</span>)</p></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026 · github.com/zhenglab/FFDBackbone @ 0675f03</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Algorithm · MIM">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Algorithm ① Pre-training</span><span class="mini"></span></div><h2>Masked image modeling: ทาย visual token ของ patch ที่ถูกปิด</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.1fr 1fr;align-items:center">
+    <div class="stack" style="gap:6px"><span class="codehd">models/lib/BEiT_v2/modeling_pretrain.py · VisionTransformerForMaskedImageModeling</span>
+<pre class="code"><span class="k">def</span> forward_features(self, x, bool_masked_pos):
+    x = self.patch_embed(x)                       <span class="c"># (B,196,768)</span>
+    mask_token = self.mask_token.expand(B, 196, -1)
+    <span class="c"># replace the masked visual tokens by mask_token</span>
+<span class="h">    w = bool_masked_pos.unsqueeze(-1).type_as(mask_token)
+    x = x * (1 - w) + mask_token * w</span>
+    x = torch.cat((cls_tokens, x), dim=1)        <span class="c"># (B,197,768)</span>
+    <span class="k">for</span> blk <span class="k">in</span> self.blocks:                     <span class="c"># 12 block</span>
+        x = blk(x, rel_pos_bias=rel_pos_bias)
+    <span class="k">return</span> self.norm(x)
+
+<span class="k">def</span> forward(self, x, bool_masked_pos):
+    x = self.forward_features(x, bool_masked_pos)[:, 1:]
+<span class="h">    <span class="k">return</span> self.lm_head(x[bool_masked_pos])     <span class="c"># Linear(768 → 8192)</span></span></pre></div>
+    <div class="stack" style="gap:16px">
+      <div class="blk"><span class="lab">ขั้นตอน</span>
+        <ol class="sm" style="gap:6px">
+          <li>แบ่งภาพใบหน้าจริงเป็น 14 × 14 = 196 patch</li>
+          <li>สุ่ม mask บาง patch แล้วแทนด้วย <span class="mono">mask_token</span> ที่เรียนได้</li>
+          <li>ViT encode ทั้ง 197 token (รวม [CLS])</li>
+          <li><span class="mono">lm_head</span> ทายรหัส visual token (1 ใน 8,192) ของ patch ที่ถูก mask · เป้าหมายมาจาก tokenizer VQ-KD ของ BEiT v2</li>
+        </ol></div>
+      <p class="eq" style="font-size:19px"><i>L</i><sub>MIM</sub> = −Σ<sub><i>i</i> ∈ 𝓜</sub> log <i>p</i>( <i>v</i><sub><i>i</i></sub> | <i>x</i><sup>𝓜</sup> )</p>
+      <p class="note sm">ใช้เฉพาะภาพจริง ไม่มี label จึงได้ backbone ที่เข้าใจโครงสร้างใบหน้าปกติ · repo มีแค่นิยามโมเดล ไม่มี tokenizer, data loader และ training loop</p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026 · Peng et al., BEiT v2, 2022</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Algorithm · ViT">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Algorithm ② Backbone</span><span class="mini"></span></div><h2>ViT-B/16: จากภาพ 224 × 224 เป็น feature [CLS] 768 มิติ</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.1fr 1fr;align-items:center">
+    <div class="stack" style="gap:6px"><span class="codehd">BEiT_v2/modeling_finetune.py · forward_features (373–408) + Block</span>
+<pre class="code"><span class="k">def</span> forward_features(self, x):
+    <span class="c"># patch_embed = Conv2d(3, 768, kernel=16, stride=16)</span>
+    x = self.patch_embed(x)                            <span class="c"># (N,196,768)</span>
+    x = torch.cat((cls_tokens, x), dim=1)              <span class="c"># (N,197,768)</span>
+    <span class="k">for</span> blk <span class="k">in</span> self.blocks:                           <span class="c"># 12 ครั้ง</span>
+        x = blk(x, rel_pos_bias=rel_pos_bias)
+    x = self.norm(x)
+<span class="h">    <span class="k">return</span> x[:, 0]                                    <span class="c"># [CLS] (N,768)</span></span>
+
+<span class="c"># Block.forward · layer scale γ เริ่มที่ 0.1 (init_values)</span>
+x = x + drop_path(self.gamma_1 * self.attn(self.norm1(x)))
+x = x + drop_path(self.gamma_2 * self.mlp(self.norm2(x)))
+
+<span class="c"># Attention.forward · 12 head × 64 มิติ</span>
+attn = (q * scale) @ k.transpose(-2, -1)
+<span class="h">attn = attn + relative_position_bias.unsqueeze(0)</span>
+x = attn.softmax(-1) @ v</pre></div>
+    <div class="stack" style="gap:14px">
+      <table>
+        <thead><tr><th>ขั้น</th><th class="r">Shape</th></tr></thead>
+        <tbody>
+          <tr><td>Input 1 batch (B วิดีโอ × T frame)</td><td class="r mono">B×8×3×224×224</td></tr>
+          <tr><td><span class="mono">x.flatten(0,1)</span> รวม frame เป็น batch</td><td class="r mono">N×3×224×224</td></tr>
+          <tr><td>Patch embedding</td><td class="r mono">N×196×768</td></tr>
+          <tr><td>+ [CLS] token</td><td class="r mono">N×197×768</td></tr>
+          <tr><td>12 Transformer block</td><td class="r mono">N×197×768</td></tr>
+          <tr><td>LayerNorm → token [CLS]</td><td class="r mono">N×768</td></tr>
+        </tbody>
+      </table>
+      <p class="eq" style="font-size:18px">Attn = softmax( <i>QK</i><sup>⊤</sup>/√<i>d</i> + <i>B</i><sub>rel</sub> ) <i>V</i></p>
+      <p class="note sm">ไม่มี absolute position embedding (<span class="mono">use_abs_pos_emb=False</span>) ใช้ relative position bias ใน attention แทน · 1 branch ≈ 86 M parameter</p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Algorithm · CFB forward">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Algorithm ③ CFB</span><span class="mini"></span></div><h2>CFB forward: 2 backbone, head ร่วมกัน และรวม feature ตาม uncertainty</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.15fr 1fr;align-items:center">
+    <div class="stack" style="gap:6px"><span class="codehd">models/custom.py · DDBF_BEiT_v2.forward (25–42) · โค้ดจริง</span>
+<pre class="code"><span class="k">def</span> forward(self, x):
+    B, T, C, H, W = x.size()
+    x = x.flatten(0,1)
+    clstoken  = self.backbone_model(x)          <span class="c"># f_M  main</span>
+    clstoken2 = self.backbone_model2(x)         <span class="c"># f_A  auxiliary</span>
+<span class="h">    pearson_loss = pearson_correlation_loss(clstoken.detach(), clstoken2)</span>
+    pred1 = self.header(self.norm_for_cls(clstoken))
+    pred2 = self.header(self.norm_for_cls(clstoken2))
+    pred1_un = uncertainty(pred1)
+    pred2_un = uncertainty(pred2)
+<span class="h">    weight = (-10)*torch.cat([pred1_un,pred2_un], dim=-1)
+    w = torch.nn.functional.softmax(weight, dim=-1)</span>
+    weighted_output = torch.matmul(w.unsqueeze(1),
+        torch.stack((clstoken, clstoken2), dim=1)).squeeze(1)
+    pred = self.header(self.norm_for_cls(weighted_output))
+    output  = pred.view(B, T, -1)               <span class="c"># fused</span>
+    output1 = pred1.view(B, T, -1)              <span class="c"># main</span>
+    output2 = pred2.view(B, T, -1)              <span class="c"># auxiliary</span>
+    <span class="k">return</span> output, output1, output2, pearson_loss</pre></div>
+    <div class="stack" style="gap:14px">
+      <div class="blk"><span class="lab">สิ่งที่เห็นจากโค้ด</span>
+        <ul class="sm" style="gap:6px">
+          <li>ทั้ง 2 branch เริ่มจาก weight FB ชุดเดียวกัน แต่ใช้ <span class="mono">norm_for_cls</span> + <span class="mono">header</span> <b>ร่วมกัน</b> ทั้ง main, aux และ fused</li>
+          <li><span class="mono">.detach()</span> = stop-gradient: <i>L</i><sub>dec</sub> ปรับเฉพาะ auxiliary</li>
+          <li>UFM ใช้ softmax(−10<i>u</i>) แต่บทความเขียน softmax(−<i>u</i>)</li>
+        </ul></div>
+      <div class="blk"><span class="lab">ตัวอย่างการคำนวณ (ค่าสมมติ)</span>
+        <table>
+          <thead><tr><th></th><th class="r">logit z</th><th class="r">u</th><th class="r">w (−10u)</th><th class="r">w (−u)</th></tr></thead>
+          <tbody>
+            <tr><td>main</td><td class="r">[−1.2, 2.3]</td><td class="r">0.163</td><td class="r"><b>0.81</b></td><td class="r">0.54</td></tr>
+            <tr><td>aux</td><td class="r">[0.4, 1.1]</td><td class="r">0.308</td><td class="r"><b>0.19</b></td><td class="r">0.46</td></tr>
+          </tbody>
+        </table>
+        <p class="xs">ตัวคูณ 10 ทำให้ UFM เลือก branch ที่มั่นใจกว่าชัดเจนขึ้น ถ้าไม่มีจะเกือบเป็นค่าเฉลี่ย</p></div>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Algorithm · L_dec, u">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Algorithm ④ L<sub>dec</sub> และ uncertainty</span><span class="mini"></span></div><h2>L<sub>dec</sub> คือค่า Pearson โดยตรง การ minimize จึงดันให้ 2 branch มี correlation ติดลบ</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.1fr 1fr;align-items:center">
+    <div class="stack" style="gap:10px">
+      <span class="codehd">models/custom.py · pearson_correlation_loss (55–68)</span>
+<pre class="code"><span class="k">def</span> pearson_correlation_loss(x, y):
+    mean_x = torch.mean(x, dim=-1, keepdim=True)  <span class="c"># เฉลี่ยตามมิติ feature</span>
+    mean_y = torch.mean(y, dim=-1, keepdim=True)
+    xm = x.sub(mean_x);  ym = y.sub(mean_y)
+    Conv_xy = torch.bmm(xm.unsqueeze(1),
+                        ym.unsqueeze(2)).squeeze()/x.size(-1)
+    std_x = torch.std(x, dim=-1);  std_y = torch.std(y, dim=-1)
+    pearson_cor = Conv_xy/(std_x*std_y)            <span class="c"># 1 ค่าต่อ 1 ภาพ</span>
+<span class="h">    r = torch.clamp(pearson_cor.mean(), -1.0, 1.0)   <span class="c"># เฉลี่ยทั้ง batch</span></span>
+    <span class="k">return</span> r</pre>
+      <span class="codehd">models/custom.py · exp_evidence + uncertainty (71–79)</span>
+<pre class="code">evidence = torch.exp(torch.clamp(output, -10, 10))
+alpha = evidence + 1                               <span class="c"># Dirichlet α</span>
+<span class="h">uncertainty = 2 / torch.sum(alpha, dim=1, keepdim=True)  <span class="c"># u = K/S</span></span></pre></div>
+    <div class="stack" style="gap:14px">
+      <div class="blk"><span class="lab">การตีความ</span>
+        <ul class="sm" style="gap:6px">
+          <li>Pearson คิด<b>ภายในแต่ละภาพ</b>ระหว่าง vector 768 มิติของ f<sub>M</sub> กับ f<sub>A</sub> แล้วเฉลี่ยทั้ง batch</li>
+          <li>ไม่ได้ใช้ |r| หรือ r² จึงไม่ได้หยุดที่ 0 แต่ลดต่อไปทาง −1</li>
+          <li>ผลของเรา: r เริ่ม +0.68 แล้วลงไปที่ −0.34 (CFB full) และ −0.63 (+ UFM ไม่มี EDU)</li>
+        </ul></div>
+      <div class="blk"><span class="lab">ตัวอย่าง: z = [−1.2, 2.3] (real, fake)</span>
+        <table>
+          <tbody>
+            <tr><td>evidence e = exp(z)</td><td class="r">[0.30, 9.97]</td></tr>
+            <tr><td>α = e + 1 · S = Σα</td><td class="r">[1.30, 10.97] · 12.28</td></tr>
+            <tr><td>u = 2 / S</td><td class="r"><b>0.163</b></td></tr>
+            <tr><td>p = softmax(z)<sub>fake</sub></td><td class="r">0.971</td></tr>
+          </tbody>
+        </table>
+        <p class="xs">evidence รวมยิ่งมาก (S สูง) uncertainty ยิ่งต่ำ · K = 2 class</p></div>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Algorithm · Loss">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Algorithm ⑤ Loss</span><span class="mini"></span></div><h2>L<sub>EDU</sub>: ลงโทษเมื่อทายผิดอย่างมั่นใจ และเมื่อทายถูกแต่ไม่มั่นใจ</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.1fr 1fr;align-items:center">
+    <div class="stack" style="gap:10px">
+      <span class="codehd">common/losses/edl_loss.py · EvidenceLoss.edl_loss (110–145) · loss_type = "log"</span>
+<pre class="code">S = torch.sum(alpha, dim=1, keepdim=True)
+<span class="h">A = torch.sum(y * (torch.log(S) - torch.log(alpha)), dim=1)    <span class="c"># L_EDL</span></span>
+<span class="c"># with_avuloss = True  → L_EUC (accuracy vs uncertainty)</span>
+pred_scores, pred_cls = torch.max(alpha / S, 1, keepdim=True)
+uncertainty = self.num_classes / S
+acc_match = (pred_cls == target).float()
+acc_uncertain = - pred_scores * torch.log(1 - uncertainty + eps)
+inacc_certain = - (1 - pred_scores) * torch.log(uncertainty + eps)
+<span class="h">avu_loss = λ_t * acc_match * acc_uncertain \
+         + (1 - λ_t) * (1 - acc_match) * inacc_certain</span></pre>
+      <span class="codehd">engine_finetune.py · train_dual_one_epoch · บรรทัด 140</span>
+<pre class="code">loss_b  = criterion_b(outputs_r, labels_r)      <span class="c"># CE บน fused</span>
+loss_e1 = criterion_e(outputs_r2, labels_r, epoch, total_epoch)  <span class="c"># main</span>
+loss_e2 = criterion_e(outputs_r3, labels_r, epoch, total_epoch)  <span class="c"># aux</span>
+<span class="h">loss = loss_b + loss_e1 + loss_e2 + ploss      <span class="c"># Eq. 9</span></span></pre></div>
+    <div class="stack" style="gap:14px">
+      <p class="eq" style="font-size:18px;padding:2px 0"><i>λ</i><sub><i>t</i></sub> = 0.01 · exp(−ln 0.01 · <i>t</i>/<i>E</i>) = 0.01<sup>1−<i>t</i>/<i>E</i></sup></p>
+      <div class="blk"><span class="lab">ตัวอย่าง: ภาพปลอม (y = fake), z<sub>M</sub> = [−1.2, 2.3]</span>
+        <table>
+          <tbody>
+            <tr><td><i>L</i><sub>EDL</sub> = log S − log α<sub>fake</sub></td><td class="r">log 12.28 − log 10.97 = <b>0.112</b></td></tr>
+            <tr><td>ทายถูก · −p̂ log(1 − u)</td><td class="r">−0.894 · log 0.837 = 0.159</td></tr>
+            <tr><td><i>L</i><sub>EUC</sub> ที่ epoch 0 (λ = 0.010)</td><td class="r">0.002</td></tr>
+            <tr><td><i>L</i><sub>EUC</sub> ที่ epoch 9 (λ = 0.631)</td><td class="r">0.100</td></tr>
+          </tbody>
+        </table></div>
+      <ul class="sm" style="gap:6px">
+        <li>ช่วงแรก λ ต่ำ: เน้นลงโทษภาพที่<b>ทายผิดแต่มั่นใจ</b></li>
+        <li>ช่วงท้าย λ สูง: ดันให้ภาพที่<b>ทายถูกมี u ต่ำ</b> ค่า u จึงใช้ได้ทั้ง UFM และ UTOM</li>
+        <li>Config ของผู้เขียนปิด KL term (<span class="mono">with_kldiv: False</span>)</li>
+      </ul>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Algorithm · Inference, UTOM">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Algorithm ⑥ Inference + UTOM</span><span class="mini"></span></div><h2>Inference ใช้เฉพาะ main branch · UTOM เขียนเองตามสมการในบทความ</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.1fr 1fr;align-items:center">
+    <div class="stack" style="gap:10px">
+      <span class="codehd">inference.py · get_model + Inference_Img (13–40) · โค้ดของผู้เขียน</span>
+<pre class="code">model = custom_ssl.BEiT_v2(pretrained=False)     <span class="c"># 1 branch</span>
+checkpoint = torch.load('…/Final-mainbranch.tar')
+model.load_state_dict(new_state_dict, strict=False)
+output = model(input_tensor).squeeze(1)
+<span class="h">pred = torch.nn.functional.softmax(output, dim=1)[:,1]   <span class="c"># p(fake)</span></span></pre>
+      <span class="codehd">FFD_level3e_eval_utom_wdf.ipynb · UTOM (เขียนเอง · ย่อ)</span>
+<pre class="code"><span class="k">def</span> utom_adjust(p, u, lam=0.02, eps=1e-7):
+<span class="h">    <span class="k">return</span> np.tanh(lam * p / (2 * (u + eps)))        <span class="c"># Eq. 10</span></span>
+
+<span class="k">def</span> best_threshold(y, s):                          <span class="c"># Eq. 11</span>
+    o = np.argsort(s)                      <span class="c"># ทุกค่า score เป็นผู้สมัคร τ</span>
+    real_below = cumsum(real[o])           <span class="c"># real ที่ s &lt; τ (ถูก)</span>
+    fake_above = n_fake − cumsum(fake[o])  <span class="c"># fake ที่ s ≥ τ (ถูก)</span>
+<span class="h">    <span class="k">return</span> s[o][argmax(real_below + fake_above)]</span></pre></div>
+    <div class="stack" style="gap:14px">
+      <div class="blk"><span class="lab">ขั้นตอนตอนใช้งานจริง</span>
+        <ol class="sm" style="gap:6px">
+          <li>หา τ<sub>UTOM</sub> บน source ที่มี label (เช่น FF++)</li>
+          <li>วิดีโอใหม่: เฉลี่ย <i>p</i> และ <i>u</i> ของ 8 frame</li>
+          <li>คำนวณ <i>p</i>′ แล้วตัดสินด้วย τ<sub>UTOM</sub> โดยไม่ต้องมี label ของ target</li>
+        </ol></div>
+      <div class="blk"><span class="lab">ตัวอย่าง</span>
+        <table>
+          <tbody>
+            <tr><td><i>p</i> = 0.971, <i>u</i> = 0.163</td><td class="r"><i>p</i>′ = tanh(0.0595) = <b>0.0595</b></td></tr>
+            <tr><td><i>p</i> = 0.971, <i>u</i> = 0.600</td><td class="r"><i>p</i>′ = <b>0.0162</b></td></tr>
+          </tbody>
+        </table>
+        <p class="xs">score เท่ากันแต่ uncertainty สูงกว่า → <i>p</i>′ ต่ำลง จึงมีโอกาสตกต่ำกว่า τ มากขึ้น</p></div>
+      <p class="note sm">λ = 0.02 ตามบทความ · คำนวณ λ<sub>auto</sub> = 2 / median(<i>p</i>/<i>u</i>) จาก checkpoint ผู้เขียนได้ 0.0236</p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Live demo">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · Live demo</span><span class="mini"></span></div><h2>Live demo: รันโค้ดจริงของ repo ให้เห็นค่าภายในโมเดลทีละขั้น</h2></header>
+  <div class="bd"><div class="g2 grow" style="grid-template-columns:1.25fr 1fr;align-items:center">
+    <table>
+      <thead><tr><th style="width:8%">#</th><th>สิ่งที่รัน</th><th>สิ่งที่ให้สังเกต</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>ดึงและพิมพ์ฟังก์ชันจาก repo แล้ว exec มาใช้</td><td>ตัวเลขทั้งหมดมาจากโค้ดต้นฉบับ</td></tr>
+        <tr><td>2</td><td>วิดีโอ → RetinaFace → align → crop 224</td><td>box, landmark 5 จุด, <i>p</i> และ <i>u</i> ราย frame</td></tr>
+        <tr><td>3</td><td>เดิน ViT ทีละขั้น: patch → 12 block → [CLS]</td><td>shape ทุกขั้น, attention map, z → e → α → <i>u</i></td></tr>
+        <tr><td>4</td><td>CFB บน 8 frame + loss Eq. 9</td><td>Pearson, น้ำหนัก UFM, ∂<i>L</i><sub>dec</sub>/∂<i>f</i><sub>M</sub> = None</td></tr>
+        <tr><td>5</td><td>Celeb-DF 6 วิดีโอ · ผู้เขียน vs ของเรา</td><td>score เท่ากับผลของ 3e_V2</td></tr>
+        <tr><td>6</td><td>UTOM จาก score ทั้งชุด</td><td>ได้ Table IX ซ้ำ, กราฟ <i>p</i>–<i>u</i></td></tr>
+      </tbody>
+    </table>
+    <div class="stack" style="gap:16px">
+      <div class="blk"><span class="lab">Notebook</span>
+        <p class="sm"><span class="mono">FFD_level4_live_demo.ipynb</span> บน Kaggle · GPU T4 ×1 · Internet On</p>
+        <p class="sm">Input: output ของ 3b (<span class="mono">cfb_run</span>), 3c (<span class="mono">cdf_crops</span>), 3e_V2 (<span class="mono">results_level3e</span>) และวิดีโอ .mp4 สั้น ๆ (ไม่บังคับ)</p></div>
+      <div class="metric"><span class="v">~1–3 นาที</span><span class="l">รันครบทุกหัวข้อ (ทดสอบแล้วบน CPU ใช้ 59 วินาที ไม่รวมการดาวน์โหลด checkpoint)</span></div>
+      <p class="note sm">ไม่มีการ train ใหม่ระหว่าง demo · ใช้ checkpoint ของผู้เขียนและของเราที่ฝึกไว้แล้ว</p>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Training setup">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · การตั้งค่าการฝึก</span><span class="mini"></span></div><h2>Hyperparameter ของบทความเทียบกับการทำซ้ำ</h2></header>
+  <div class="bd"><div class="g64 grow">
+    <table>
+      <thead><tr><th>Setting</th><th>บทความ</th><th>การทำซ้ำของเรา</th></tr></thead>
+      <tbody>
+        <tr><td>Initial weight</td><td>FB (1K → Face)</td><td>weight ของผู้เขียน</td></tr>
+        <tr><td>Architecture</td><td>Dual ViT-B/16</td><td>เหมือนกัน (171.5M)</td></tr>
+        <tr><td>Hardware</td><td>GTX 3090 ×2</td><td>T4 ×2</td></tr>
+        <tr><td>Batch size</td><td class="num">64</td><td class="num">64 (32 × 2 GPU, AMP fp16)</td></tr>
+        <tr><td>Optimizer</td><td>Lamb</td><td>Lamb</td></tr>
+        <tr><td>Learning rate</td><td class="num">5e-5, cosine</td><td class="num">5e-5, cosine + warmup</td></tr>
+        <tr><td>Weight / layer decay</td><td class="num">0.05 / 0.75</td><td class="num">0.05 / 0.75</td></tr>
+        <tr><td>Epochs</td><td class="num">60 (FB converge ใน 10)</td><td class="num">10 (ตาม DBBF.yaml)</td></tr>
+        <tr><td>Augmentation</td><td>ไม่ระบุ</td><td>เหมือนโค้ด repo: 6 แบบ + Cutout</td></tr>
+        <tr><td>Training time</td><td>—</td><td class="num">≈ 98 นาที (9.8 นาที/epoch)</td></tr>
+      </tbody>
+    </table>
+    <div class="stack" style="gap:16px">
+      <div class="blk"><span class="lab">การปรับเพื่อให้รันบน T4 ได้</span>
+        <ul class="sm"><li>VRAM 16 GB ไม่พอ จึงใช้ AMP และ gradient checkpointing</li><li>เขียน cosine scheduler รายสเต็ปใหม่ เพราะของ repo ไม่ทำงาน</li></ul></div>
+      <div class="note sm">ผลการฝึกและ learning curve อยู่ในสไลด์ถัดไป</div>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="mo" data-t="Learning curves">
+  <header class="hd"><div class="row"><span class="sec">4 · Modeling · ผลการฝึก</span><span class="mini"></span></div><h2>Learning curve: validation AUC เพิ่มต่อเนื่องจนถึง 96.45% ที่ epoch 10</h2></header>
+  <div class="bd"><div class="g3 grow" style="align-items:center">
+    <div class="blk"><span class="lab">(a) Validation video-AUC (%)</span>{{CURVE_AUC}}
+      <p class="xs">FF++ c23 validation 700 วิดีโอ · เลือก best checkpoint ตาม AUC</p></div>
+    <div class="blk"><span class="lab">(b) Training loss (Eq. 9)</span>{{CURVE_LOSS}}
+      <p class="xs">ลดลงเร็วใน 3 epoch แรก แล้วค่อย ๆ ลดลงต่อ</p></div>
+    <div class="blk"><span class="lab">(c) Pearson(<i>f</i><sub>M</sub>, <i>f</i><sub>A</sub>)</span>{{CURVE_PEAR}}
+      <p class="xs">จาก +0.68 เป็นค่าลบ แสดงว่า <i>L</i><sub>dec</sub> ทำให้ 2 branch เรียนรู้ต่างกันจริง</p></div>
+  </div>
+  <p class="key">ผลสุดท้ายบน <b>FF++ c23 test</b> (700 วิดีโอ) ด้วย main branch: video-AUC <b>96.57%</b> · ACC <b>91.71%</b> (τ = 0.5) · best val AUC 96.45%</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<!-- ============ 5 EV ============ -->
+<section class="slide" data-ph="ev" data-t="Paper results">
+  <header class="hd"><div class="row"><span class="sec">5 · Evaluation</span><span class="mini"></span></div><h2>ผลการทดลอง: CFB ได้ AUC สูงกว่า 84% ในทุก cross-dataset</h2></header>
+  <div class="bd"><div class="g64 grow">
+    <figure class="fig" style="justify-content:center">{{SOTA}}
+      <figcaption><b>Table II</b> เทียบกับ state-of-the-art · TFCU ใช้ข้อมูลเชิงเวลา ส่วน CFB ใช้ภาพเดี่ยว</figcaption></figure>
+    <div class="stack" style="gap:18px;justify-content:center">
+      <div class="blk"><span class="lab">Protocol</span><p class="sm">Train บน FF++ c23 แล้วทดสอบข้าม dataset โดยไม่ fine-tune เพิ่ม · <b>video-level AUC</b> (เฉลี่ย 8 frame)</p></div>
+      <table>
+        <thead><tr><th>Dataset</th><th class="r">AUC (%)</th></tr></thead>
+        <tbody>
+          <tr><td>FF++ (in-domain)</td><td class="r">99.36</td></tr>
+          <tr><td>Celeb-DF</td><td class="r">90.46</td></tr>
+          <tr><td>DFDC</td><td class="r">84.90</td></tr>
+          <tr><td>FFIW</td><td class="r">90.97</td></tr>
+          <tr><td>DFDCP</td><td class="r">87.16</td></tr>
+          <tr><td>DFD</td><td class="r">96.21</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="ev" data-t="Analysis">
+  <header class="hd"><div class="row"><span class="sec">5 · Evaluation · การวิเคราะห์</span><span class="mini"></span></div><h2>ทุกองค์ประกอบช่วยเพิ่มประสิทธิภาพ</h2></header>
+  <div class="bd"><div class="g3 grow" style="align-items:center">
+    <div class="blk"><span class="lab">(a) Ablation</span>{{ABL}}
+      <p class="xs">Table VI · <i>L</i><sub>dec</sub> ช่วยมากที่สุด ส่วน UFM ให้ค่า uncertainty สำหรับ UTOM</p></div>
+    <div class="blk"><span class="lab">(b) Threshold optimization</span>{{UTOM}}
+      <p class="xs"><i>p</i>′ = tanh(λ<i>p</i> / 2(<i>u</i>+ε)) แล้วเลือก τ ที่ให้ ACC สูงสุดบน cross-dataset 1 ชุด</p></div>
+    <div class="blk"><span class="lab">(c) Few-shot adaptation</span>
+      <table>
+        <thead><tr><th>Setting</th><th class="r">ก่อน</th><th class="r">หลัง</th></tr></thead>
+        <tbody>
+          <tr><td>DFDC 10-shot</td><td class="r">84.90</td><td class="r"><b>87.72</b></td></tr>
+          <tr><td>DFDC 20-shot</td><td class="r">84.90</td><td class="r"><b>88.07</b></td></tr>
+          <tr><td>FFIW 20-shot</td><td class="r">90.97</td><td class="r"><b>96.65</b></td></tr>
+        </tbody>
+      </table>
+      <p class="xs">Table V · fine-tune 2 epoch, lr 2e-5 · AUC (%)</p></div>
+  </div>
+  <p class="key"><b>L<sub>dec</sub></b> เพิ่ม AUC 1.10 จุด · <b>UTOM</b> เพิ่ม ACC 2.87 จุด · <b>Adaptation</b> เพิ่ม AUC 2.8–5.7 จุดด้วยภาพเพียง 10–20 ภาพ</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="ev" data-t="Replication scope">
+  <header class="hd"><div class="row"><span class="sec">5 · Evaluation · ขอบเขตการทำซ้ำ</span><span class="mini"></span></div><h2>ขอบเขตการทำซ้ำ: pipeline หลักครบ ส่วนที่ขาดติดข้อมูลหรือทรัพยากร</h2></header>
+  <div class="bd" style="gap:10px">
+    <table class="scope" style="font-size:14.5px">
+      <thead><tr><th style="width:27%">การทดลองในบทความ</th><th style="width:9%">ตาราง</th><th style="width:14%">สถานะ</th><th>เหตุผล / สิ่งที่ทำแทน</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-training FaceBEiT</td><td>Sec. III-B</td><td>ไม่ได้ทำ</td><td>ไม่มีสคริปต์/ข้อมูล · ~450 GPU-ชม. → ใช้ weight ผู้เขียน</td></tr>
+        <tr><td>เทียบ backbone แบบต่าง ๆ</td><td>Table I</td><td>ไม่ได้ทำ</td><td>ต้องใช้ backbone ที่ pre-train เอง → อ้างตัวเลขจากบทความ</td></tr>
+        <tr class="hl"><td><b>Fine-tune CFB บน FF++ c23</b></td><td>—</td><td><b>✓ ทำแล้ว</b></td><td>10 epoch, T4 ×2 · ตรวจ pipeline ด้วย checkpoint ผู้เขียน</td></tr>
+        <tr class="hl"><td><b>Cross-dataset</b></td><td>Table II</td><td><b>บางส่วน</b></td><td>Celeb-DF + WildDeepfake (เพิ่ม) · ชุดอื่นไม่มีสิทธิ์/ข้อมูล</td></tr>
+        <tr><td>9 ชุด GAN/Diffusion</td><td>Table III</td><td>ไม่ได้ทำ</td><td>ผู้เขียนไม่เผยแพร่ข้อมูล</td></tr>
+        <tr><td>DF40</td><td>Table IV</td><td>ไม่ได้ทำ</td><td>ต้องขอสิทธิ์และข้อมูลมีขนาดใหญ่</td></tr>
+        <tr><td>Few-shot adaptation</td><td>Table V</td><td>ไม่ได้ทำ</td><td>ไม่มีโค้ด · ชุดเป้าหมายไม่มีข้อมูล</td></tr>
+        <tr class="hl"><td><b>Ablation องค์ประกอบ CFB</b></td><td>Table VI</td><td><b>✓ ทำแล้ว</b></td><td>6 variant · เพิ่ม seed ให้ FB·CE, CFB full</td></tr>
+        <tr><td>CFB กับ backbone อื่น</td><td>Table VII</td><td>ไม่ได้ทำ</td><td>fine-tune หลาย backbone · นอกกรอบเวลา</td></tr>
+        <tr><td>FB++ (7.5M ภาพ)</td><td>Table VIII</td><td>ไม่ได้ทำ</td><td>ต้อง pre-train · ไม่มี weight เผยแพร่</td></tr>
+        <tr class="hl"><td><b>Threshold (UTOM)</b></td><td>Table IX</td><td><b>✓ ทำซ้ำได้</b></td><td>CDF ACC 85.33 = บทความ · เขียน UTOM เอง</td></tr>
+      </tbody>
+    </table>
+    <p class="note sm">ครบทุกขั้น: data → preprocessing → split → fine-tune CFB → inference + UTOM</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="ev" data-t="Our results">
+  <header class="hd"><div class="row"><span class="sec">5 · Evaluation · การทำซ้ำ</span><span class="mini"></span></div><h2>Checkpoint ของผู้เขียนผ่าน pipeline ของเราได้ผลใกล้บทความ ผลต่างจึงมาจากขั้นการฝึก</h2></header>
+  <div class="bd" style="gap:14px">
+    <table>
+      <thead><tr><th>Model (main branch)</th><th class="r">FF++ AUC</th><th class="r">FF++ ACC</th><th class="r">Celeb-DF AUC</th><th class="r">Celeb-DF ACC</th><th class="r">WDF* AUC</th><th class="r">WDF* ACC</th></tr></thead>
+      <tbody>
+        <tr><td>CFB · รายงานในบทความ</td><td class="r">99.36</td><td class="r">—</td><td class="r">90.46</td><td class="r">83.20</td><td class="r">—</td><td class="r">—</td></tr>
+        <tr class="hl"><td>CFB · checkpoint ผู้เขียน ผ่าน pipeline ของเรา</td><td class="r">99.24</td><td class="r">97.14</td><td class="r">90.05</td><td class="r">82.82</td><td class="r">89.78</td><td class="r">72.33</td></tr>
+        <tr><td><b>CFB · ฝึกเอง</b></td><td class="r"><b>96.57</b></td><td class="r"><b>91.71</b></td><td class="r"><b>84.97</b></td><td class="r"><b>71.04</b></td><td class="r"><b>84.44</b></td><td class="r"><b>68.98</b></td></tr>
+      </tbody>
+    </table>
+    <p class="xs" style="margin-top:-6px">ACC ที่ τ = 0.5 · 95% CI ของ AUC (bootstrap) ฝึกเอง: Celeb-DF [81.51, 88.17], WDF [81.63, 86.96] · checkpoint ผู้เขียน: Celeb-DF [87.38, 92.83] · * WildDeepfake = ทดสอบเพิ่มเติม ไม่มีในบทความ</p>
+    <div class="g3 grow" style="grid-template-columns:1fr 1fr 0.95fr;align-items:center">
+      <div class="blk"><span class="lab">(a) AUC แยกตาม dataset</span>{{XDS}}<div class="lg"><span><i style="background:var(--base);border-radius:50%"></i>checkpoint ผู้เขียน</span><span><i style="background:var(--accent);border-radius:50%"></i>ฝึกเอง</span></div></div>
+      <div class="blk"><span class="lab">(b) AUC แยกตามวิธีปลอม (FF++)</span>{{PERM2}}
+        <p class="xs">ผลต่างกระจุกที่ NeuralTextures (−8.73 จุด) ส่วนวิธีอื่นต่างไม่เกิน 1 จุด</p></div>
+      <div class="blk"><span class="lab">(c) การตีความ</span>
+        <ul class="sm"><li>Preprocessing ของเราถูกต้อง: checkpoint ผู้เขียนได้ AUC ต่างจากบทความ ≤ 0.41 จุด</li><li>ผลต่างของโมเดลที่ฝึกเองจึงมาจากการฝึก เช่น AMP fp16, batch 64, seed เดียว</li><li>NeuralTextures แก้เฉพาะบริเวณปาก ต้องใช้รายละเอียดที่ละเอียดมาก</li></ul></div>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="ev" data-t="Cross-dataset">
+  <header class="hd"><div class="row"><span class="sec">5 · Evaluation · Cross-dataset &amp; UTOM</span><span class="mini"></span></div><h2>UTOM: ทำซ้ำ Table IX ได้ตรงกับบทความ และดีกว่า τ<sub>ot</sub> บน target ที่ไม่เคยเห็น</h2></header>
+  <div class="bd"><div class="g3 grow" style="grid-template-columns:1.05fr 1.05fr 0.9fr;align-items:center">
+    <div class="blk"><span class="lab">(a) ทำซ้ำ Table IX · Celeb-DF ACC (%)</span>
+      <table>
+        <thead><tr><th>Model</th><th class="r">τ = 0.5</th><th class="r">τ<sub>ot</sub></th><th class="r">τ<sub>UTOM</sub></th></tr></thead>
+        <tbody>
+          <tr><td>บทความ</td><td class="r">83.20</td><td class="r">83.78</td><td class="r">85.33</td></tr>
+          <tr class="hl"><td>Checkpoint ผู้เขียน</td><td class="r">82.82</td><td class="r">83.20</td><td class="r"><b>85.33</b></td></tr>
+          <tr><td>ฝึกเอง</td><td class="r">71.04</td><td class="r">79.15</td><td class="r"><b>81.85</b></td></tr>
+        </tbody>
+      </table>
+      <p class="xs">หา τ บน Celeb-DF แล้ววัดบน Celeb-DF ตาม Table IX · λ<sub>auto</sub> ของ checkpoint ผู้เขียน = 0.0236 ใกล้ค่า 0.02 ในบทความ</p></div>
+    <div class="blk"><span class="lab">(b) หา τ บน source แล้วใช้กับ target อื่น</span>{{UTOM2}}<div class="lg"><span><i style="background:var(--base);border-radius:50%"></i>checkpoint ผู้เขียน</span><span><i style="background:var(--accent);border-radius:50%"></i>ฝึกเอง</span></div>
+      <p class="xs">เฉลี่ยทุกคู่ source → target จาก FF++, Celeb-DF, WDF</p></div>
+    <div class="blk"><span class="lab">(c) ความแม่นยำแยก class · Celeb-DF</span>{{CDF_CLS}}
+      <p class="xs">โมเดลที่ฝึกเองพลาดใบหน้าปลอมมากกว่า real ที่ τ = 0.5</p></div>
+  </div>
+  <p class="key">τ<sub>UTOM</sub> ดีกว่า τ<sub>ot</sub> <b>+8.3 จุด</b> (ผู้เขียน) และ <b>+5.3 จุด</b> (ฝึกเอง) เมื่อย้ายข้าม dataset แต่ยัง<b>ไม่ดีกว่า τ = 0.5</b> ในการทดลองของเรา</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="ev" data-t="Ablation (ours)">
+  <header class="hd"><div class="row"><span class="sec">5 · Evaluation · Ablation (ทำซ้ำ Table VI)</span><span class="mini"></span></div><h2>Ablation: แนวโน้มต่างจากบทความ แต่ผลต่างอยู่ในช่วงความเชื่อมั่น</h2></header>
+  <div class="bd"><div class="g3 grow" style="grid-template-columns:1.1fr 1.2fr 0.85fr;align-items:center">
+    <div class="blk"><span class="lab">(a) Celeb-DF AUC · บทความ vs ฝึกเอง</span>{{ABL2}}<div class="lg"><span><i style="background:var(--base);border-radius:50%"></i>บทความ (Table VI)</span><span><i style="background:var(--accent);border-radius:50%"></i>ฝึกเอง</span></div></div>
+    <div class="blk"><span class="lab">(b) AUC ของแต่ละ variant (main branch, %)</span>
+      <table>
+        <thead><tr><th>Variant</th><th class="r">FF++</th><th class="r">CDF</th><th class="r">WDF*</th><th class="r">Pearson</th></tr></thead>
+        <tbody>
+          <tr><td>FB · CE</td><td class="r">97.37</td><td class="r"><b>87.92</b></td><td class="r"><b>86.17</b></td><td class="r">—</td></tr>
+          <tr><td>FB · EDU</td><td class="r">97.14</td><td class="r">87.24</td><td class="r">85.18</td><td class="r">—</td></tr>
+          <tr><td>CFB base</td><td class="r">97.49</td><td class="r">87.04</td><td class="r">85.80</td><td class="r">+0.74</td></tr>
+          <tr><td>+ L<sub>dec</sub></td><td class="r"><b>97.60</b></td><td class="r">85.53</td><td class="r">85.86</td><td class="r">−0.38</td></tr>
+          <tr><td style="white-space:nowrap">+ L<sub>dec</sub> + UFM</td><td class="r">97.43</td><td class="r">86.39</td><td class="r">86.02</td><td class="r">−0.63</td></tr>
+          <tr><td>CFB full</td><td class="r">96.57</td><td class="r">84.97</td><td class="r">84.44</td><td class="r">−0.34</td></tr>
+        </tbody>
+      </table>
+      <p class="xs">Pearson(<i>f</i><sub>M</sub>, <i>f</i><sub>A</sub>) ที่ epoch สุดท้าย · ฝึก 10 epoch ต่อ variant บน T4&nbsp;×2</p></div>
+    <div class="blk"><span class="lab">(c) ข้อสังเกต</span>
+      <ul class="sm"><li><i>L</i><sub>dec</sub> ทำงานตามที่ออกแบบ: Pearson เปลี่ยนจาก +0.74 เป็นค่าลบ</li><li>แต่ความต่างของ branch ไม่ได้เพิ่ม AUC ใน run ของเรา</li><li>ผลต่างระหว่าง variant (≤ 3 จุด) อยู่ในช่วง 95% CI (±3 จุด)</li><li>ใช้ seed เดียว จึงยังสรุปไม่ได้ว่าแนวโน้มกลับด้านจริง</li></ul></div>
+  </div></div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<!-- ============ 6 DE ============ -->
+<section class="slide" data-ph="de" data-t="Deployment">
+  <header class="hd"><div class="row"><span class="sec">6 · Deployment</span><span class="mini"></span></div><h2>การนำไปใช้งาน: ใช้เฉพาะ main branch และ threshold จาก UTOM</h2></header>
+  <div class="bd" style="gap:30px">
+    <div class="flow big">
+      <div class="s io"><span class="k">INPUT</span><span class="t">ภาพหรือวิดีโอ</span><span class="d">ไม่มี label</span></div>
+      <div class="s"><span class="k">PREPROCESS</span><span class="t">Face crop</span><span class="d">224 × 224</span></div>
+      <div class="s"><span class="k">MODEL</span><span class="t">Main branch</span><span class="d">ลดการคำนวณครึ่งหนึ่ง</span></div>
+      <div class="s"><span class="k">SCORE</span><span class="t"><i>p</i>, <i>u</i> → <i>p</i>′</span><span class="d">ปรับด้วย uncertainty</span></div>
+      <div class="s io"><span class="k">OUTPUT</span><span class="t">Real / Fake</span><span class="d">ตัดสินด้วย τ จาก UTOM</span></div>
+    </div>
+    <div class="g2">
+      <div class="blk"><span class="lab">จุดเด่นและข้อจำกัดของบทความ</span>
+        <ul style="gap:10px">
+          <li>ปรับตัวกับวิธีปลอมใหม่ได้ด้วยภาพเพียง 10–20 ภาพ</li>
+          <li>ใช้กับ presentation attack detection ได้ด้วย</li>
+          <li>การ pre-train ใช้ทรัพยากรสูง (A100 ×4)</li>
+          <li>ขึ้นกับ face detector และยังทำได้ไม่ดีกับใบหน้าสังเคราะห์ทั้งหน้า (StyleGAN3)</li>
+        </ul></div>
+      <div class="blk"><span class="lab">ข้อจำกัดและงานต่อของการทำซ้ำ</span>
+        <ul style="gap:10px">
+          <li>ใช้ pre-trained weight ของผู้เขียน ไม่ได้ pre-train เอง</li>
+          <li>ประเมิน cross-dataset ได้ 2 ชุด: Celeb-DF (ตามบทความ) และ WildDeepfake (ทดสอบเพิ่ม) · ไม่ได้ทำ DFDC, FFIW, DFDCP, DFD และ few-shot</li>
+          <li>ฝึกด้วย seed เดียวและ AMP fp16 ทั้ง CFB และ ablation</li>
+        </ul>
+        <p class="note sm"><b>งานในอนาคต:</b> ฝึกหลาย seed / fp32 เพื่อยืนยัน ablation · ประเมิน DFDC / FFIW · few-shot adaptation</p></div>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide" data-ph="de" data-t="Reproducibility">
+  <header class="hd"><div class="row"><span class="sec">6 · Deployment · Reproducibility</span><span class="mini"></span></div><h2>ข้อจำกัดด้าน reproducibility ที่พบจากการตรวจบทความ, supplementary และ repository</h2></header>
+  <div class="bd">
+    <table>
+      <thead><tr><th style="width:22%">ประเด็น</th><th>สิ่งที่ผู้เขียนให้มา</th><th style="width:30%">ผลต่อการทำซ้ำ</th></tr></thead>
+      <tbody>
+        <tr><td><b>Pre-training</b></td><td>มีแต่ weight สำเร็จรูป ไม่มีสคริปต์, config หรือจำนวน epoch</td><td>ใช้ weight ของผู้เขียน</td></tr>
+        <tr><td><b>Dataset</b></td><td>บอกชื่อและอ้างอิง แต่ไม่มีลิงก์ (ติดเงื่อนไขห้ามแจกต่อ)</td><td>ต้องขอสิทธิ์หรือหาข้อมูลเอง</td></tr>
+        <tr><td><b>FFIW</b></td><td>บทความเขียน 10k วิดีโอ แต่ไฟล์ score มี 500 วิดีโอโดยไม่ระบุชื่อ</td><td>เทียบผลได้แบบประมาณเท่านั้น</td></tr>
+        <tr><td><b>DFDCP, DFD</b></td><td>ไม่ระบุ subset และจำนวนที่ใช้</td><td>ต้องกำหนดเอง</td></tr>
+        <tr><td><b>UTOM</b></td><td>มีสมการในบทความ แต่ไม่มีโค้ดใน repo</td><td>ต้องเขียนเอง</td></tr>
+        <tr><td><b>Ablation, few-shot</b></td><td>ไม่มีสคริปต์หรือตัวเลือกใน config · few-shot ไม่ระบุวิธีสุ่มและการแยกจากชุดทดสอบ</td><td>ต้องแก้โค้ดและกำหนด protocol เอง</td></tr>
+        <tr><td><b>โค้ด vs บทความ</b></td><td>UFM ในโค้ดใช้ softmax(−10·u) ส่วนบทความเขียน softmax(−u) · augmentation 6 แบบ + Cutout มีในโค้ด แต่บทความไม่กล่าวถึง</td><td>ทำตามโค้ดของผู้เขียน</td></tr>
+        <tr><td><b>README</b></td><td>สั่งรัน <code>train.py</code> และ <code>eval.py</code> แต่ทั้งสองไฟล์ไม่มีใน repo (มีเพียง <code>train_dualbranch.py</code>, <code>inference.py</code>)</td><td>ต้องเขียนลูปประเมินผลเอง</td></tr>
+      </tbody>
+    </table>
+    <p class="note sm">Pipeline หลัก (FF++ → fine-tune CFB → ทดสอบ FF++ และ Celeb-DF) มีโค้ด, config, weight และรายชื่อข้อมูลครบ จึงทำซ้ำได้จริง</p>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+
+<!-- ============ CONCLUSION ============ -->
+<section class="slide" data-ph="x" data-t="Conclusion">
+  <header class="hd"><div class="row"><span class="sec">สรุป</span><span class="mini"></span></div><h2>บทความปรับปรุง pipeline การตรวจจับใบหน้าปลอมครบทั้ง 3 ขั้น</h2></header>
+  <div class="bd">
+    <div class="g3">
+      <div class="blk"><span class="lab">Pre-training · FB (บทความ)</span><div class="metric"><span class="v">86.56</span><span class="l">Avg. AUC (จาก 77.11 ของ SL)</span></div><p class="sm">SSL บนใบหน้าจริงให้ backbone ที่เข้าใจใบหน้า</p></div>
+      <div class="blk"><span class="lab">Fine-tuning · CFB (บทความ)</span><div class="metric"><span class="v">89.94</span><span class="l">Avg. AUC บน 5 cross-dataset</span></div><p class="sm">2 branch แข่งกันค้นหาร่องรอยการปลอมที่ต่างกัน</p></div>
+      <div class="blk"><span class="lab">Inference · UTOM (บทความ)</span><div class="metric"><span class="v">82.29</span><span class="l">Avg. ACC (จาก 79.42 ที่ τ = 0.5)</span></div><p class="sm">ใช้ uncertainty ช่วยเลือก threshold โดยไม่ต้องมี label</p></div>
+    </div>
+    <div class="g2">
+      <div class="blk"><span class="lab">ผลการทำซ้ำ · In-domain (FF++ c23)</span>
+        <ul class="sm"><li>Checkpoint ผู้เขียนผ่าน pipeline ของเรา AUC <b>99.24%</b> (บทความ 99.36%) ยืนยันว่า preprocessing ถูกต้อง</li><li>ฝึกเอง AUC <b>96.57%</b> ผลต่างกระจุกที่ NeuralTextures</li><li><i>L</i><sub>dec</sub> ทำให้ Pearson ระหว่าง 2 branch ติดลบตามที่ออกแบบ</li></ul></div>
+      <div class="blk"><span class="lab">ผลการทำซ้ำ · Cross-dataset &amp; UTOM</span>
+        <ul class="sm"><li>Celeb-DF AUC: ผู้เขียน <b>90.05%</b> · ฝึกเอง <b>84.97%</b> · WildDeepfake (ทดสอบเพิ่ม) 89.78% / 84.44%</li><li>ทำซ้ำ Table IX ได้ ACC <b>85.33%</b> ตรงกับบทความ</li><li>Ablation ยังไม่ยืนยันแนวโน้มของบทความ (seed เดียว, CI ซ้อนทับ)</li></ul></div>
+    </div>
+  </div>
+  <footer class="ft"><span>Guo et al., IEEE TPAMI, 2026</span><span class="pg"></span></footer>
+</section>
+
+<section class="slide title" data-ph="x" data-t="Q&amp;A">
+  <div class="tb" style="gap:26px">
+    <h1 style="font-size:56px">Questions &amp; Discussion</h1>
+    <p class="th">ขอบคุณครับ/ค่ะ</p>
+    <div class="cite" style="max-width:900px">Z. Guo, Y. Liu, J. Zhang, H. Zheng, and S. Shan, “Revisiting Face Forgery Detection: From Facial Representation to Forgery Detection,” <i>IEEE TPAMI</i>, vol. 48, no. 8, pp. 9228–9244, 2026. doi: 10.1109/TPAMI.2026.3675018</div>
+  </div>
+  <div class="bot"><span>Code: <span class="mono">github.com/zhenglab/FFDBackbone</span></span><span class="muted">นางสาวกัญญ์วรา ถาวโรฤทธิ์ · มหาวิทยาลัยขอนแก่น</span></div>
+</section>
+
+</div></main>
+
+<div class="overview" id="ov" hidden><div class="gr" id="ovg"></div></div>
+<nav class="ctl" aria-label="Slide controls">
+  <button id="prev" aria-label="สไลด์ก่อนหน้า">←</button>
+  <span id="cnt">1 / 1</span>
+  <button id="next" aria-label="สไลด์ถัดไป">→</button>
+  <button id="ovBtn">ภาพรวม</button>
+</nav>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const deck=document.getElementById('deck'), vp=document.getElementById('vp');
+  const PH=[['bu','BU'],['du','DU'],['dp','DP'],['mo','MO'],['ev','EV'],['de','DE']];
+  const order=PH.map(p=>p[0]);
+  let i=0;
+  const narrow=()=>matchMedia('(max-width:760px)').matches;
+  slides.forEach((s,k)=>{
+    const pg=s.querySelector('.pg'); if(pg) pg.textContent=(k+1)+' / '+slides.length;
+    const m=s.querySelector('.mini'); if(!m) return;
+    // phase index for slides outside CRISP (profile/outline/conclusion) follows position
+    let pi=order.indexOf(s.dataset.ph);
+    if(pi<0){ pi = k<3 ? -1 : 6; }
+    PH.forEach(([id,ab],j)=>{
+      const b=document.createElement('button'); b.textContent=ab; b.title=id;
+      if(j===pi) b.className='cur'; else if(j<pi) b.className='past';
+      b.onclick=()=>go(id); m.appendChild(b);
+    });
+  });
+  function fit(){
+    if(narrow()){deck.style.transform='';return}
+    const r=vp.getBoundingClientRect();
+    deck.style.transform='scale('+Math.max(Math.min((r.width-32)/1280,(r.height-24)/720),.2)+')';
+  }
+  function show(n,scroll){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    document.getElementById('cnt').textContent=(i+1)+' / '+slides.length;
+    try{history.replaceState(null,'','#s'+(i+1))}catch(e){}
+    if(scroll&&narrow()) slides[i].scrollIntoView({block:'start'});
+  }
+  function go(ph){const k=slides.findIndex(s=>s.dataset.ph===ph); if(k>=0){show(k,true);ov.hidden=true}}
+  document.querySelectorAll('[data-go]').forEach(g=>{
+    g.addEventListener('click',()=>go(g.dataset.go));
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'){go(g.dataset.go)}});
+  });
+  document.getElementById('prev').onclick=()=>show(i-1,true);
+  document.getElementById('next').onclick=()=>show(i+1,true);
+  const ov=document.getElementById('ov'), ovg=document.getElementById('ovg');
+  slides.forEach((s,k)=>{
+    const b=document.createElement('button'); const h=s.querySelector('h1,h2');
+    b.innerHTML='<span class="k">'+(k+1)+' · '+s.dataset.t+'</span><span>'+(h?h.textContent:'')+'</span>';
+    b.onclick=()=>{show(k,true);ov.hidden=true}; ovg.appendChild(b);
+  });
+  const toggleOv=()=>{if(ov.hidden){[...ovg.children].forEach((b,k)=>b.classList.toggle('cur',k===i));ov.hidden=false}else ov.hidden=true};
+  document.getElementById('ovBtn').onclick=toggleOv;
+  document.addEventListener('keydown',e=>{
+    if(e.target.closest('g.n'))return;
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1,true)}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1,true)}
+    else if(e.key==='Home')show(0,true); else if(e.key==='End')show(slides.length-1,true);
+    else if(e.key==='g'||e.key==='G')toggleOv(); else if(e.key==='Escape')ov.hidden=true;
+  });
+  let x0=null;
+  vp.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+  vp.addEventListener('touchend',e=>{if(x0===null||narrow())return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>50)show(i+(dx<0?1:-1));x0=null});
+  addEventListener('resize',fit);
+  const m=/^#s(\d+)$/.exec(location.hash||''); fit(); show(m?parseInt(m[1],10)-1:0);
+})();
+</script>
