@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluation Metrics: TP, TN, FP, FN and everything derived from them</title>
+<!-- Source: https://claude.ai/public/artifacts/5c7fe16d-8c28-4301-838d-847c21a89bb2 (shared in class) -->
+<style>
+:root{
+  --canvas:#e6ebf1;
+  --panel:#ffffff;
+  --ink:#0f1e33;
+  --ink2:#6c7c90;
+  --line:#dbe3ec;
+  --data:#1f4fd8;
+  --tp:#0e9c86;
+  --tn:#4a6fa5;
+  --fp:#e4941f;
+  --fn:#b3184c;
+  --tp-bg:#e4f5f1;
+  --tn-bg:#e8eef8;
+  --fp-bg:#fdf1dd;
+  --fn-bg:#fbe6ec;
+  --mono:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--canvas);color:var(--ink);font-family:var(--sans);
+  font-size:14px;line-height:1.5;padding:26px 18px 40px;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;}
+.back{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--data);text-decoration:none;margin-bottom:14px;}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px;}
+h1{font-size:clamp(25px,4.4vw,40px);line-height:1.05;letter-spacing:-.033em;font-weight:760;margin:0 0 10px;}
+h1 em{font-style:normal;color:var(--data);}
+.lede{max-width:66ch;color:#3d4d63;font-size:15px;margin:0 0 22px;}
+
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px 20px;margin-bottom:14px;}
+.stage-head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
+.num{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--data);background:#eaf0fe;border-radius:5px;padding:2px 7px;flex:none;}
+h2{font-size:16px;font-weight:680;letter-spacing:-.012em;margin:0;}
+.hint{color:var(--ink2);font-size:12.5px;margin:0 0 15px;max-width:76ch;}
+.cols{display:grid;gap:16px;grid-template-columns:1fr;}
+@media(min-width:900px){.cols{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);}}
+@media(min-width:900px){.cols.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}}
+
+/* controls */
+.ctl{display:flex;flex-wrap:wrap;gap:7px 16px;align-items:center;margin-bottom:14px;}
+.knob{display:flex;align-items:center;gap:8px;}
+.klab{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--ink2);text-transform:uppercase;}
+.kval{font-family:var(--mono);font-weight:700;font-size:12px;color:#fff;background:var(--data);border-radius:5px;padding:2px 7px;min-width:44px;text-align:center;}
+input[type=range]{width:112px;accent-color:var(--data);}
+button{font-family:var(--sans);font-size:12px;font-weight:620;color:var(--ink);background:#f2f5f9;border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;max-width:100%;transition:background .15s,border-color .15s;}
+button:hover{background:#e7edf6;border-color:#c6d3e2;}
+button.on{background:var(--data);border-color:var(--data);color:#fff;}
+:focus-visible{outline:2.5px solid var(--fp);outline-offset:2px;}
+svg{width:100%;height:auto;display:block;}
+.tick{font-family:var(--mono);font-size:9.5px;fill:var(--ink2);}
+.axname{font-family:var(--mono);font-size:9.5px;fill:var(--ink2);letter-spacing:.06em;}
+@media(max-width:640px){.tick{font-size:13px;}.axname{font-size:11.5px;}}
+
+/* four outcome chips */
+.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;}
+@media(min-width:560px){.chips{grid-template-columns:repeat(4,minmax(0,1fr));}}
+.chip{border-radius:10px;padding:9px 10px;border:1px solid transparent;}
+.chip .code{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;}
+.chip .cnt{font-family:var(--mono);font-size:21px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;}
+.chip .alias{font-size:10.5px;line-height:1.35;color:#55637a;margin-top:2px;}
+.c-tp{background:var(--tp-bg);border-color:#bfe6dd;color:var(--tp);}
+.c-fn{background:var(--fn-bg);border-color:#f0c8d5;color:var(--fn);}
+.c-fp{background:var(--fp-bg);border-color:#f2dcb4;color:#a86c0d;}
+.c-tn{background:var(--tn-bg);border-color:#ccd9ed;color:var(--tn);}
+
+/* confusion matrix */
+.cmwrap{overflow-x:auto;}
+table.cm{border-collapse:separate;border-spacing:4px;width:100%;min-width:420px;}
+table.cm td,table.cm th{padding:0;}
+.hd{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:700;text-align:center;padding:4px 2px;}
+.hd.side{writing-mode:horizontal-tb;text-align:right;padding-right:6px;}
+.cell{border-radius:9px;padding:11px 9px;text-align:center;transition:box-shadow .15s,opacity .15s;}
+.cell .lb{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;}
+.cell .vv{font-family:var(--mono);font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;}
+.cell .al{font-size:10px;color:#5b687d;line-height:1.3;}
+.cell.dim{opacity:.3;}
+.cell.den{box-shadow:0 0 0 2px #b9c6d6;}
+.cell.numr{box-shadow:0 0 0 3px var(--data);}
+.marg{background:#f4f7fa;border-radius:9px;padding:8px 7px;text-align:center;}
+.marg .mn{font-family:var(--mono);font-size:9.5px;color:var(--ink2);letter-spacing:.05em;line-height:1.3;}
+.marg .mv{font-family:var(--mono);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+.scrollhint{display:none;}
+@media(max-width:700px){.scrollhint{display:block;margin-top:6px;}}
+.popbar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin-top:14px;}
+.popbar div{transition:width .2s;}
+.popcap{font-family:var(--mono);font-size:10px;color:var(--ink2);margin-top:6px;}
+
+/* metric cards */
+.mgrid{display:grid;gap:9px;grid-template-columns:1fr;}
+@media(min-width:620px){.mgrid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(min-width:980px){.mgrid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+.mcard{
+  text-align:left;background:#fbfcfe;border:1px solid var(--line);border-radius:11px;
+  padding:11px 12px;cursor:pointer;font:inherit;color:inherit;display:block;width:100%;
+}
+.mcard:hover{background:#f2f6fc;border-color:#c6d3e2;}
+.mcard.sel{background:#fff;border-color:var(--data);box-shadow:0 0 0 2px rgba(31,79,216,.16);}
+.mcard .mname{font-size:13px;font-weight:680;letter-spacing:-.008em;margin-bottom:1px;}
+.mcard .maka{font-family:var(--mono);font-size:9.5px;color:var(--ink2);letter-spacing:.04em;margin-bottom:7px;line-height:1.35;}
+.mcard .mform{font-family:var(--mono);font-size:11px;color:#41506a;margin-bottom:3px;}
+.mcard .msub{font-family:var(--mono);font-size:11px;color:var(--ink2);}
+.mcard .mval{font-family:var(--mono);font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:5px;}
+.mcard .mbar{height:4px;border-radius:3px;background:#e6ecf4;margin-top:5px;overflow:hidden;}
+.mcard .mbar i{display:block;height:100%;background:var(--data);border-radius:3px;}
+.t-tp{color:var(--tp);font-weight:700;}
+.t-tn{color:var(--tn);font-weight:700;}
+.t-fp{color:#a86c0d;font-weight:700;}
+.t-fn{color:var(--fn);font-weight:700;}
+.readout{background:#f4f7fa;border-radius:9px;padding:11px 13px;font-size:12.5px;color:#43536a;margin-top:12px;}
+.readout b{color:var(--ink);}
+
+/* wikipedia style full table */
+.big{overflow-x:auto;}
+table.wk{border-collapse:separate;border-spacing:3px;width:100%;min-width:640px;font-size:11px;}
+table.wk td{background:#f7f9fc;border-radius:7px;padding:7px 8px;vertical-align:top;}
+table.wk td.q{background:#eef2f8;}
+table.wk td.blank{background:transparent;}
+.wn{font-family:var(--mono);font-size:9.5px;color:var(--ink2);line-height:1.35;display:block;}
+.wf{font-family:var(--mono);font-size:9.5px;color:#8b99ac;display:block;margin-top:2px;}
+.wv{font-family:var(--mono);font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;display:block;margin-top:3px;}
+td.cTP{background:var(--tp-bg);}
+td.cFN{background:var(--fn-bg);}
+td.cFP{background:var(--fp-bg);}
+td.cTN{background:var(--tn-bg);}
+
+.notes{border-top:1px solid #cfd8e3;margin-top:20px;padding-top:16px;}
+.notes h3{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:700;margin:0 0 10px;}
+.notes ul{margin:0;padding-left:17px;color:#43536a;font-size:12.5px;}
+.notes li{margin-bottom:7px;}
+.notes b{color:var(--ink);}
+.src{font-family:var(--mono);font-size:10px;color:var(--ink2);margin-top:14px;}
+.src a{color:var(--data);}
+#errbar{display:none;background:#fdf0f4;border:1px solid #f2ccd9;color:#8e1039;border-radius:9px;padding:10px 12px;font-family:var(--mono);font-size:12px;margin-bottom:14px;}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../index.html">&larr; MSC DPML 2026 · หน้ารวมเนื้อหา</a>
+  <div id="errbar"></div>
+
+  <header>
+    <div class="eyebrow">Binary classification</div>
+    <h1>TP, TN, FP, FN<br>and <em>everything derived from them</em></h1>
+    <p class="lede">A cohort of 1,000 patients, a model that outputs a score, and one threshold that turns that score into a decision. Move the threshold and the prevalence, and watch which metrics move with them and which do not.</p>
+  </header>
+
+  <!-- 01 -->
+  <section class="stage">
+    <div class="stage-head"><span class="num">01</span><h2>One threshold, four outcomes</h2></div>
+    <p class="hint">Each patient is truly positive or truly negative, and the model calls them positive or negative. Two ways to be right, two ways to be wrong. Nothing else on this page is new information: every metric below is a ratio of these four counts.</p>
+
+    <div class="ctl">
+      <div class="knob"><span class="klab">threshold</span><span class="kval" id="v-thr">55</span>
+        <input type="range" id="s-thr" min="5" max="95" step="1" value="55" data-act="thr" aria-label="decision threshold"></div>
+      <div class="knob"><span class="klab">prevalence</span><span class="kval" id="v-prev">20%</span>
+        <input type="range" id="s-prev" min="1" max="60" step="1" value="20" data-act="prev" aria-label="disease prevalence"></div>
+      <div class="knob"><span class="klab">separation</span><span class="kval" id="v-sep">AUC .92</span>
+        <input type="range" id="s-sep" min="0" max="40" step="1" value="22" data-act="sep" aria-label="model separation"></div>
+      <div class="knob"><button data-act="scale" data-val="count" id="b-count" class="on">by count</button><button data-act="scale" data-val="shape" id="b-shape">by shape</button></div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <div id="dist"></div>
+        <div class="popcap" id="dist-cap"></div>
+        <div class="chips">
+          <div class="chip c-tp"><div class="code">TP</div><div class="cnt" id="n-tp">0</div><div class="alias">true positive, hit. Sick and flagged.</div></div>
+          <div class="chip c-fn"><div class="code">FN</div><div class="cnt" id="n-fn">0</div><div class="alias">false negative, miss, type II error. Sick and cleared.</div></div>
+          <div class="chip c-fp"><div class="code">FP</div><div class="cnt" id="n-fp">0</div><div class="alias">false positive, false alarm, type I error. Well and flagged.</div></div>
+          <div class="chip c-tn"><div class="code">TN</div><div class="cnt" id="n-tn">0</div><div class="alias">true negative, correct rejection. Well and cleared.</div></div>
+        </div>
+      </div>
+      <div>
+        <div id="roc"></div>
+        <div class="readout" id="roc-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="stage">
+    <div class="stage-head"><span class="num">02</span><h2>The confusion matrix</h2></div>
+    <p class="hint">Rows are the truth, columns are the prediction. Read a row to get sensitivity and specificity, read a column to get precision and negative predictive value. Selecting a metric in stage 03 outlines its denominator and fills in its numerator here.</p>
+    <div class="cmwrap"><table class="cm" id="cm"></table></div>
+    <div class="popcap scrollhint">swipe the table sideways to reach the row and column metrics</div>
+    <div class="popbar" id="popbar"></div>
+    <div class="popcap" id="popcap"></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="stage">
+    <div class="stage-head"><span class="num">03</span><h2>The metrics, and what each one refuses to tell you</h2></div>
+    <p class="hint">Click a card to see which cells it uses. Recall and sensitivity are two names for the same number: machine learning says recall, clinical literature says sensitivity, and both mean TP divided by everyone who was truly positive.</p>
+    <div class="mgrid" id="cards"></div>
+    <div class="readout" id="focus-note"></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="stage">
+    <div class="stage-head"><span class="num">04</span><h2>The full derived table</h2></div>
+    <p class="hint">The same arrangement used in the Wikipedia confusion matrix article, filled in live from the counts above. The margins hold everything conditioned on the truth (rows) or on the prediction (columns).</p>
+    <div class="big"><table class="wk" id="wk"></table></div>
+  </section>
+
+  <div class="notes">
+    <h3>Three traps this page is built to expose</h3>
+    <ul>
+      <li><b>Accuracy lies under class imbalance.</b> Drag prevalence to 1% and set the threshold high. A model that flags almost nobody scores above 98% accuracy while missing most of the disease. Report sensitivity, specificity and precision, or balanced accuracy, not accuracy alone.</li>
+      <li><b>Precision depends on prevalence, sensitivity and specificity do not.</b> Hold the threshold still and move prevalence: sensitivity and specificity are frozen, because each is computed inside one row of the truth. Precision collapses, because at low prevalence the healthy majority contributes false positives faster than the sick minority contributes true positives. This is why a 95% sensitive, 95% specific screening test is still mostly wrong when the disease is rare.</li>
+      <li><b>Sensitivity and specificity are properties of a threshold, not of a model.</b> One model gives you the whole ROC curve. Quoting a single sensitivity without its threshold, or without the specificity that came with it, describes one point and hides the rest.</li>
+    </ul>
+    <p class="src">Layout and terminology follow the Wikipedia confusion matrix article. Counts here come from two Gaussian score distributions, so every number is reproducible.</p>
+    <p class="src">Original page shared in class: <a href="https://claude.ai/public/artifacts/5c7fe16d-8c28-4301-838d-847c21a89bb2">claude.ai/public/artifacts/5c7fe16d…</a></p>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var N = 1000, MU0 = 42, SIG = 11;
+  var S = { thr:55, prev:0.20, sep:22, scale:'count', focus:'acc' };
+
+  /* ---------- normal cdf ---------- */
+  function erf(x) {
+    var s = x < 0 ? -1 : 1, a = Math.abs(x);
+    var t = 1 / (1 + 0.3275911 * a);
+    var y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a);
+    return s * y;
+  }
+  function Phi(z) { return 0.5 * (1 + erf(z / Math.SQRT2)); }
+  function pdf(x, mu, sig) { return Math.exp(-0.5 * Math.pow((x - mu) / sig, 2)) / (sig * Math.sqrt(2 * Math.PI)); }
+
+  /* ---------- counts ---------- */
+  function counts() {
+    var mu1 = MU0 + S.sep;
+    var sens = 1 - Phi((S.thr - mu1) / SIG);
+    var spec = Phi((S.thr - MU0) / SIG);
+    var P = Math.round(N * S.prev), Ng = N - P;
+    var tp = Math.round(P * sens), fn = P - tp;
+    var tn = Math.round(Ng * spec), fp = Ng - tn;
+    return { tp:tp, fn:fn, fp:fp, tn:tn, P:P, Ng:Ng, mu1:mu1,
+             auc: Phi(S.sep / (SIG * Math.SQRT2)) };
+  }
+  function el(id) { return document.getElementById(id); }
+  function r2(v) { return (v === null) ? 'undefined' : v.toFixed(3); }
+  function pcs(v) { return (v === null) ? 'n/a' : (v * 100).toFixed(1) + '%'; }
+  function safe(a, b) { return b === 0 ? null : a / b; }
+
+  /* ---------- metric catalogue ---------- */
+  /* num and den are lists of cell keys, so the matrix can show what each ratio touches */
+  var METRICS = [
+    { id:'acc',  name:'Accuracy', aka:'ACC',
+      num:['tp','tn'], den:['tp','fn','fp','tn'],
+      form:'(TP + TN) / (TP + FN + FP + TN)',
+      note:'The share of all calls that were right. It is the only metric here that mixes both rows of the truth, which is exactly why it hides a bad result when one class dominates.' },
+    { id:'prec', name:'Precision', aka:'positive predictive value, PPV',
+      num:['tp'], den:['tp','fp'],
+      form:'TP / (TP + FP)',
+      note:'Of everyone the model flagged, how many really were positive. This is the number a patient cares about after a positive result, and the one that collapses when the disease is rare.' },
+    { id:'rec',  name:'Recall = Sensitivity', aka:'true positive rate, TPR, hit rate, power',
+      num:['tp'], den:['tp','fn'],
+      form:'TP / (TP + FN)',
+      note:'Of everyone who truly was positive, how many the model caught. Computed inside the positive row only, so prevalence cannot touch it. Raise it by lowering the threshold, and pay in false positives.' },
+    { id:'spec', name:'Specificity', aka:'true negative rate, TNR, selectivity',
+      num:['tn'], den:['tn','fp'],
+      form:'TN / (TN + FP)',
+      note:'Of everyone who truly was negative, how many the model correctly cleared. The mirror of sensitivity, computed inside the negative row only, and equally immune to prevalence.' },
+    { id:'npv',  name:'Negative predictive value', aka:'NPV',
+      num:['tn'], den:['tn','fn'],
+      form:'TN / (TN + FN)',
+      note:'Of everyone the model cleared, how many really were negative. The number that justifies sending someone home, and it flatters you when the disease is rare.' },
+    { id:'f1',   name:'F1 score', aka:'harmonic mean of precision and recall',
+      num:['tp'], den:['tp','fp','fn'],
+      form:'2TP / (2TP + FP + FN)',
+      note:'One number for the positive class that ignores TN entirely. Useful under imbalance for that reason, and misleading whenever correctly rejecting negatives is part of the job.' },
+    { id:'fnr',  name:'False negative rate', aka:'miss rate, type II error rate, 1 - sensitivity',
+      num:['fn'], den:['tp','fn'],
+      form:'FN / (TP + FN)',
+      note:'The misses, as a share of the truly positive. In screening this is the metric with a clinical cost attached, so it is usually the one that fixes the threshold.' },
+    { id:'fpr',  name:'False positive rate', aka:'fall-out, type I error rate, 1 - specificity',
+      num:['fp'], den:['tn','fp'],
+      form:'FP / (TN + FP)',
+      note:'The false alarms, as a share of the truly negative. This is the horizontal axis of the ROC curve.' },
+    { id:'bacc', name:'Balanced accuracy', aka:'BA, mean of sensitivity and specificity',
+      num:['tp','tn'], den:['tp','fn','fp','tn'],
+      form:'(TPR + TNR) / 2',
+      note:'Accuracy with the class imbalance taken out, by averaging the two row-wise rates instead of pooling everyone. A fairer headline number for a rare disease.' },
+    { id:'prev', name:'Prevalence', aka:'base rate',
+      num:['tp','fn'], den:['tp','fn','fp','tn'],
+      form:'(TP + FN) / (TP + FN + FP + TN)',
+      note:'Not a property of the model at all, but a property of the cohort you tested on. Move it and precision moves with it, which is why a model validated in a clinic behaves differently in a screening programme.' }
+  ];
+
+  function value(id, c) {
+    var tpr = safe(c.tp, c.tp + c.fn), tnr = safe(c.tn, c.tn + c.fp);
+    switch (id) {
+      case 'acc':  return safe(c.tp + c.tn, N);
+      case 'prec': return safe(c.tp, c.tp + c.fp);
+      case 'rec':  return tpr;
+      case 'spec': return tnr;
+      case 'npv':  return safe(c.tn, c.tn + c.fn);
+      case 'f1':   return safe(2 * c.tp, 2 * c.tp + c.fp + c.fn);
+      case 'fnr':  return tpr === null ? null : 1 - tpr;
+      case 'fpr':  return tnr === null ? null : 1 - tnr;
+      case 'bacc': return (tpr === null || tnr === null) ? null : (tpr + tnr) / 2;
+      case 'prev': return safe(c.tp + c.fn, N);
+    }
+    return null;
+  }
+  function subst(id, c) {
+    switch (id) {
+      case 'acc':  return '(' + c.tp + ' + ' + c.tn + ') / ' + N;
+      case 'prec': return c.tp + ' / (' + c.tp + ' + ' + c.fp + ')';
+      case 'rec':  return c.tp + ' / (' + c.tp + ' + ' + c.fn + ')';
+      case 'spec': return c.tn + ' / (' + c.tn + ' + ' + c.fp + ')';
+      case 'npv':  return c.tn + ' / (' + c.tn + ' + ' + c.fn + ')';
+      case 'f1':   return (2 * c.tp) + ' / (' + (2 * c.tp) + ' + ' + c.fp + ' + ' + c.fn + ')';
+      case 'fnr':  return c.fn + ' / (' + c.tp + ' + ' + c.fn + ')';
+      case 'fpr':  return c.fp + ' / (' + c.tn + ' + ' + c.fp + ')';
+      case 'bacc': return '(' + pcs(value('rec', c)) + ' + ' + pcs(value('spec', c)) + ') / 2';
+      case 'prev': return '(' + c.tp + ' + ' + c.fn + ') / ' + N;
+    }
+    return '';
+  }
+  function colour(f) {
+    return f.replace(/TPR|TNR/g, function (m) { return '<span class="t-' + (m === 'TPR' ? 'tp' : 'tn') + '">' + m + '</span>'; })
+            .replace(/\bTP\b/g, '<span class="t-tp">TP</span>')
+            .replace(/\bTN\b/g, '<span class="t-tn">TN</span>')
+            .replace(/\bFP\b/g, '<span class="t-fp">FP</span>')
+            .replace(/\bFN\b/g, '<span class="t-fn">FN</span>');
+  }
+
+  /* ---------- 01 : distributions ---------- */
+  function drawDist(c) {
+    var W = 540, H = 236, L = 36, R = 14, T = 14, B = 36;
+    var xp = function (s) { return L + s * (W - L - R) / 100; };
+    var peak0 = c.Ng * pdf(MU0, MU0, SIG), peak1 = c.P * pdf(c.mu1, c.mu1, SIG);
+    var s0 = 1, s1 = 1, ymax;
+    if (S.scale === 'shape') {
+      s0 = peak0 > 0 ? 1 / peak0 : 0; s1 = peak1 > 0 ? 1 / peak1 : 0; ymax = 1.12;
+    } else {
+      ymax = Math.max(peak0, peak1, 1e-6) * 1.12;
+    }
+    var yp = function (d) { return H - B - (d / ymax) * (H - T - B); };
+    var base = H - B;
+
+    function area(mu, count, scale, from, to) {
+      var pts = [], x;
+      for (x = from; x <= to; x += 0.8) { pts.push(xp(x) + ',' + yp(count * pdf(x, mu, SIG) * scale)); }
+      if (!pts.length) { return ''; }
+      return 'M' + xp(from) + ',' + base + ' L' + pts.join(' L') + ' L' + xp(to) + ',' + base + ' Z';
+    }
+
+    var t = S.thr, g = '';
+    g += '<rect x="' + L + '" y="' + T + '" width="' + (W - L - R) + '" height="' + (H - T - B) + '" fill="#fbfcfe"/>';
+    [0, 25, 50, 75, 100].forEach(function (v) {
+      g += '<line x1="' + xp(v) + '" y1="' + T + '" x2="' + xp(v) + '" y2="' + base + '" stroke="#eef1f6"/>';
+      g += '<text x="' + xp(v) + '" y="' + (base + 15) + '" text-anchor="middle" class="tick">' + v + '</text>';
+    });
+
+    var dimN = false, dimP = false;
+    var m = current();
+    var used = m.den.concat(m.num);
+    dimN = used.indexOf('tn') < 0 && used.indexOf('fp') < 0;
+    dimP = used.indexOf('tp') < 0 && used.indexOf('fn') < 0;
+
+    g += '<path d="' + area(MU0, c.Ng, s0, 0, t) + '" fill="#4a6fa5" opacity="' + (dimN ? .12 : .55) + '"/>';
+    g += '<path d="' + area(MU0, c.Ng, s0, t, 100) + '" fill="#e4941f" opacity="' + (dimN ? .12 : .72) + '"/>';
+    g += '<path d="' + area(c.mu1, c.P, s1, 0, t) + '" fill="#b3184c" opacity="' + (dimP ? .12 : .68) + '"/>';
+    g += '<path d="' + area(c.mu1, c.P, s1, t, 100) + '" fill="#0e9c86" opacity="' + (dimP ? .12 : .72) + '"/>';
+
+    g += '<line x1="' + xp(t) + '" y1="' + (T - 2) + '" x2="' + xp(t) + '" y2="' + (base + 4) + '" stroke="#0f1e33" stroke-width="2.2"/>';
+    g += '<rect x="' + (xp(t) - 26) + '" y="' + (T - 12) + '" width="52" height="15" rx="4" fill="#0f1e33"/>';
+    g += '<text x="' + xp(t) + '" y="' + (T - 1) + '" text-anchor="middle" class="tick" style="fill:#fff;font-weight:700">' + t + '</text>';
+
+    g += '<text x="' + (L + 4) + '" y="' + (T + 12) + '" class="axname" style="fill:#4a6fa5">CALLED NEGATIVE</text>';
+    g += '<text x="' + (W - R - 4) + '" y="' + (T + 12) + '" text-anchor="end" class="axname" style="fill:#0e9c86">CALLED POSITIVE</text>';
+    g += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 4) + '" text-anchor="middle" class="axname">MODEL SCORE</text>';
+
+    el('dist').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" data-act="plot" ' +
+      'aria-label="score distributions for positive and negative cases with the decision threshold">' + g + '</svg>';
+    var cap = 'left of the line the model says negative, right of it says positive. ' +
+              'the four shaded areas are the four cells of the confusion matrix. click the plot to move the threshold.';
+    if (S.scale === 'count' && S.prev < 0.1) {
+      cap = 'the positive curve is nearly flat here, because only ' + c.P + ' of 1,000 patients have the disease. ' +
+            'that is the honest picture. switch to "by shape" to compare the two distributions.';
+    }
+    el('dist-cap').textContent = cap;
+  }
+
+  /* ---------- 01 : roc ---------- */
+  function drawRoc(c) {
+    var W = 250, H = 250, L = 38, R = 14, T = 14, B = 36;
+    var xp = function (v) { return L + v * (W - L - R); };
+    var yp = function (v) { return H - B - v * (H - T - B); };
+    var mu1 = c.mu1, pts = [], t;
+    for (t = 105; t >= -5; t -= 1) {
+      pts.push(xp(1 - Phi((t - MU0) / SIG)) + ',' + yp(1 - Phi((t - mu1) / SIG)));
+    }
+    var g = '';
+    g += '<rect x="' + L + '" y="' + T + '" width="' + (W - L - R) + '" height="' + (H - T - B) + '" fill="#fbfcfe"/>';
+    g += '<line x1="' + xp(0) + '" y1="' + yp(0) + '" x2="' + xp(1) + '" y2="' + yp(1) + '" stroke="#d6dfea" stroke-dasharray="4 4"/>';
+    g += '<polyline fill="none" stroke="#1f4fd8" stroke-width="2.4" points="' + pts.join(' ') + '"/>';
+    var fpr = 1 - Phi((S.thr - MU0) / SIG), tpr = 1 - Phi((S.thr - mu1) / SIG);
+    g += '<line x1="' + xp(fpr) + '" y1="' + yp(0) + '" x2="' + xp(fpr) + '" y2="' + yp(tpr) + '" stroke="#0f1e33" stroke-opacity=".2"/>';
+    g += '<line x1="' + xp(0) + '" y1="' + yp(tpr) + '" x2="' + xp(fpr) + '" y2="' + yp(tpr) + '" stroke="#0f1e33" stroke-opacity=".2"/>';
+    g += '<circle cx="' + xp(fpr) + '" cy="' + yp(tpr) + '" r="6" fill="#0f1e33"/>';
+    [0, 0.5, 1].forEach(function (v) {
+      g += '<text x="' + xp(v) + '" y="' + (H - B + 15) + '" text-anchor="middle" class="tick">' + v + '</text>';
+      g += '<text x="' + (L - 7) + '" y="' + (yp(v) + 3.5) + '" text-anchor="end" class="tick">' + v + '</text>';
+    });
+    g += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 3) + '" text-anchor="middle" class="axname">FPR = 1 - SPECIFICITY</text>';
+    g += '<text transform="translate(11,' + ((H - B + T) / 2) + ') rotate(-90)" text-anchor="middle" class="axname">TPR = SENSITIVITY</text>';
+    el('roc').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="ROC curve with the current operating point">' + g + '</svg>';
+    el('roc-note').innerHTML =
+      'The threshold slides you along this curve. <b>AUC ' + c.auc.toFixed(3) + '</b> is the whole curve, ' +
+      'so it survives a change of threshold and a change of prevalence. The black dot is where you are standing: ' +
+      'sensitivity <b>' + pcs(tpr) + '</b> at a false positive rate of <b>' + pcs(fpr) + '</b>.';
+  }
+
+  /* ---------- 02 : confusion matrix ---------- */
+  function cls(key) {
+    var m = current(), c = '';
+    if (m.num.indexOf(key) >= 0) { c = ' numr'; }
+    else if (m.den.indexOf(key) >= 0) { c = ' den'; }
+    else { c = ' dim'; }
+    return c;
+  }
+  function drawMatrix(c) {
+    var tpr = value('rec', c), tnr = value('spec', c), ppv = value('prec', c), npv = value('npv', c);
+    var h = '';
+    h += '<tr><td class="blank"></td><td class="hd">predicted positive</td><td class="hd">predicted negative</td>' +
+         '<td class="hd">conditioned on the truth</td></tr>';
+
+    h += '<tr><td class="hd side">actually<br>positive<br>P = ' + c.P + '</td>' +
+         '<td class="cell' + cls('tp') + '" style="background:var(--tp-bg);color:var(--tp)">' +
+           '<div class="lb">TP</div><div class="vv">' + c.tp + '</div><div class="al">hit</div></td>' +
+         '<td class="cell' + cls('fn') + '" style="background:var(--fn-bg);color:var(--fn)">' +
+           '<div class="lb">FN</div><div class="vv">' + c.fn + '</div><div class="al">miss, type II</div></td>' +
+         '<td class="marg"><div class="mn">sensitivity, recall, TPR</div><div class="mv" style="color:var(--tp)">' + pcs(tpr) + '</div>' +
+           '<div class="mn" style="margin-top:5px">miss rate, FNR</div><div class="mv" style="color:var(--fn);font-size:12px">' + pcs(tpr === null ? null : 1 - tpr) + '</div></td></tr>';
+
+    h += '<tr><td class="hd side">actually<br>negative<br>N = ' + c.Ng + '</td>' +
+         '<td class="cell' + cls('fp') + '" style="background:var(--fp-bg);color:#a86c0d">' +
+           '<div class="lb">FP</div><div class="vv">' + c.fp + '</div><div class="al">false alarm, type I</div></td>' +
+         '<td class="cell' + cls('tn') + '" style="background:var(--tn-bg);color:var(--tn)">' +
+           '<div class="lb">TN</div><div class="vv">' + c.tn + '</div><div class="al">correct rejection</div></td>' +
+         '<td class="marg"><div class="mn">specificity, TNR</div><div class="mv" style="color:var(--tn)">' + pcs(tnr) + '</div>' +
+           '<div class="mn" style="margin-top:5px">fall-out, FPR</div><div class="mv" style="color:#a86c0d;font-size:12px">' + pcs(tnr === null ? null : 1 - tnr) + '</div></td></tr>';
+
+    h += '<tr><td class="hd side">conditioned on<br>the prediction</td>' +
+         '<td class="marg"><div class="mn">precision, PPV</div><div class="mv">' + pcs(ppv) + '</div></td>' +
+         '<td class="marg"><div class="mn">NPV</div><div class="mv">' + pcs(npv) + '</div></td>' +
+         '<td class="marg"><div class="mn">accuracy</div><div class="mv">' + pcs(value('acc', c)) + '</div></td></tr>';
+
+    el('cm').innerHTML = h;
+
+    var seg = [['tp', c.tp, 'var(--tp)'], ['fn', c.fn, 'var(--fn)'], ['fp', c.fp, '#e4941f'], ['tn', c.tn, 'var(--tn)']];
+    el('popbar').innerHTML = seg.map(function (s) {
+      return '<div style="width:' + (s[1] / N * 100) + '%;background:' + s[2] + '" title="' + s[0].toUpperCase() + ' = ' + s[1] + '"></div>';
+    }).join('');
+    el('popcap').textContent = 'all 1,000 patients, to scale:  TP ' + c.tp + '  /  FN ' + c.fn + '  /  FP ' + c.fp + '  /  TN ' + c.tn;
+  }
+
+  /* ---------- 03 : metric cards ---------- */
+  function current() {
+    var i;
+    for (i = 0; i < METRICS.length; i++) { if (METRICS[i].id === S.focus) { return METRICS[i]; } }
+    return METRICS[0];
+  }
+  function drawCards(c) {
+    el('cards').innerHTML = METRICS.map(function (m) {
+      var v = value(m.id, c);
+      return '<button class="mcard' + (m.id === S.focus ? ' sel' : '') + '" data-act="focus" data-val="' + m.id + '">' +
+        '<div class="mname">' + m.name + '</div>' +
+        '<div class="maka">' + m.aka + '</div>' +
+        '<div class="mform">' + colour(m.form) + '</div>' +
+        '<div class="msub">= ' + subst(m.id, c) + '</div>' +
+        '<div class="mval">' + (v === null ? 'undefined' : pcs(v)) + '</div>' +
+        '<div class="mbar"><i style="width:' + (v === null ? 0 : Math.max(0, Math.min(1, v)) * 100) + '%"></i></div>' +
+        '</button>';
+    }).join('');
+    var m = current(), val = value(m.id, c);
+    el('focus-note').innerHTML = '<b>' + m.name + ' = ' + (val === null ? 'undefined' : r2(val)) + '.</b> ' + m.note +
+      (val === null ? ' Right now the denominator is zero, which is a real state a classifier can reach and a real thing your code has to handle.' : '');
+  }
+
+  /* ---------- 04 : the full table ---------- */
+  function drawWiki(c) {
+    var tp = c.tp, fn = c.fn, fp = c.fp, tn = c.tn, P = c.P, Ng = c.Ng;
+    var PP = tp + fp, PN = fn + tn;
+    var tpr = safe(tp, P), fnr = safe(fn, P), fpr = safe(fp, Ng), tnr = safe(tn, Ng);
+    var ppv = safe(tp, PP), fdr = safe(fp, PP), forr = safe(fn, PN), npv = safe(tn, PN);
+    var lrp = (fpr === null || fpr === 0 || tpr === null) ? null : tpr / fpr;
+    var lrn = (tnr === null || tnr === 0 || fnr === null) ? null : fnr / tnr;
+    var dor = (lrp === null || lrn === null || lrn === 0) ? null : lrp / lrn;
+    var mccD = Math.sqrt(PP * P * Ng * PN);
+    var mcc = mccD === 0 ? null : (tp * tn - fp * fn) / mccD;
+    var pt = (tpr === null || fpr === null || tpr === fpr) ? null : (Math.sqrt(tpr * fpr) - fpr) / (tpr - fpr);
+    var bm = (tpr === null || tnr === null) ? null : tpr + tnr - 1;
+    var mk = (ppv === null || npv === null) ? null : ppv + npv - 1;
+    var f1 = safe(2 * tp, 2 * tp + fp + fn);
+    var fm = (ppv === null || tpr === null) ? null : Math.sqrt(ppv * tpr);
+    var ts = safe(tp, tp + fn + fp);
+
+    function box(name, formula, v, kind) {
+      var txt = (v === null) ? 'undefined' : (kind === 'raw' ? v.toFixed(2) : pcs(v));
+      return '<span class="wn">' + name + '</span><span class="wf">' + formula + '</span><span class="wv">' + txt + '</span>';
+    }
+    function cnt(code, label, n, klass) {
+      return '<td class="' + klass + '"><span class="wn" style="font-weight:700;letter-spacing:.1em">' + code + '</span>' +
+             '<span class="wf">' + label + '</span><span class="wv" style="font-size:19px">' + n + '</span></td>';
+    }
+
+    var h = '';
+    h += '<tr>' +
+      '<td class="q"><span class="wn">Total population</span><span class="wf">P + N</span><span class="wv">' + N + '</span></td>' +
+      '<td class="q"><span class="wn">Predicted positive</span><span class="wf">PP = TP + FP</span><span class="wv">' + PP + '</span></td>' +
+      '<td class="q"><span class="wn">Predicted negative</span><span class="wf">PN = FN + TN</span><span class="wv">' + PN + '</span></td>' +
+      '<td>' + box('Informedness (BM)', 'TPR + TNR - 1', bm) + '</td>' +
+      '<td>' + box('Prevalence threshold', '(&radic;(TPR&middot;FPR) - FPR) / (TPR - FPR)', pt) + '</td></tr>';
+
+    h += '<tr><td class="q"><span class="wn">Actually positive</span><span class="wf">P</span><span class="wv">' + P + '</span></td>' +
+      cnt('TP', 'true positive, hit', tp, 'cTP') + cnt('FN', 'false negative, miss, type II', fn, 'cFN') +
+      '<td>' + box('TPR, recall, sensitivity', 'TP / P', tpr) + '</td>' +
+      '<td>' + box('FNR, miss rate', 'FN / P', fnr) + '</td></tr>';
+
+    h += '<tr><td class="q"><span class="wn">Actually negative</span><span class="wf">N</span><span class="wv">' + Ng + '</span></td>' +
+      cnt('FP', 'false positive, false alarm, type I', fp, 'cFP') + cnt('TN', 'true negative, correct rejection', tn, 'cTN') +
+      '<td>' + box('FPR, fall-out', 'FP / N', fpr) + '</td>' +
+      '<td>' + box('TNR, specificity, selectivity', 'TN / N', tnr) + '</td></tr>';
+
+    h += '<tr><td>' + box('Prevalence', 'P / (P + N)', safe(P, N)) + '</td>' +
+      '<td>' + box('PPV, precision', 'TP / PP', ppv) + '</td>' +
+      '<td>' + box('False omission rate', 'FN / PN', forr) + '</td>' +
+      '<td>' + box('LR+', 'TPR / FPR', lrp, 'raw') + '</td>' +
+      '<td>' + box('LR-', 'FNR / TNR', lrn, 'raw') + '</td></tr>';
+
+    h += '<tr><td>' + box('Accuracy', '(TP + TN) / (P + N)', safe(tp + tn, N)) + '</td>' +
+      '<td>' + box('False discovery rate', 'FP / PP', fdr) + '</td>' +
+      '<td>' + box('NPV', 'TN / PN', npv) + '</td>' +
+      '<td>' + box('Markedness (MK)', 'PPV + NPV - 1', mk) + '</td>' +
+      '<td>' + box('Diagnostic odds ratio', 'LR+ / LR-', dor, 'raw') + '</td></tr>';
+
+    h += '<tr><td>' + box('Balanced accuracy', '(TPR + TNR) / 2', (tpr === null || tnr === null) ? null : (tpr + tnr) / 2) + '</td>' +
+      '<td>' + box('F1 score', '2TP / (2TP + FP + FN)', f1) + '</td>' +
+      '<td>' + box('Fowlkes-Mallows', '&radic;(PPV &middot; TPR)', fm) + '</td>' +
+      '<td>' + box('MCC', '(TP&middot;TN - FP&middot;FN) / &radic;(PP&middot;P&middot;N&middot;PN)', mcc) + '</td>' +
+      '<td>' + box('Threat score, Jaccard', 'TP / (TP + FN + FP)', ts) + '</td></tr>';
+
+    el('wk').innerHTML = h;
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    var c = counts();
+    el('v-thr').textContent = S.thr;
+    el('v-prev').textContent = Math.round(S.prev * 100) + '%';
+    el('v-sep').textContent = 'AUC ' + c.auc.toFixed(2).replace('0.', '.');
+    el('n-tp').textContent = c.tp; el('n-fn').textContent = c.fn;
+    el('n-fp').textContent = c.fp; el('n-tn').textContent = c.tn;
+    drawDist(c); drawRoc(c); drawMatrix(c); drawCards(c); drawWiki(c);
+  }
+
+  /* ---------- delegated events ---------- */
+  function node(n) {
+    while (n && n !== document) {
+      if (n.getAttribute && n.getAttribute('data-act')) { return n; }
+      n = n.parentNode;
+    }
+    return null;
+  }
+  function onInput(e) {
+    var n = node(e.target);
+    if (!n) { return; }
+    var a = n.getAttribute('data-act');
+    if (a === 'thr') { S.thr = parseInt(n.value, 10); }
+    else if (a === 'prev') { S.prev = parseInt(n.value, 10) / 100; }
+    else if (a === 'sep') { S.sep = parseInt(n.value, 10); }
+    else { return; }
+    render();
+  }
+  function onClick(e) {
+    var n = node(e.target);
+    if (!n) { return; }
+    var a = n.getAttribute('data-act');
+    if (a === 'focus') { S.focus = n.getAttribute('data-val'); render(); return; }
+    if (a === 'scale') {
+      S.scale = n.getAttribute('data-val');
+      el('b-count').classList.toggle('on', S.scale === 'count');
+      el('b-shape').classList.toggle('on', S.scale === 'shape');
+      render();
+      return;
+    }
+    if (a === 'plot') {
+      var svg = n, box = svg.getBoundingClientRect();
+      var frac = (e.clientX - box.left) / box.width;
+      var score = Math.round(((frac * 540) - 36) / (540 - 36 - 14) * 100);
+      score = Math.max(5, Math.min(95, score));
+      S.thr = score;
+      el('s-thr').value = score;
+      render();
+    }
+  }
+
+  function boot() {
+    try {
+      document.addEventListener('click', onClick);
+      document.addEventListener('input', onInput);
+      render();
+    } catch (err) {
+      var bar = el('errbar');
+      if (bar) { bar.style.display = 'block'; bar.textContent = 'Script error: ' + (err && err.message ? err.message : String(err)); }
+    }
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+}());
+</script>
+</body>
+</html>
