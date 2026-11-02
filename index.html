@@ -151,6 +151,9 @@ table.pt tr.cur td{box-shadow:inset 0 -2px 0 var(--accent)}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
 select{font:inherit;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .note{background:var(--code);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.deck{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#000}
+.deck iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.deckbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;color:var(--ink2);font-size:14px}
 iframe.roc{width:100%;height:1500px;border:1px solid var(--line);border-radius:12px;background:#e6ebf1}
 
 /* search */
@@ -279,13 +282,25 @@ footer{margin-top:50px;color:var(--ink2);font-size:13px;border-top:1px solid var
       '<h1 class="ptitle">' + esc(p.title) + '</h1><p class="psum">' + esc(p.summary) + '</p><div class="res">' +
       p.links.map(function(l){ return '<a href="' + esc(l.href) + '" target="_blank" rel="noopener">📄 ' + esc(l.label) + '</a>'; }).join('') +
       (p.tools.length ? '<a href="#" data-jump="tools">▶ ลองเล่นท้ายบท</a>' : '') +
-      '<a href="' + esc(p.source) + '" target="_blank" rel="noopener">ไฟล์ Markdown บน GitHub</a></div>' +
-      '<details class="toc" open><summary>สารบัญในบทนี้</summary><ol id="toc"></ol></details>' +
-      '<article class="md" id="md">' + renderMd(p.md) + '</article>';
+      (p.embed ? '' : '<a href="' + esc(p.source) + '" target="_blank" rel="noopener">ไฟล์ Markdown บน GitHub</a>') + '</div>' +
+      (p.embed
+        ? '<div class="deck"><iframe id="deckframe" src="' + esc(p.embed) + '" title="' + esc(p.title) + '" allowfullscreen></iframe></div>' +
+          '<div class="deckbar"><button class="btn pri" id="deckfs" type="button">⛶ ดูเต็มจอ</button>' +
+          '<span>คลิกที่สไลด์แล้วใช้ปุ่มลูกศร ← → เพื่อเปลี่ยนหน้า</span></div>'
+        : '<details class="toc" open><summary>สารบัญในบทนี้</summary><ol id="toc"></ol></details>' +
+          '<article class="md" id="md">' + renderMd(p.md) + '</article>');
     if (p.tools.length) h += '<h2 class="tools-head" id="tools-anchor">▶ ลองเล่น</h2>' + p.tools.map(toolHtml).join('');
     h += '<nav class="pn">' + (prev ? '<a href="#/' + prev.id + '"><small>‹ ก่อนหน้า</small>' + esc(short(prev.title)) + '</a>' : '<span></span>') +
          (next ? '<a class="next" href="#/' + next.id + '"><small>ถัดไป ›</small>' + esc(short(next.title)) + '</a>' : '') + '</nav>';
     view.innerHTML = h;
+    if (p.embed) {
+      el('deckfs').addEventListener('click', function(){
+        var f = el('deckframe');
+        (f.requestFullscreen || f.webkitRequestFullscreen || function(){ window.open(p.embed, '_blank'); }).call(f);
+      });
+      drawNav(p.id);
+      return;
+    }
     var heads = decorate(el('md'));
     el('toc').innerHTML = Array.prototype.map.call(heads, function(hd){
       return '<li class="' + hd.tagName.toLowerCase() + '"><a href="#" data-jump="' + hd.id + '">' + esc(hd.textContent) + '</a></li>';

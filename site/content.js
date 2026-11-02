@@ -259,6 +259,31 @@ window.COURSE = {
    ],
    "tools": [],
    "md": "\n**Paper:** Guo et al., *Revisiting Face Forgery Detection: From Facial Representation to Forgery Detection*, IEEE TPAMI 2026\n**Code ต้นฉบับ:** https://github.com/zhenglab/FFDBackbone\n**แนวทาง:** ทำซ้ำตาม CRISP-DM บน Kaggle (T4) เน้น algorithm ระดับโค้ดและรันแสดง\n**นำเสนอ:** 22 ต.ค. 2026\n\n## โครงสร้าง\n\n| โฟลเดอร์ | เนื้อหา |\n|---|---|\n| [paper/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/paper) | ไฟล์ PDF ของ paper |\n| [slides/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/slides) | สไลด์นำเสนอ `ffdbackbone-crispdm-deck.html` และฉบับ `.pptx` (ซอร์สและภาพใน `slides/src/`) |\n| [notebooks/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/notebooks) | Kaggle notebook ระดับ 1–4 และสคริปต์สร้าง notebook (ดู `README_pipeline.md`) |\n| [results/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/results) | ตารางผลลัพธ์ (CSV) แยกตามระดับการทดลอง |\n| [docs/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/docs) | `PROGRESS_LOG.md` (สรุปทุกขั้นและตัวเลข), `HANDOFF.md`, `speaker_script.md` (บทพูดประกอบสไลด์) |\n\n## ขั้นการทดลอง\n\n| ระดับ | งาน | Notebook | ผลลัพธ์ |\n|:-:|---|---|---|\n| 1–2 | Inference ด้วย checkpoint ผู้เขียน | `FFD_level1_*`, `FFD_level2_*` | — |\n| 3a | เตรียมข้อมูล FF++ c23 | `FFD_level3a_FFpp_prepare.ipynb` | — |\n| 3b | Fine-tune CFB 10 epoch | `FFD_level3b_CFB_finetune.ipynb` | — |\n| 3c | Cross-dataset Celeb-DF | `FFD_level3c_eval_crossdataset.ipynb` | [01](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/results/01_main_results_auc.csv), [02](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/results/02_auc_95ci.csv), [03](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/results/03_ffpp_per_method_auc.csv) |\n| 3d / 3d2 | Ablation (Table VI) และหลาย seed | `FFD_level3d_*`, `FFD_level3d2_*` | [04](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/results/04_ablation_table6.csv), [level3d2_seeds/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/results/level3d2_seeds) |\n| 3e | Eval ทุกโมเดล + UTOM + WildDeepfake | `FFD_level3e_eval_utom_wdf.ipynb` | [05](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/results/05_table9_utom_cdf.csv), [06](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/results/06_utom_unseen_target_avg_acc.csv) |\n| 3f | Paired significance test | `FFD_level3f_significance.ipynb` | [level3f_significance/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/results/level3f_significance) |\n| 3g | Few-shot adaptation (k = 10, 20) | `FFD_level3g_fewshot.ipynb` | [level3g_fewshot/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/results/level3g_fewshot) |\n| 3h | ตรวจภาพซ้ำระหว่าง WildDeepfake กับ FF++/Celeb-DF | `FFD_level3h_wdf_dupcheck.ipynb` | [level3h_dupcheck/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/results/level3h_dupcheck) |\n| 3i | Eval บน DF40 (Table IV) | `FFD_level3i_DF40_eval.ipynb` | [level3i_df40/](https://github.com/Kanvara001/MSC_DPML_2026/tree/main/research-project/deepfake-ffdbackbone/results/level3i_df40) |\n| 4 | Live demo (algorithm ภายใน) | `FFD_level4_live_demo.ipynb` | — |\n\n## ผลหลัก (main branch, video-level AUC)\n\n| ชุดข้อมูล | ทำซ้ำได้ | Paper |\n|---|:--:|:--:|\n| FF++ c23 | 96.57 | 99.36 |\n| Celeb-DF | 84.97 | 90.46 |\n\nDF40 (ค่าเฉลี่ย 7 วิธี, checkpoint ผู้เขียน, ทุก domain): 84.32 เทียบกับ paper 96.22 — รายละเอียดใน [table4_df40_auc.csv](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/results/level3i_df40/table4_df40_auc.csv)\n\nรายละเอียดและข้อจำกัดอยู่ใน [docs/PROGRESS_LOG.md](https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/docs/PROGRESS_LOG.md)\n\n## ข้อมูลที่ไม่ได้อยู่ใน repo\n\nDataset และ output ขนาดใหญ่ (Celeb-DF-v2 ~9.5 GB, FF++ crops, checkpoint `.pth`, score `.npy`, zip) ถูกแยกออกด้วย `.gitignore` และเก็บไว้ในเครื่อง / Kaggle เท่านั้น\n\n> หมายเหตุ: `slides/src/build.py` เขียนไฟล์ออกตามตัวแปรสภาพแวดล้อม `DECK_OUT` (ค่าเริ่มต้นคือโฟลเดอร์แม่ของ `src/`)\n"
+  },
+  {
+   "id": "research-deck",
+   "module": "research",
+   "tag": "Deck",
+   "title": "สไลด์นำเสนอ Paper: FFDBackbone (Face Forgery Detection)",
+   "summary": "สไลด์นำเสนอ paper ตาม CRISP-DM ดูได้ในหน้านี้ หรือเปิดเต็มจอ",
+   "source": "https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html",
+   "links": [
+    {
+     "label": "เปิดสไลด์เต็มหน้า (HTML)",
+     "href": "research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html"
+    },
+    {
+     "label": "ไฟล์ PowerPoint (.pptx)",
+     "href": "research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.pptx"
+    },
+    {
+     "label": "บทพูดประกอบสไลด์",
+     "href": "https://github.com/Kanvara001/MSC_DPML_2026/blob/main/research-project/deepfake-ffdbackbone/docs/speaker_script.md"
+    }
+   ],
+   "tools": [],
+   "embed": "research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html",
+   "md": ""
   }
  ]
 };

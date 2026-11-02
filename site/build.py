@@ -67,7 +67,19 @@ PAGES = [
      [('สไลด์นำเสนอ (HTML)', 'research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html'),
       ('Paper (PDF)', 'research-project/deepfake-ffdbackbone/paper/Revisiting_Face_Forgery_Detection_From_Facial_Representation_to_Forgery_Detection.pdf')],
      []),
+    ('research-deck', 'research', 'Deck', None,
+     'สไลด์นำเสนอ paper ตาม CRISP-DM ดูได้ในหน้านี้ หรือเปิดเต็มจอ',
+     [('เปิดสไลด์เต็มหน้า (HTML)', 'research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html'),
+      ('ไฟล์ PowerPoint (.pptx)', 'research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.pptx'),
+      ('บทพูดประกอบสไลด์', 'research-project/deepfake-ffdbackbone/docs/speaker_script.md')],
+     []),
 ]
+
+# Pages without a Markdown file: title and an embedded HTML page shown above the text
+EMBEDS = {
+    'research-deck': ('สไลด์นำเสนอ Paper: FFDBackbone (Face Forgery Detection)',
+                      'research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html'),
+}
 
 LINK = re.compile(r'(!?)\[([^\]]*)\]\(([^)\s]+)\)')
 
@@ -99,6 +111,14 @@ def rewrite_links(text, md_path):
 def main():
     pages = []
     for pid, mod, tag, path, summary, links, tools in PAGES:
+        if path is None:
+            title, embed = EMBEDS[pid]
+            pages.append({
+                'id': pid, 'module': mod, 'tag': tag, 'title': title, 'summary': summary,
+                'source': GH + embed, 'links': [{'label': l, 'href': GH + h if h.endswith('.md') else h} for l, h in links],
+                'tools': tools, 'embed': embed, 'md': '',
+            })
+            continue
         with open(os.path.join(ROOT, path), encoding='utf-8') as f:
             text = f.read()
         title_match = re.match(r'\s*#\s+(.+)\n', text)
