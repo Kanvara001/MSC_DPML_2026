@@ -1,0 +1,5 @@
+reference,n_ref_frames,threshold,wdf_frames_hit,wdf_sequences_hit,pct_sequences
+FF++ (ทุก split),39999,6,23,18,2.23
+FF++ (ทุก split),39999,10,980,422,52.36
+Celeb-DF,4144,6,16,8,0.99
+Celeb-DF,4144,10,356,190,23.57

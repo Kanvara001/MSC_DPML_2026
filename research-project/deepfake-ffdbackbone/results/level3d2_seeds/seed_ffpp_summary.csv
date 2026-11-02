@@ -1,0 +1,5 @@
+variant,seed,status,best val AUC,FF++ test AUC,FF++ test ACC
+fb_ce,2025,เสร็จ,97.26,97.34,93.0
+cfb_full,2025,เสร็จ,96.71,97.31,92.57
+fb_ce,3407,เสร็จ,96.96,97.36,93.29
+cfb_full,3407,เสร็จ,96.96,97.5,93.43

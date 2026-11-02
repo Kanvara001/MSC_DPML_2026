@@ -85,3 +85,49 @@
 | `deck_src/` | ซอร์สของสไลด์ (`build.py`, template, รูป) สำหรับแก้ไขภายหลัง |
 | `FFD_level3a_FFpp_prepare/`, `FFD_level3b_CFB_finetune/` | output จาก Kaggle (ภาพ crop, checkpoint, history) |
 | `Celeb-DF-v2/` | dataset ต้นฉบับ |
+
+---
+
+## 6. อัปเดต 17 ต.ค. 2026 — 3d2 + 3f
+- **3d2:** ฝึก FB·CE และ CFB full ซ้ำ seed 2025, 3407 (ไฟล์ใน `results_summary/ระดับ 3d2 — Ablation/`)
+- **3f:** paired DeLong + Holm (seed 1234) และ mean ± SD ข้าม 3 seed (ไฟล์ใน `results_summary/ระดับ 3f — ablation/`)
+- AUC main branch ราย seed (1234 / 2025 / 3407)
+  - CFB full: CDF 84.97 / 87.35 / 87.69 · WDF 84.44 / 85.73 / 85.77 · FF++ 96.57 / 97.42 / 97.70
+  - FB·CE: CDF 87.92 / 86.23 / 86.84 · WDF 86.17 / 85.88 / 86.82 · FF++ 97.37 / 97.34 / 97.36
+- mean ± SD: CDF FB·CE 87.00 ± 0.85 vs CFB 86.67 ± 1.48 · WDF 86.29 ± 0.48 vs 85.31 ± 0.76 · FF++ 97.36 ± 0.02 vs 97.23 ± 0.59
+- Seed ensemble (paired DeLong, CFB − FB·CE): CDF −0.01 (p 0.97) · FF++ 0.00 (p 0.99) · WDF −0.90 (p < 0.001)
+- สรุป: seed 1234 เป็นรอบที่ CFB ต่ำสุด · seed เปลี่ยน AUC ได้ 2.7 จุด > ผลต่างใน Table VI (0.16–1.28) · ยังไม่เห็นประโยชน์ของ CFB เหนือ FB·CE
+- สไลด์: เพิ่มหน้า "ขอบเขตการทำซ้ำ" และ "Seed variance" (รวม 37 หน้า) · แก้ augmentation/epochs ให้ตรงโค้ด · ลิงก์ใหม่ claude.ai/artifact/6gwqwCAoQg1BYHYpFfGPZR
+- เหลือ: รัน live demo บน Kaggle · ซ้อมนำเสนอ
+
+---
+
+## 7. อัปเดต 20 ต.ค. 2569 — จัดโครงสไลด์ใหม่ (Part I บทความ / Part II ของเรา)
+**สำรองก่อนแก้ (ตรวจแล้วเปิดอ่านได้):** `deck_src/deck2.tpl.bak-2026-10-20.html` · `deck_src/build.bak-2026-10-20.py` · `ffdbackbone-crispdm-deck.bak-2026-10-20.html` · `speaker_script.bak-2026-10-20.md` · `PROGRESS_LOG.bak-2026-10-20.md`
+- (ก่อนหน้านี้ในวันเดียวกันมีการลองจัดเป็น 30 หน้า แล้วคืนกลับตามที่ผู้ใช้ขอ · ไฟล์ทดลองเก็บไว้ที่ `deck_src/*.restructure-20261020*`)
+
+**ไฟล์ที่แก้:** `deck_src/deck2.tpl.html` (สร้างจาก template เดิมด้วยสคริปต์ใหม่ ไม่ได้ใช้ `restructure.py`) · `deck_src/build.py` (แก้ข้อมูลกราฟ, ชื่อไฟล์ output เดิม) · `speaker_script.md` (เขียนใหม่ทั้งไฟล์) · `ffdbackbone-crispdm-deck.html` (build ใหม่)
+
+**โครงสร้าง:** 42 หน้า → หน้าหลัก 40 + ภาคผนวก 12 (+ หน้าคั่น)
+- Part I บทความ: A Business 4–5 · B Data Understanding 6–8 · C Data Preparation 9–12 · D Modeling 13–19 · E Evaluation 20–24
+- Part II ของเรา: F ข้อมูล/การเตรียม 25–28 · G การฝึก 29–30 · H ผล (Q1–Q6) 31–36 · I Reproducibility/สรุป 37–39
+- ย้ายโค้ดยาวและ live demo ไปภาคผนวก A1–A8 · หน้าเดิมที่ถูกแทนด้วยหน้าใหม่ (ไม่อยู่ใน deck แล้ว แต่ยังอยู่ใน backup): Research questions, Datasets, Data composition, Preprocessing, Pre-training (Table I), Analysis, Our results, Few-shot (ours, ผลรอบ AMP), Conclusion
+
+**Build:** `python3 build.py` สำเร็จ · output 53 slides · ไฟล์ที่ build บนเครื่องตรงกับไฟล์ที่ตรวจภาพ (md5 เดียวกัน)
+**ตรวจภาพ:** render ทุกหน้า (53) ที่ 1280×720 ด้วย Chromium + ฟอนต์ Sarabun/Fira Sans · ตรวจอัตโนมัติหาข้อความล้น/องค์ประกอบหลุดขอบ · พบ 2 หน้า (23, 31) ล้นเล็กน้อย → แก้แล้ว ตรวจซ้ำผ่าน · ป้าย บทความ/โค้ดผู้เขียน/ของเรา อยู่ทุกหน้าเนื้อหา
+
+**ตัวเลขที่ตรวจกับ PDF และแก้ในสไลด์:**
+- UTOM ของบทความ: เดิมเขียน "τ = 0.5 79.42 → 82.29" แต่ 79.42 คือ Avg ACC ของ variant +L_dec ใน Table VI · Table IX (CFB + L_EDU, Avg.) = τ0.5 80.13 · τ_ot 80.63 · τ_UTOM 82.29
+- layer decay 0.75 / weight decay 0.05 มีเฉพาะใน DBBF.yaml บทความไม่ระบุ
+- L_dec = Eq. 1 (เดิมเขียน Eq. 5) · CFB ไม่ได้อยู่ใน Fig. 4
+- Table V มีแถว CDF เป็นเป้าหมาย (CFB 90.46 → 91.33 / 91.31; FF++ 99.25 / 99.10) → ใช้เทียบกับ 3g
+- ยืนยันกับ PDF แล้ว: Table I (77.11, 81.92, 82.70, 83.77, 86.56; in-set 97.09–99.16), Table II CFB, Table III, Table VI, Table IX, Table V
+
+**3g รอบ fp32 (ผู้ใช้รันเสร็จ 20 ต.ค.):** notebook ตั้ง `FT_AMP = False` + ตรวจว่า weight เปลี่ยน · 0/24 run ค้าง (รอบ AMP เดิม 6/24 ทั้งหมด k = 10)
+- ΔAUC CDF (mean ± SD, 6 run): CFB k10 −0.65 ± 0.70 · k20 −0.08 ± 1.37 · FB·CE k10 −1.01 ± 0.29 · k20 −0.74 ± 2.25 · FF++ Δ −0.01 ถึง −0.13
+
+**ยังยืนยันไม่ได้ / ข้อจำกัด:**
+- จำนวนรอบที่รันในตารางของบทความ: ไม่ระบุ
+- เหตุผลที่ฝึกเองต่ำกว่าบทความ (10 vs 60 epoch, fp16) ยังเป็นสมมติฐาน ไม่ได้ทดลองแยก
+- ผล 3h (ตรวจภาพซ้ำ WildDeepfake) บันทึกไว้ใน `results_summary/ระดับ 3h — dupcheck/` แต่ไม่ได้ใส่ใน deck
+- Live demo (level 4) ผู้ใช้รันบน Kaggle สำเร็จแล้ว (20 ต.ค.) · ยังไม่ได้เทียบตัวเลขที่ demo พิมพ์กับสไลด์

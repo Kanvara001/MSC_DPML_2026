@@ -1,0 +1,12 @@
+{
+ "test_auc": 0.9730994897959183,
+ "test_acc": 0.9257142857142857,
+ "best_val_auc": 0.9671173469387755,
+ "variant": "cfb_full",
+ "flags": {
+  "dual": true,
+  "dec": true,
+  "ufm": true,
+  "edu": true
+ }
+}

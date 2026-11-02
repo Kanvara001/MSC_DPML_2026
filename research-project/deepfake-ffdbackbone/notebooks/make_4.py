@@ -27,6 +27,7 @@ notebook นี้ใช้ตอนนำเสนอ รันจบในป�
 | 4 | CFB: 2 branch, Pearson, UFM, fused head และ loss Eq. 9 | `models/custom.py`, `engine_finetune.py` |
 | 5 | Video-level: เฉลี่ย 8 frame บนหลายวิดีโอ เทียบ checkpoint ผู้เขียนกับของเรา | `common/evaluations/` |
 | 6 | UTOM: ปรับ score ด้วย *u* แล้วหา threshold | (ไม่มีใน repo — เขียนเองตาม Eq. 10–11) |
+| 7 | ทดสอบกับภาพใบหน้าจากภายนอก (ภาพนิ่งที่เราเตรียมเอง) | `face_process/`, `inference.py` |
 
 **ก่อนรัน:** GPU **T4 ×1** · Internet **On** · Add Input:
 - output ของระดับ **3b** (`cfb_run/best.pth`) · **3c** (`cdf_crops`) · **3e_V2** (`results_level3e`)
@@ -486,7 +487,102 @@ if ("author", "CDF") in SC:
 tick("หัวข้อ 6 เสร็จ")
 ''')
 
-md("## 7. สรุป")
+md(r"""
+## 7. ทดสอบกับภาพใบหน้าจากภายนอก (ภาพที่เราเตรียมเอง)
+
+ใส่ภาพใบหน้า (`.jpg` `.jpeg` `.png` `.webp`) แล้วรัน pipeline เดียวกับหัวข้อ 2: **RetinaFace → align → crop 224 × 224 → โมเดล → p(fake), u**
+ใช้ฟังก์ชันที่โหลดไว้แล้วในหัวข้อ 2 (`detector`, `valid_faces`, `pick_face`, `align_and_crop`, `score_frames`) จึงต้องรันหัวข้อ 0–2 มาก่อน
+
+**วิธีใส่ภาพ (เลือก 1 ทาง)**
+1. Add Input → Upload → สร้าง Dataset จากรูป แล้วตั้ง `EXT_DIR = "/kaggle/input/<ชื่อ dataset>"` (ตั้งเป็นไฟล์เดี่ยวก็ได้)
+2. ใส่รูปในโฟลเดอร์ชื่อ `ext_faces` (ใน `/kaggle/working` หรือใน Dataset ที่ Add Input ไว้) โดยไม่ต้องตั้ง `EXT_DIR`
+
+**ข้อควรรู้ตอนอธิบาย**
+- ภาพนิ่ง 1 ภาพ = 1 frame จึงไม่มีการเฉลี่ย 8 frame แบบระดับวิดีโอ
+- ภาพไม่มีเฉลย (label) ผลที่ได้คือ score ไม่ใช่ความถูกต้อง
+- โมเดลฝึกบนเฟรมวิดีโอ FF++ c23 ภาพนิ่งจากกล้องหรือจากเว็บมีการบีบอัดต่างกัน และ τ = 0.5 ไม่ใช่ค่าที่ดีที่สุดสำหรับ domain ใหม่
+- ใช้เฉพาะภาพที่เจ้าของยินยอม
+""")
+code(r'''
+from PIL import ImageOps
+
+EXT_DIR = None                       # เช่น "/kaggle/input/my-faces" (None = หาโฟลเดอร์ชื่อ ext_faces เอง)
+EXT_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".bmp")
+MAX_EXT_IMAGES = 8                   # จำนวนภาพสูงสุดที่รันต่อครั้ง
+MAX_SIDE = 1600                      # ย่อภาพที่ใหญ่เกินนี้ก่อนหาใบหน้า (ด้านยาวสุด, px)
+
+def list_ext_images():
+    if EXT_DIR:
+        roots = [Path(EXT_DIR)]
+    else:
+        roots = [WORK_DIR / "ext_faces"]
+        if INPUT_DIR.exists():
+            roots += sorted(INPUT_DIR.glob("*/ext_faces")) + sorted(INPUT_DIR.glob("*/*/ext_faces"))
+    files = []
+    for r in roots:
+        if r.is_dir():
+            files += sorted(p for p in r.rglob("*") if p.is_file() and p.suffix.lower() in EXT_EXTS)
+        elif r.is_file() and r.suffix.lower() in EXT_EXTS:
+            files.append(r)
+    return files[:MAX_EXT_IMAGES]
+
+def ext_image_to_face(path):
+    """ภาพนิ่งจากภายนอก → (ใบหน้า RGB 224x224, ภาพวาด box+landmark, จำนวนหน้าที่เจอ, det score) หรือ None"""
+    pil = ImageOps.exif_transpose(Image.open(path)).convert("RGB")      # แก้ภาพที่หมุนจาก EXIF
+    if max(pil.size) > MAX_SIDE:
+        pil.thumbnail((MAX_SIDE, MAX_SIDE))
+    bgr = cv2.cvtColor(np.asarray(pil), cv2.COLOR_RGB2BGR)
+    faces = valid_faces(detector.detect(bgr))
+    if not faces:
+        return None
+    face = pick_face(faces, None)                                         # เลือกหน้าที่ใหญ่สุด
+    crop = align_and_crop(bgr, face)                                      # align 5 จุด + crop แบบเดียวกับตอนเตรียม FF++/CDF
+    if crop is None:
+        return None
+    vis = bgr.copy(); x0, y0, x1, y1 = face[0].astype(int)
+    th = max(2, max(vis.shape[:2]) // 300)
+    cv2.rectangle(vis, (int(x0), int(y0)), (int(x1), int(y1)), (40, 40, 200), th)
+    for lx, ly in face[1].astype(int):
+        cv2.circle(vis, (int(lx), int(ly)), th * 2, (60, 200, 60), -1)
+    return cv2.cvtColor(crop, cv2.COLOR_BGR2RGB), cv2.cvtColor(vis, cv2.COLOR_BGR2RGB), len(faces), float(face[2])
+
+ext_files = list_ext_images()
+if not ext_files:
+    print("ไม่พบภาพ — ใส่ภาพตามวิธีในหัวข้อ 7 (ตั้ง EXT_DIR หรือสร้างโฟลเดอร์ ext_faces) แล้วรัน cell นี้ใหม่")
+else:
+    rows, shown = [], []
+    for fp in ext_files:
+        try:
+            r = ext_image_to_face(fp)
+        except Exception as e:
+            print(f"อ่านภาพไม่ได้: {fp.name} ({type(e).__name__}: {e})"); continue
+        if r is None:
+            print(f"RetinaFace ไม่พบใบหน้า: {fp.name}"); continue
+        crop, vis, n_faces, det = r
+        ra, ro = score_frames(author, [crop]), score_frames(ours, [crop])
+        pa, ua = float(ra["main"][0][0]), float(ra["main"][1][0])
+        po, uo = float(ro["main"][0][0]), float(ro["main"][1][0])
+        rows.append({"file": fp.name, "faces": n_faces, "det_score": round(det, 3),
+                     "author_p": pa, "author_u": ua, "author_pred": "FAKE" if pa >= DET_THRES else "REAL",
+                     "ours_p": po, "ours_u": uo, "ours_pred": "FAKE" if po >= DET_THRES else "REAL",
+                     "ours_fused_p": float(ro["fused"][0][0]) if "fused" in ro else np.nan})
+        shown.append((fp.name, vis, crop, pa, ua, po))
+    if rows:
+        E = pd.DataFrame(rows)
+        print(f"รัน {len(E)} ภาพ (1 ภาพ = 1 frame · ทำนายที่ τ = {DET_THRES} · p ≥ τ → FAKE · ไม่มีเฉลย)")
+        print(E.round(4).to_string(index=False))
+        E.to_csv(OUT_DIR / "external_images_scores.csv", index=False)
+        fig, axs = plt.subplots(len(shown), 2, figsize=(7, 3.3 * len(shown)), squeeze=False)
+        for (nm, vis, crop, pa, ua, po), (a0, a1) in zip(shown, axs):
+            a0.imshow(vis); a0.set_title(nm[:34], fontsize=8); a0.axis("off")
+            a1.imshow(crop); a1.axis("off")
+            a1.set_title(f"crop 224 · author p={pa:.2f} u={ua:.3f} | ours p={po:.2f}", fontsize=8)
+        plt.tight_layout(); plt.show()
+        print("หมายเหตุ: ผลนี้เป็น score ของภาพเดียว ไม่ใช่การตัดสินว่าภาพจริงหรือปลอม")
+tick("หัวข้อ 7 เสร็จ")
+''')
+
+md("## 8. สรุป")
 code(r'''
 print(f"""
 สิ่งที่ demo นี้แสดง (รันจบใน {time.time() - T_START:.0f} วินาที)
@@ -496,6 +592,7 @@ print(f"""
   4. CFB: Pearson ระหว่าง 2 branch, น้ำหนัก UFM, fused head, loss Eq. 9 และ stop-gradient ของ L_dec
   5. รันสดได้ score เท่ากับผลระดับ 3e_V2
   6. UTOM: ปรับ score ด้วย u แล้วหา threshold (Table IX)
+  7. ทดสอบกับภาพใบหน้าจากภายนอก: RetinaFace → align/crop → p(fake), u
 """)
 ''')
 

@@ -1,0 +1,15 @@
+(คัดลอกจาก output ของ FFD_level3h_wdf_dupcheck.ipynb บน Kaggle · ผู้ใช้ส่งมา 20 ต.ค. 2569)
+WDF test: 6,448 frame จาก 806 sequence
+  FF++ (ทุก split): ใกล้สุด d= 4 · 81__81_fake_2/4.png ↔ ace_v1/manipulated_sequences/FaceSwap/c23/videos/784_769/frame/120.png
+  FF++ (ทุก split): ใกล้สุด d= 6 · 67__67_fake_20/2.png ↔ ace_v1/manipulated_sequences/FaceSwap/c23/videos/897_969/frame/123.png
+  FF++ (ทุก split): ใกล้สุด d= 6 · 65__65_fake_0/2.png ↔ ce_v1/manipulated_sequences/Face2Face/c23/videos/783_916/frame/120.png
+  FF++ (ทุก split): ใกล้สุด d= 6 · 67__67_fake_12/2.png ↔ face_v1/manipulated_sequences/Deepfakes/c23/videos/134_192/frame/0.png
+  FF++ (ทุก split): ใกล้สุด d= 6 · 81__81_fake_2/7.png ↔ ce_v1/manipulated_sequences/Deepfakes/c23/videos/338_336/frame/222.png
+  Celeb-DF: ใกล้สุด d= 4 · 57__57_real_33/4.png ↔ ara/3c-cross-dataset/cdf_crops/Celeb-synthesis__id22_id21_0005/270.png
+  Celeb-DF: ใกล้สุด d= 6 · 73__73_fake_8/6.png ↔ nvara/3c-cross-dataset/cdf_crops/Celeb-synthesis__id4_id0_0001/228.png
+  Celeb-DF: ใกล้สุด d= 6 · 82__82_fake_14/4.png ↔ nvara/3c-cross-dataset/cdf_crops/Celeb-synthesis__id4_id0_0000/413.png
+  Celeb-DF: ใกล้สุด d= 6 · 39__39_fake_5/4.png ↔ nvara/3c-cross-dataset/cdf_crops/Celeb-synthesis__id53_id52_0003/0.png
+  Celeb-DF: ใกล้สุด d= 6 · 81__81_fake_24/6.png ↔ otebooks/kanvara/3c-cross-dataset/cdf_crops/YouTube-real__00285/56.png
+
+อ้างอิง: ระยะ Hamming ระหว่าง frame สุ่มจาก 2 sequence ต่างกันใน WDF · median 28, 1st percentile 16
+ตรวจภาพซ้ำเสร็จใน 3.3 นาที

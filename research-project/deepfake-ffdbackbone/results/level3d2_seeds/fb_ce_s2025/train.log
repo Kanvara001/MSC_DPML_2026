@@ -1,0 +1,113 @@
+load pretrain | missing: 0 unexpected: 37
+variant fb_ce | flags {'dual': False, 'dec': False, 'ufm': False, 'edu': False}
+E1 [0/450] loss 0.7495 ce 0.7495 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.3750 lr 1.00e-06 | 0.1 min
+E1 [50/450] loss 0.6094 ce 0.6094 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.5564 lr 6.44e-06 | 0.5 min
+E1 [100/450] loss 0.5597 ce 0.5597 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.6343 lr 1.19e-05 | 1.0 min
+E1 [150/450] loss 0.4533 ce 0.4533 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.6865 lr 1.73e-05 | 1.4 min
+E1 [200/450] loss 0.4009 ce 0.4009 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.7141 lr 2.28e-05 | 1.9 min
+E1 [250/450] loss 0.2601 ce 0.2601 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.7313 lr 2.82e-05 | 2.3 min
+E1 [300/450] loss 0.5082 ce 0.5082 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.7406 lr 3.37e-05 | 2.8 min
+E1 [350/450] loss 0.3437 ce 0.3437 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.7490 lr 3.91e-05 | 3.3 min
+E1 [400/450] loss 0.3318 ce 0.3318 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.7574 lr 4.46e-05 | 3.7 min
+[EPOCH 1] train loss 0.5258 acc 0.7633 pearson +0.0000 | val video-AUC 80.85 acc 80.00 | 4.4 min
+  -> best (val AUC 80.85)
+E2 [0/450] loss 0.4900 ce 0.4900 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.7812 lr 5.00e-05 | 0.0 min
+E2 [50/450] loss 0.2907 ce 0.2907 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8039 lr 5.00e-05 | 0.5 min
+E2 [100/450] loss 0.5532 ce 0.5532 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8106 lr 4.99e-05 | 1.0 min
+E2 [150/450] loss 0.4129 ce 0.4129 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8121 lr 4.99e-05 | 1.4 min
+E2 [200/450] loss 0.4951 ce 0.4951 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8117 lr 4.98e-05 | 1.9 min
+E2 [250/450] loss 0.4001 ce 0.4001 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8132 lr 4.96e-05 | 2.4 min
+E2 [300/450] loss 0.5168 ce 0.5168 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8142 lr 4.95e-05 | 2.8 min
+E2 [350/450] loss 0.3368 ce 0.3368 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8136 lr 4.93e-05 | 3.3 min
+E2 [400/450] loss 0.3396 ce 0.3396 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8144 lr 4.90e-05 | 3.8 min
+[EPOCH 2] train loss 0.4197 acc 0.8144 pearson +0.0000 | val video-AUC 90.21 acc 85.43 | 4.4 min
+  -> best (val AUC 90.21)
+E3 [0/450] loss 0.3450 ce 0.3450 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8438 lr 4.88e-05 | 0.0 min
+E3 [50/450] loss 0.3462 ce 0.3462 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8290 lr 4.85e-05 | 0.5 min
+E3 [100/450] loss 0.3151 ce 0.3151 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8261 lr 4.82e-05 | 1.0 min
+E3 [150/450] loss 0.3524 ce 0.3524 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8187 lr 4.79e-05 | 1.4 min
+E3 [200/450] loss 0.1468 ce 0.1468 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8240 lr 4.75e-05 | 1.9 min
+E3 [250/450] loss 0.5732 ce 0.5732 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8216 lr 4.71e-05 | 2.3 min
+E3 [300/450] loss 0.3968 ce 0.3968 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8239 lr 4.67e-05 | 2.8 min
+E3 [350/450] loss 0.2832 ce 0.2832 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8257 lr 4.63e-05 | 3.3 min
+E3 [400/450] loss 0.2905 ce 0.2905 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8281 lr 4.58e-05 | 3.7 min
+[EPOCH 3] train loss 0.3681 acc 0.8294 pearson +0.0000 | val video-AUC 93.86 acc 88.29 | 4.4 min
+  -> best (val AUC 93.86)
+E4 [0/450] loss 0.1681 ce 0.1681 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.9062 lr 4.53e-05 | 0.0 min
+E4 [50/450] loss 0.4404 ce 0.4404 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8438 lr 4.48e-05 | 0.5 min
+E4 [100/450] loss 0.2587 ce 0.2587 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8382 lr 4.43e-05 | 1.0 min
+E4 [150/450] loss 0.2386 ce 0.2386 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8427 lr 4.37e-05 | 1.4 min
+E4 [200/450] loss 0.2716 ce 0.2716 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8475 lr 4.32e-05 | 1.9 min
+E4 [250/450] loss 0.3196 ce 0.3196 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8494 lr 4.26e-05 | 2.4 min
+E4 [300/450] loss 0.4633 ce 0.4633 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8497 lr 4.19e-05 | 2.8 min
+E4 [350/450] loss 0.2994 ce 0.2994 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8470 lr 4.13e-05 | 3.3 min
+E4 [400/450] loss 0.3204 ce 0.3204 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8480 lr 4.07e-05 | 3.7 min
+[EPOCH 4] train loss 0.3357 acc 0.8471 pearson +0.0000 | val video-AUC 94.95 acc 88.86 | 4.4 min
+  -> best (val AUC 94.95)
+E5 [0/450] loss 0.2871 ce 0.2871 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.9062 lr 4.00e-05 | 0.0 min
+E5 [50/450] loss 0.2445 ce 0.2445 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8732 lr 3.93e-05 | 0.5 min
+E5 [100/450] loss 0.2945 ce 0.2945 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8639 lr 3.86e-05 | 1.0 min
+E5 [150/450] loss 0.1895 ce 0.1895 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8638 lr 3.79e-05 | 1.4 min
+E5 [200/450] loss 0.2406 ce 0.2406 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8637 lr 3.72e-05 | 1.9 min
+E5 [250/450] loss 0.2941 ce 0.2941 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8625 lr 3.65e-05 | 2.3 min
+E5 [300/450] loss 0.4583 ce 0.4583 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8635 lr 3.57e-05 | 2.8 min
+E5 [350/450] loss 0.4082 ce 0.4082 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8649 lr 3.50e-05 | 3.3 min
+E5 [400/450] loss 0.3579 ce 0.3579 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8645 lr 3.42e-05 | 3.7 min
+[EPOCH 5] train loss 0.3046 acc 0.8649 pearson +0.0000 | val video-AUC 95.98 acc 90.14 | 4.4 min
+  -> best (val AUC 95.98)
+E6 [0/450] loss 0.2908 ce 0.2908 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8438 lr 3.35e-05 | 0.0 min
+E6 [50/450] loss 0.2879 ce 0.2879 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8695 lr 3.27e-05 | 0.5 min
+E6 [100/450] loss 0.2913 ce 0.2913 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8670 lr 3.19e-05 | 0.9 min
+E6 [150/450] loss 0.3350 ce 0.3350 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8638 lr 3.12e-05 | 1.4 min
+E6 [200/450] loss 0.1987 ce 0.1987 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8674 lr 3.04e-05 | 1.9 min
+E6 [250/450] loss 0.3425 ce 0.3425 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8663 lr 2.96e-05 | 2.4 min
+E6 [300/450] loss 0.3644 ce 0.3644 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8660 lr 2.88e-05 | 2.8 min
+E6 [350/450] loss 0.3367 ce 0.3367 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8664 lr 2.81e-05 | 3.3 min
+E6 [400/450] loss 0.1932 ce 0.1932 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8689 lr 2.73e-05 | 3.7 min
+[EPOCH 6] train loss 0.2964 acc 0.8682 pearson +0.0000 | val video-AUC 96.59 acc 91.29 | 4.4 min
+  -> best (val AUC 96.59)
+E7 [0/450] loss 0.2616 ce 0.2616 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8438 lr 2.65e-05 | 0.0 min
+E7 [50/450] loss 0.3265 ce 0.3265 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8652 lr 2.58e-05 | 0.5 min
+E7 [100/450] loss 0.3517 ce 0.3517 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8716 lr 2.50e-05 | 1.0 min
+E7 [150/450] loss 0.3969 ce 0.3969 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8738 lr 2.43e-05 | 1.4 min
+E7 [200/450] loss 0.2095 ce 0.2095 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8731 lr 2.35e-05 | 1.9 min
+E7 [250/450] loss 0.3277 ce 0.3277 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8740 lr 2.28e-05 | 2.3 min
+E7 [300/450] loss 0.2787 ce 0.2787 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8752 lr 2.21e-05 | 2.8 min
+E7 [350/450] loss 0.2829 ce 0.2829 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8759 lr 2.14e-05 | 3.3 min
+E7 [400/450] loss 0.1877 ce 0.1877 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8773 lr 2.07e-05 | 3.7 min
+[EPOCH 7] train loss 0.2810 acc 0.8774 pearson +0.0000 | val video-AUC 96.82 acc 92.00 | 4.4 min
+  -> best (val AUC 96.82)
+E8 [0/450] loss 0.1908 ce 0.1908 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.9062 lr 2.00e-05 | 0.0 min
+E8 [50/450] loss 0.1510 ce 0.1510 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8977 lr 1.93e-05 | 0.5 min
+E8 [100/450] loss 0.3427 ce 0.3427 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8846 lr 1.87e-05 | 1.0 min
+E8 [150/450] loss 0.3234 ce 0.3234 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8847 lr 1.81e-05 | 1.4 min
+E8 [200/450] loss 0.2827 ce 0.2827 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8862 lr 1.74e-05 | 1.9 min
+E8 [250/450] loss 0.2108 ce 0.2108 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8850 lr 1.68e-05 | 2.4 min
+E8 [300/450] loss 0.2006 ce 0.2006 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8854 lr 1.63e-05 | 2.8 min
+E8 [350/450] loss 0.5688 ce 0.5688 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8843 lr 1.57e-05 | 3.3 min
+E8 [400/450] loss 0.2823 ce 0.2823 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8851 lr 1.52e-05 | 3.7 min
+[EPOCH 8] train loss 0.2679 acc 0.8843 pearson +0.0000 | val video-AUC 96.99 acc 92.14 | 4.4 min
+  -> best (val AUC 96.99)
+E9 [0/450] loss 0.2396 ce 0.2396 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.9375 lr 1.47e-05 | 0.0 min
+E9 [50/450] loss 0.3222 ce 0.3222 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8934 lr 1.42e-05 | 0.5 min
+E9 [100/450] loss 0.2913 ce 0.2913 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8864 lr 1.37e-05 | 1.0 min
+E9 [150/450] loss 0.4511 ce 0.4511 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8820 lr 1.33e-05 | 1.4 min
+E9 [200/450] loss 0.2708 ce 0.2708 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8794 lr 1.29e-05 | 1.9 min
+E9 [250/450] loss 0.1975 ce 0.1975 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8790 lr 1.25e-05 | 2.3 min
+E9 [300/450] loss 0.3194 ce 0.3194 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8802 lr 1.21e-05 | 2.8 min
+E9 [350/450] loss 0.2262 ce 0.2262 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8804 lr 1.18e-05 | 3.3 min
+E9 [400/450] loss 0.1116 ce 0.1116 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8799 lr 1.15e-05 | 3.7 min
+[EPOCH 9] train loss 0.2686 acc 0.8815 pearson +0.0000 | val video-AUC 97.12 acc 92.71 | 4.4 min
+  -> best (val AUC 97.12)
+E10 [0/450] loss 0.1909 ce 0.1909 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.9062 lr 1.12e-05 | 0.0 min
+E10 [50/450] loss 0.2534 ce 0.2534 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8848 lr 1.10e-05 | 0.5 min
+E10 [100/450] loss 0.1419 ce 0.1419 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8929 lr 1.07e-05 | 1.0 min
+E10 [150/450] loss 0.2733 ce 0.2733 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8893 lr 1.05e-05 | 1.4 min
+E10 [200/450] loss 0.3504 ce 0.3504 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8884 lr 1.04e-05 | 1.9 min
+E10 [250/450] loss 0.3724 ce 0.3724 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8896 lr 1.02e-05 | 2.4 min
+E10 [300/450] loss 0.1658 ce 0.1658 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8886 lr 1.01e-05 | 2.8 min
+E10 [350/450] loss 0.3261 ce 0.3261 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8892 lr 1.01e-05 | 3.3 min
+E10 [400/450] loss 0.3532 ce 0.3532 edlM 0.0000 edlA 0.0000 pear +0.0000 acc 0.8881 lr 1.00e-05 | 3.7 min
+[EPOCH 10] train loss 0.2580 acc 0.8881 pearson +0.0000 | val video-AUC 97.26 acc 92.71 | 4.4 min
+  -> best (val AUC 97.26)
+[FINAL] FF++ c23 test video-AUC 97.34 acc 93.00

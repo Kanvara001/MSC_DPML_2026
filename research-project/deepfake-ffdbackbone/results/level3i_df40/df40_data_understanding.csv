@@ -1,0 +1,17 @@
+domain,class,category,videos,% in domain
+ff,Real,-,140,7.7
+ff,SadTalker,FR,138,7.6
+ff,FOMM,FR,140,7.7
+ff,FaceDancer,FS,140,7.7
+ff,MobileSwap,FS,858,47.3
+ff,SimSwap,FS,140,7.7
+ff,InSwapper,FS,118,6.5
+ff,UniFace,FS,140,7.7
+cdf,Real,-,178,4.0
+cdf,SadTalker,FR,660,14.8
+cdf,FOMM,FR,647,14.5
+cdf,FaceDancer,FS,648,14.5
+cdf,MobileSwap,FS,637,14.3
+cdf,SimSwap,FS,641,14.4
+cdf,InSwapper,FS,424,9.5
+cdf,UniFace,FS,626,14.0
