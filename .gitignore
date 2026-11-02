@@ -16,3 +16,5 @@ research-project/**/ffpp_c23_faces/
 Thumbs.db
 __pycache__/
 .ipynb_checkpoints/
+*.npy
+~$*

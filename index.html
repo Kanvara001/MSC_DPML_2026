@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MSC DPML 2026</title>
+<meta name="description" content="หน้ารวมเนื้อหารายวิชา DPML 2026: สรุปบทเรียน สไลด์ Quiz เครื่องมือ interactive และ Research Project">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f9; --panel:#ffffff; --ink:#132033; --ink2:#5d6b7e; --line:#dde3eb;
+  --accent:#1f56d6; --accent-bg:#e9effd;
+  --m1:#1f56d6; --m2:#0e8f7c; --m3:#b4561b; --m4:#7a3fc1; --m5:#c0264f; --m6:#3d6a9c;
+  --chip:#eef2f7; --code:#f1f4f8;
+  --sans:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f141b; --panel:#171e28; --ink:#e6ecf3; --ink2:#9aa8b9; --line:#2a3442;
+    --accent:#7aa2ff; --accent-bg:#1d2a44;
+    --m1:#7aa2ff; --m2:#4fd1b9; --m3:#f0a46a; --m4:#b98cf0; --m5:#f07a98; --m6:#8db4e0;
+    --chip:#222b38; --code:#1d2530;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --panel:#171e28; --ink:#e6ecf3; --ink2:#9aa8b9; --line:#2a3442;
+  --accent:#7aa2ff; --accent-bg:#1d2a44;
+  --m1:#7aa2ff; --m2:#4fd1b9; --m3:#f0a46a; --m4:#b98cf0; --m5:#f07a98; --m6:#8db4e0;
+  --chip:#222b38; --code:#1d2530;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.1;margin:6px 0 8px;letter-spacing:-.02em}
+.who{color:var(--ink2);font-size:14px}
+.themebtn{font:inherit;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat b{display:block;font-size:24px;font-family:var(--mono)}
+.stat span{color:var(--ink2);font-size:13px}
+.toolbar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 12px;display:flex;flex-direction:column;gap:10px}
+.search{width:100%;font:inherit;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.search:focus{outline:2px solid var(--accent);outline-offset:1px}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.fbtn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.fbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+section.module{margin-top:26px}
+.mhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mdot{width:12px;height:12px;border-radius:4px;flex:none}
+.mhead h2{font-size:19px;margin:0}
+.mhead .mdesc{color:var(--ink2);font-size:13px}
+.grid{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+details.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));border-radius:12px;padding:0}
+details.card summary{list-style:none;cursor:pointer;padding:13px 15px;display:flex;gap:10px;align-items:flex-start}
+details.card summary::-webkit-details-marker{display:none}
+.tag{font-family:var(--mono);font-size:11px;font-weight:600;background:var(--chip);border-radius:6px;padding:2px 7px;flex:none;margin-top:2px}
+.ct{font-weight:600}
+.cs{color:var(--ink2);font-size:13.5px}
+.chev{margin-left:auto;color:var(--ink2);transition:transform .15s;flex:none}
+details[open] .chev{transform:rotate(90deg)}
+.body{padding:0 15px 14px}
+.body ul{margin:4px 0 10px;padding-left:20px}
+.body li{margin-bottom:3px}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.links a{font-size:12.5px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--ink);background:var(--chip)}
+.links a:hover{border-color:var(--accent);color:var(--accent)}
+.empty{color:var(--ink2);padding:20px 0;display:none}
+/* tools */
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:10px}
+.tool h3{margin:0 0 4px;font-size:16px}
+.tool p.h{margin:0 0 12px;color:var(--ink2);font-size:13.5px}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:12px}
+.row label{font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:8px}
+.row input[type=range]{accent-color:var(--accent)}
+.val{font-family:var(--mono);font-weight:600;color:var(--ink)}
+.kgrid{display:grid;gap:3px;width:min(340px,100%)}
+.kgrid div{font-family:var(--mono);font-size:13px;text-align:center;padding:8px 0;border-radius:6px;color:#fff}
+.cols2{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:760px){.cols2{grid-template-columns:auto 1fr}}
+.mono{font-family:var(--mono);font-size:13px}
+.tbl{overflow-x:auto}
+table.pt{border-collapse:collapse;width:100%;min-width:560px;font-family:var(--mono);font-size:12.5px}
+table.pt th,table.pt td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:center}
+table.pt th{color:var(--ink2);font-weight:600}
+table.pt tr.err td{background:color-mix(in srgb,var(--m5) 14%,transparent)}
+table.pt tr.cur td{outline:2px solid var(--accent);outline-offset:-2px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+select{font:inherit;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.note{background:var(--code);border-radius:10px;padding:10px 12px;font-size:13.5px;margin-top:10px}
+footer{margin-top:40px;color:var(--ink2);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Master · Term 1 · Data Preparation for ML &amp; AI</div>
+      <h1>MSC DPML 2026</h1>
+      <div class="who">กัญญ์วรา ถาวโรฤทธิ์ · 695020018-8 · <a href="https://github.com/Kanvara001/MSC_DPML_2026">GitHub repo</a></div>
+    </div>
+    <button class="themebtn" id="theme" type="button" aria-label="สลับธีม">◐ ธีม</button>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <input class="search" id="q" type="search" placeholder="ค้นหาหัวข้อ เช่น PCA, Gaussian, perceptron, leakage, AUC…" aria-label="ค้นหาเนื้อหา">
+    <div class="filters" id="filters"></div>
+  </div>
+
+  <main id="content"></main>
+  <p class="empty" id="empty">ไม่พบหัวข้อที่ตรงกับคำค้น</p>
+
+  <section class="module" id="tools">
+    <div class="mhead"><span class="mdot" style="background:var(--m5)"></span><div><h2>เครื่องมือ interactive</h2><div class="mdesc">ลองเปลี่ยนค่าแล้วดูผลทันที</div></div></div>
+
+    <div class="tool">
+      <h3>Evaluation Metrics &amp; ROC / AUC</h3>
+      <p class="h">เลื่อน threshold, prevalence และ separation แล้วดู TP/TN/FP/FN, confusion matrix, ROC curve และ metric ทุกตัวเปลี่ยนตาม</p>
+      <div class="links"><a href="course/interactive/evaluation-metrics-roc-auc.html">เปิดหน้า Evaluation Metrics →</a></div>
+    </div>
+
+    <div class="tool">
+      <h3>Gaussian Kernel Builder <span class="tag">Quiz 1</span></h3>
+      <p class="h">G(x,y) = e<sup>−(x²+y²)/2σ²</sup> สเกลให้มุม kernel เป็น 1 แล้วปัดเป็นจำนวนเต็ม แล้ว normalize ด้วยผลรวม (kernel มาตรฐาน 1/273 ใน Quiz 1 ใช้สเกลอื่น ค่าจึงต่างกันเล็กน้อย)</p>
+      <div class="row">
+        <label>ขนาด <select id="ksize"><option>3</option><option selected>5</option><option>7</option></select></label>
+        <label>σ <input type="range" id="ksig" min="0.5" max="3" step="0.1" value="1"> <span class="val" id="ksigv">1.0</span></label>
+      </div>
+      <div class="cols2">
+        <div class="kgrid" id="kgrid"></div>
+        <div class="mono" id="kinfo"></div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <h3>Perceptron Step-through <span class="tag">Quiz 2</span></h3>
+      <p class="h">w<sub>i</sub> ← w<sub>i</sub> + α(t − o)x<sub>i</sub> · bias x<sub>0</sub> = 1 · ทีละแถว แถวสีแดงคือแถวที่ทายผิดและมีการปรับ weight</p>
+      <div class="row">
+        <label>ฟังก์ชัน <select id="pfn">
+          <option value="quiz2">(X1 ∧ X2) ∨ X3 — Quiz 2</option>
+          <option value="and">AND</option>
+          <option value="or">OR</option>
+          <option value="xor">XOR (แบ่งเส้นตรงไม่ได้)</option>
+        </select></label>
+        <label>α <input type="range" id="palpha" min="0.1" max="1" step="0.1" value="0.5"> <span class="val" id="palphav">0.5</span></label>
+        <label>threshold <input type="range" id="pthr" min="0" max="1" step="0.1" value="0.5"> <span class="val" id="pthrv">0.5</span></label>
+      </div>
+      <div class="btns" style="margin-bottom:10px">
+        <button class="btn pri" id="pstep" type="button">ทีละแถว ▸</button>
+        <button class="btn" id="pepoch" type="button">ทีละ epoch ▸▸</button>
+        <button class="btn" id="prun" type="button">รันจนจบ</button>
+        <button class="btn" id="preset" type="button">เริ่มใหม่</button>
+      </div>
+      <div class="tbl"><table class="pt" id="ptable"></table></div>
+      <div class="note" id="pnote"></div>
+    </div>
+  </section>
+
+  <footer>
+    เนื้อหาสรุปจากสไลด์และเอกสารประกอบการเรียนรายวิชา DPML 2026 ·
+    ไฟล์ Markdown เปิดบน GitHub, ไฟล์ HTML/PDF เปิดในหน้านี้
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var GH = 'https://github.com/Kanvara001/MSC_DPML_2026/blob/main/';
+  function md(p){ return GH + p; }
+
+  var MODULES = [
+    { id:'m0', name:'ภาพรวมรายวิชา', desc:'เกณฑ์คะแนนและแผนกิจกรรม', color:'var(--m6)', items:[
+      { tag:'00', title:'เกณฑ์คะแนนและแผนรายวิชา', sum:'สัดส่วนคะแนน เกณฑ์เกรด และกิจกรรม Research Paper',
+        pts:['Research Project 30% · Homework 10% · Quiz 10%','Midterm 20% · Final 20% · Github 10%','A ≥ 80 … F < 50'],
+        links:[['สรุป (md)', md('course/00_grading-and-schedule.md')]] }
+    ]},
+    { id:'m1', name:'พื้นฐาน AI / ML', desc:'ข้อมูล โมเดล และ LLM', color:'var(--m1)', items:[
+      { tag:'L1', title:'AI และ Machine Learning เบื้องต้น', sum:'ข้อมูลและโมเดล, row = data point/sample',
+        pts:['ความต่างของ AI, ML, Deep Learning','ข้อมูลแบบตาราง: row, feature, label','ภาพรวมการสร้างโมเดล'],
+        links:[['สรุป (md)', md('course/lectures/lecture_01_intro-ml.md')]] },
+      { tag:'L2', title:'Large Language Model', sum:'Discriminative vs Generative, 5 ขั้นตอนการพัฒนา LLM, RAG',
+        pts:['Discriminative vs Generative model','ขั้นตอนพัฒนา LLM','Retrieval-Augmented Generation (RAG)'],
+        links:[['สรุป (md)', md('course/lectures/lecture_02_llm.md')]] }
+    ]},
+    { id:'m2', name:'Data Preparation', desc:'คุณภาพข้อมูล การ split leakage และ preprocessing', color:'var(--m2)', items:[
+      { tag:'L3', title:'Session 1: A number you can defend', sum:'Data quality, profiling, splitting, leakage, evaluation hygiene',
+        pts:['Data-centric vs model-centric','Task-first design: task, unit of analysis, metric, deployment','Leakage และการ split ที่ถูกต้อง'],
+        links:[['สรุป (md)', md('course/lectures/lecture_03_data-prep-session1.md')],['เอกสาร HTML', 'course/materials/data-preparation/index.html'],['ฉบับย่อ', 'course/materials/data-preparation/index-condensed.html']] },
+      { tag:'L4', title:'Data Preprocessing (Han ch.3)', sum:'Data cleaning, integration, reduction, PCA',
+        pts:['6 มิติของ data quality','Missing data และ noisy data (binning, regression, clustering)','Redundancy: correlation / covariance','Imbalanced data: under/over-sampling, SMOTE','PCA: eigenvector ของ covariance matrix'],
+        links:[['สรุป (md)', md('course/lectures/lecture_04_data-preprocessing.md')],['สไลด์ (PDF)', 'course/slides/03_data-preprocessing_annotated.pdf']] },
+      { tag:'T', title:'SMOTE และ Imbalanced Data', sum:'ผลเปรียบเทียบ SMOTE และสรุป Data section ของงานวิจัย SMOTE',
+        pts:['SMOTE สร้างตัวอย่าง minority ด้วยการ interpolate เชิงเส้น','การใช้ benchmark dataset ในงานวิจัย SMOTE และปัญหาการรายงานผล'],
+        links:[['Performance (HTML)', 'course/topics/smote/performance.html'],['สรุป SMOTE25 (PDF)', 'course/topics/smote/smote25_data-section-summary.pdf']] }
+    ]},
+    { id:'m3', name:'Image Data', desc:'การเกิดภาพดิจิทัล และ preprocessing ภาพ', color:'var(--m3)', items:[
+      { tag:'L5', title:'Class 1: How a Digital Image is Formed', sum:'กล้อง เซนเซอร์ ภาพการแพทย์ sampling aliasing สี resize/normalize',
+        pts:['Pinhole vs lens camera, CCD vs CMOS','X-ray, Ultrasound, CT (HU), MRI','Sampling, quantization, aliasing, Nyquist','In-camera pipeline: white balance, demosaic, gamma','Resize = resampling: เลือก interpolation ให้ถูก'],
+        links:[['สรุป (md)', md('course/lectures/lecture_05_image-formation.md')],['สไลด์ (PDF 31 MB)', 'course/slides/image-data_class1_how-a-digital-image-is-formed.pdf']] },
+      { tag:'L6', title:'Class 2: Preprocessing Before & During Training', sum:'Filtering, CLAHE, normalization, the rule, transfer learning, augmentation',
+        pts:['Gaussian vs box filter, median filter','Histogram equalization และ CLAHE','Fit สถิติบน training split เท่านั้น','ImageNet mean/std คือสัญญาของ backbone','Augmentation และ pipeline: torchvision v2, Albumentations, MONAI'],
+        links:[['สรุป (md)', md('course/lectures/lecture_06_image-preprocessing-training.md')],['สไลด์ (PDF 19 MB)', 'course/slides/image-data_class2_preprocessing-before-and-during-training.pdf']] }
+    ]},
+    { id:'m4', name:'Classification & Neural Network', desc:'Decision tree, Naive Bayes, evaluation, perceptron', color:'var(--m4)', items:[
+      { tag:'L7', title:'Classification: Basic Concepts', sum:'Decision tree (information gain), Naive Bayes, linear classifier, confusion matrix',
+        pts:['Entropy และ Information Gain (ID3/C4.5)','แบบฝึกหัด Flu: Gain(Temp > 37.5) = 0.5488','Naive Bayes และ Laplacian correction','Logistic regression, generative vs discriminative','Accuracy, precision, recall, specificity, F1, ROC/AUC'],
+        links:[['สรุป (md)', md('course/lectures/lecture_07_classification-basic.md')],['สไลด์ (PDF)', 'course/slides/08_classification-basic_annotated.pdf'],['ROC / AUC interactive', 'course/interactive/evaluation-metrics-roc-auc.html']] },
+      { tag:'T', title:'Decision Tree (หัวข้อเสริม)', sum:'สไลด์และบทบรรยาย Decision Tree',
+        pts:['การสร้างต้นไม้ การเลือก attribute และการตัดกิ่ง'],
+        links:[['Interactive (HTML)', 'course/topics/decision-tree/Decision_tree.html'],['สไลด์ (HTML)', 'course/topics/decision-tree/Decision_tree_slides.html'],['บทบรรยาย (PDF)', 'course/topics/decision-tree/Decision_tree_lecture-notes.pdf']] },
+      { tag:'L8', title:'Neural Network: Perceptron & Delta Rule', sum:'Perceptron learning rule, AND vs XOR, gradient descent',
+        pts:['Net sum, bias, activation function','w ← w + α(t − o)x','AND แบ่งเส้นตรงได้, XOR แบ่งไม่ได้','Delta rule: ลด E = ½Σ(t − o)²'],
+        links:[['สรุป (md)', md('course/lectures/lecture_08_neural-network.md')],['เอกสาร (PDF)', 'course/slides/neural-network_perceptron_annotated.pdf'],['ลองเล่น perceptron', '#tools']] }
+    ]},
+    { id:'m5', name:'Quiz', desc:'ไฟล์ที่ส่งและวิธีทำ', color:'var(--m5)', items:[
+      { tag:'Q1', title:'Quiz 1: Gaussian Kernel 5×5 (σ = 1)', sum:'คำนวณ kernel, ปัดเป็นจำนวนเต็ม และ normalize ด้วย 273',
+        pts:['G(x,y) = e^(−(x²+y²)/2σ²)','ผลรวม = 273 → หารทั้ง kernel'],
+        links:[['วิธีทำ (md)', md('quizzes/quiz_01.md')],['ไฟล์ที่ส่ง (PDF)', 'quizzes/quiz_01_gaussian-kernel.pdf'],['Kernel builder', '#tools']] },
+      { tag:'Q2', title:'Quiz 2: Perceptron (X1 ∧ X2) ∨ X3', sum:'สอน perceptron 4 epoch แล้วทดสอบ คำนวณ accuracy/precision/recall/specificity',
+        pts:['α = 0.5, weight เริ่มต้น 0.1','weight สุดท้าย (0.1, 1.1, −0.4, 0.6)'],
+        links:[['วิธีทำ (md)', md('quizzes/quiz_02.md')],['ไฟล์ที่ส่ง (PDF)', 'quizzes/quiz_02_perceptron.pdf'],['Step-through', '#tools']] }
+    ]},
+    { id:'m6', name:'Research Project', desc:'AI Detection: Deepfake (FFDBackbone)', color:'var(--m6)', items:[
+      { tag:'RP', title:'ทำซ้ำ FFDBackbone — Face Forgery Detection', sum:'Guo et al., IEEE TPAMI 2026 · ทำซ้ำตาม CRISP-DM บน Kaggle',
+        pts:['FF++ c23 AUC 96.57 (paper 99.36)','Celeb-DF AUC 84.97 (paper 90.46)','Ablation, significance test, few-shot, DF40'],
+        links:[['README', md('research-project/deepfake-ffdbackbone/README.md')],['สไลด์นำเสนอ (HTML)', 'research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html'],['Progress log', md('research-project/deepfake-ffdbackbone/docs/PROGRESS_LOG.md')]] }
+    ]}
+  ];
+
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  /* ---------- theme ---------- */
+  var root = document.documentElement;
+  try { var t = localStorage.getItem('dpml-theme'); if (t) root.setAttribute('data-theme', t); } catch(e) {}
+  el('theme').addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    var dark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('dpml-theme', next); } catch(e) {}
+  });
+
+  /* ---------- stats ---------- */
+  var nLec = 0, nAll = 0;
+  MODULES.forEach(function(m){ m.items.forEach(function(it){ nAll++; if (/^L\d/.test(it.tag)) nLec++; }); });
+  el('stats').innerHTML = [[nLec,'บทเรียนที่สรุป'],[2,'Quiz'],[3,'เครื่องมือ interactive'],[nAll,'หัวข้อทั้งหมด']]
+    .map(function(s){ return '<div class="stat"><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'; }).join('');
+
+  /* ---------- catalogue ---------- */
+  var state = { q:'', mod:'all' };
+  el('filters').innerHTML = '<button class="fbtn on" data-m="all" type="button">ทั้งหมด</button>' +
+    MODULES.map(function(m){ return '<button class="fbtn" data-m="'+m.id+'" type="button">'+esc(m.name)+'</button>'; }).join('');
+
+  function render(){
+    var q = state.q.trim().toLowerCase(), shown = 0, h = '';
+    MODULES.forEach(function(m){
+      if (state.mod !== 'all' && state.mod !== m.id) return;
+      var items = m.items.filter(function(it){
+        if (!q) return true;
+        return (it.title+' '+it.sum+' '+it.pts.join(' ')+' '+m.name).toLowerCase().indexOf(q) >= 0;
+      });
+      if (!items.length) return;
+      shown += items.length;
+      h += '<section class="module"><div class="mhead"><span class="mdot" style="background:'+m.color+'"></span><div><h2>'+esc(m.name)+'</h2><div class="mdesc">'+esc(m.desc)+'</div></div></div><div class="grid">';
+      items.forEach(function(it){
+        h += '<details class="card" style="--c:'+m.color+'"'+(q?' open':'')+'><summary><span class="tag">'+esc(it.tag)+'</span><div><div class="ct">'+esc(it.title)+'</div><div class="cs">'+esc(it.sum)+'</div></div><span class="chev">›</span></summary>' +
+             '<div class="body"><ul>'+it.pts.map(function(p){return '<li>'+esc(p)+'</li>';}).join('')+'</ul><div class="links">' +
+             it.links.map(function(l){ var ext = /^https?:/.test(l[1]); return '<a href="'+esc(l[1])+'"'+(ext?' target="_blank" rel="noopener"':'')+'>'+esc(l[0])+'</a>'; }).join('') +
+             '</div></div></details>';
+      });
+      h += '</div></section>';
+    });
+    el('content').innerHTML = h;
+    el('empty').style.display = shown ? 'none' : 'block';
+  }
+  el('q').addEventListener('input', function(e){ state.q = e.target.value; render(); });
+  el('filters').addEventListener('click', function(e){
+    var b = e.target.closest('.fbtn'); if (!b) return;
+    state.mod = b.getAttribute('data-m');
+    Array.prototype.forEach.call(el('filters').children, function(x){ x.classList.toggle('on', x === b); });
+    render();
+  });
+  render();
+
+  /* ---------- Gaussian kernel ---------- */
+  function kernel(){
+    var n = parseInt(el('ksize').value,10), s = parseFloat(el('ksig').value), r = (n-1)/2;
+    el('ksigv').textContent = s.toFixed(1);
+    var g = [], i, j, corner = Math.exp(-(2*r*r)/(2*s*s)), mx = 0, sum = 0;
+    for (i=-r;i<=r;i++){ for (j=-r;j<=r;j++){ var v = Math.round(Math.exp(-(i*i+j*j)/(2*s*s))/corner); g.push(v); sum += v; if (v>mx) mx=v; } }
+    var grid = el('kgrid'); grid.style.gridTemplateColumns = 'repeat('+n+',1fr)';
+    grid.innerHTML = g.map(function(v){
+      var a = 0.25 + 0.75*Math.log(1+v)/Math.log(1+mx);
+      return '<div style="background:color-mix(in srgb,var(--accent) '+Math.round(a*100)+'%,#8a96a8)">'+v+'</div>';
+    }).join('');
+    el('kinfo').innerHTML = 'ผลรวม = <b>'+sum+'</b><br>kernel = (1/'+sum+') × matrix<br>ค่ากลาง / ค่ามุม = '+(1/corner).toFixed(1) +
+      '<br><br>σ มากขึ้น → kernel แบนลง → blur มากขึ้น';
+  }
+  el('ksize').addEventListener('change', kernel);
+  el('ksig').addEventListener('input', kernel);
+  kernel();
+
+  /* ---------- perceptron ---------- */
+  var DATA = {
+    quiz2:{ n:3, rows:[[1,1,0,1],[0,1,0,0],[0,0,1,1],[1,1,1,1]] },
+    and:{ n:2, rows:[[0,0,0],[0,1,0],[1,0,0],[1,1,1]] },
+    or:{ n:2, rows:[[0,0,0],[0,1,1],[1,0,1],[1,1,1]] },
+    xor:{ n:2, rows:[[0,0,0],[0,1,1],[1,0,1],[1,1,0]] }
+  };
+  var P;
+  function r2(v){ return Math.round(v*100)/100; }
+  function preset(){
+    var d = DATA[el('pfn').value];
+    P = { d:d, w:new Array(d.n+1).fill(0.1), i:0, epoch:1, errs:0, log:[], done:false, alpha:parseFloat(el('palpha').value), thr:parseFloat(el('pthr').value) };
+    el('palphav').textContent = P.alpha.toFixed(1); el('pthrv').textContent = P.thr.toFixed(1);
+    pdraw();
+  }
+  function pstep(){
+    if (P.done) return;
+    var row = P.d.rows[P.i], x = [1].concat(row.slice(0,P.d.n)), t = row[P.d.n];
+    var s = 0; x.forEach(function(xi,k){ s += xi*P.w[k]; }); s = r2(s);
+    var o = s > P.thr ? 1 : 0, e = t - o;
+    P.w = P.w.map(function(wi,k){ return r2(wi + P.alpha*e*x[k]); });
+    if (e) P.errs++;
+    P.log.push({ ep:P.epoch, x:row.slice(0,P.d.n), t:t, s:s, o:o, e:e, w:P.w.slice() });
+    P.i++;
+    if (P.i >= P.d.rows.length){
+      if (P.errs === 0) P.done = 'ok';
+      else if (P.epoch >= 30) P.done = 'stop';
+      else { P.i = 0; P.epoch++; P.errs = 0; }
+    }
+  }
+  function pdraw(){
+    var n = P.d.n, h = '<tr><th>epoch</th>';
+    for (var k=1;k<=n;k++) h += '<th>X'+k+'</th>';
+    h += '<th>T</th><th>Σ</th><th>o</th><th>α(t−o)</th>';
+    for (k=0;k<=n;k++) h += '<th>w'+k+'</th>';
+    h += '</tr>';
+    var rows = P.log.slice(-16);
+    if (P.log.length > 16) h += '<tr><td colspan="'+(2*n+6)+'">… แสดง 16 แถวล่าสุด จากทั้งหมด '+P.log.length+' แถว</td></tr>';
+    rows.forEach(function(r,idx){
+      h += '<tr class="'+(r.e?'err':'')+(idx===rows.length-1?' cur':'')+'"><td>'+r.ep+'</td>'+r.x.map(function(v){return '<td>'+v+'</td>';}).join('') +
+           '<td>'+r.t+'</td><td>'+r.s+'</td><td>'+r.o+'</td><td>'+r2(P.alpha*r.e)+'</td>'+r.w.map(function(v){return '<td>'+v+'</td>';}).join('')+'</tr>';
+    });
+    el('ptable').innerHTML = h;
+    var wtxt = '('+P.w.join(', ')+')';
+    el('pnote').innerHTML = P.done === 'ok'
+      ? '✓ ลู่เข้าใน epoch '+P.epoch+' (ไม่มี error ทั้ง epoch) · weight สุดท้าย <b>'+wtxt+'</b>'
+      : P.done === 'stop'
+      ? '✗ ครบ 30 epoch ยังไม่ลู่เข้า — ข้อมูลแบ่งด้วยเส้นตรงไม่ได้ (เช่น XOR) ต้องใช้ multilayer network'
+      : 'weight เริ่มต้น 0.1 ทุกตัว · ตอนนี้ epoch '+P.epoch+' แถวที่ '+(P.i+1)+' · weight ปัจจุบัน '+wtxt;
+  }
+  el('pstep').addEventListener('click', function(){ pstep(); pdraw(); });
+  el('pepoch').addEventListener('click', function(){ var e = P.epoch; while(!P.done && P.epoch === e) pstep(); pdraw(); });
+  el('prun').addEventListener('click', function(){ while(!P.done) pstep(); pdraw(); });
+  el('preset').addEventListener('click', preset);
+  el('pfn').addEventListener('change', preset);
+  el('palpha').addEventListener('input', preset);
+  el('pthr').addEventListener('input', preset);
+  preset();
+})();
+</script>
+</body>
+</html>
