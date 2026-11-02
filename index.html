@@ -4,243 +4,197 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MSC DPML 2026</title>
-<meta name="description" content="หน้ารวมเนื้อหารายวิชา DPML 2026: สรุปบทเรียน สไลด์ Quiz เครื่องมือ interactive และ Research Project">
+<meta name="description" content="หน้ารวมเนื้อหารายวิชา DPML 2026: สรุปบทเรียนฉบับเต็ม Quiz เครื่องมือ interactive และ Research Project">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="site/content.js"></script>
 <style>
 :root{
-  --bg:#f4f6f9; --panel:#ffffff; --ink:#132033; --ink2:#5d6b7e; --line:#dde3eb;
-  --accent:#1f56d6; --accent-bg:#e9effd;
-  --m1:#1f56d6; --m2:#0e8f7c; --m3:#b4561b; --m4:#7a3fc1; --m5:#c0264f; --m6:#3d6a9c;
-  --chip:#eef2f7; --code:#f1f4f8;
+  --bg:#f5f7fa; --panel:#ffffff; --side:#ffffff; --ink:#142135; --ink2:#5b6a7d; --line:#dfe5ec;
+  --accent:#1f56d6; --accent-bg:#eaf0fd; --chip:#eef2f7; --code:#f2f5f9; --hl:#fff6d6;
+  --m-overview:#3d6a9c; --m-basics:#1f56d6; --m-dataprep:#0e8f7c; --m-image:#b4561b;
+  --m-classify:#7a3fc1; --m-quiz:#c0264f; --m-research:#2f7d4f;
   --sans:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0f141b; --panel:#171e28; --ink:#e6ecf3; --ink2:#9aa8b9; --line:#2a3442;
-    --accent:#7aa2ff; --accent-bg:#1d2a44;
-    --m1:#7aa2ff; --m2:#4fd1b9; --m3:#f0a46a; --m4:#b98cf0; --m5:#f07a98; --m6:#8db4e0;
-    --chip:#222b38; --code:#1d2530;
+    --bg:#0f141b; --panel:#161d27; --side:#131a23; --ink:#e6ecf3; --ink2:#9aa8b9; --line:#29333f;
+    --accent:#7aa2ff; --accent-bg:#1c2942; --chip:#212a36; --code:#1b232e; --hl:#3a3418;
+    --m-overview:#8db4e0; --m-basics:#7aa2ff; --m-dataprep:#4fd1b9; --m-image:#f0a46a;
+    --m-classify:#b98cf0; --m-quiz:#f07a98; --m-research:#6fcf97;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0f141b; --panel:#171e28; --ink:#e6ecf3; --ink2:#9aa8b9; --line:#2a3442;
-  --accent:#7aa2ff; --accent-bg:#1d2a44;
-  --m1:#7aa2ff; --m2:#4fd1b9; --m3:#f0a46a; --m4:#b98cf0; --m5:#f07a98; --m6:#8db4e0;
-  --chip:#222b38; --code:#1d2530;
+  --bg:#0f141b; --panel:#161d27; --side:#131a23; --ink:#e6ecf3; --ink2:#9aa8b9; --line:#29333f;
+  --accent:#7aa2ff; --accent-bg:#1c2942; --chip:#212a36; --code:#1b232e; --hl:#3a3418;
+  --m-overview:#8db4e0; --m-basics:#7aa2ff; --m-dataprep:#4fd1b9; --m-image:#f0a46a;
+  --m-classify:#b98cf0; --m-quiz:#f07a98; --m-research:#6fcf97;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+html{scroll-padding-top:70px}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
 a{color:var(--accent)}
-.wrap{max-width:1100px;margin:0 auto;padding:28px 16px 60px}
-header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
-h1{font-size:clamp(28px,5vw,42px);line-height:1.1;margin:6px 0 8px;letter-spacing:-.02em}
-.who{color:var(--ink2);font-size:14px}
-.themebtn{font:inherit;font-size:13px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-.stat b{display:block;font-size:24px;font-family:var(--mono)}
-.stat span{color:var(--ink2);font-size:13px}
-.toolbar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 12px;display:flex;flex-direction:column;gap:10px}
-.search{width:100%;font:inherit;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button{font:inherit}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{font-weight:700;text-decoration:none;color:var(--ink);white-space:nowrap}
+.brand small{font-weight:400;color:var(--ink2);font-size:12px;margin-left:6px}
+.menubtn{display:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer}
+.search{flex:1;min-width:0;max-width:440px;margin-left:auto;font:inherit;font-size:14px;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 .search:focus{outline:2px solid var(--accent);outline-offset:1px}
-.filters{display:flex;flex-wrap:wrap;gap:6px}
-.fbtn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
-.fbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
-section.module{margin-top:26px}
-.mhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.mdot{width:12px;height:12px;border-radius:4px;flex:none}
-.mhead h2{font-size:19px;margin:0}
-.mhead .mdesc{color:var(--ink2);font-size:13px}
-.grid{display:grid;gap:10px;grid-template-columns:1fr}
-@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
-details.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));border-radius:12px;padding:0}
-details.card summary{list-style:none;cursor:pointer;padding:13px 15px;display:flex;gap:10px;align-items:flex-start}
-details.card summary::-webkit-details-marker{display:none}
-.tag{font-family:var(--mono);font-size:11px;font-weight:600;background:var(--chip);border-radius:6px;padding:2px 7px;flex:none;margin-top:2px}
-.ct{font-weight:600}
-.cs{color:var(--ink2);font-size:13.5px}
-.chev{margin-left:auto;color:var(--ink2);transition:transform .15s;flex:none}
-details[open] .chev{transform:rotate(90deg)}
-.body{padding:0 15px 14px}
-.body ul{margin:4px 0 10px;padding-left:20px}
-.body li{margin-bottom:3px}
-.links{display:flex;flex-wrap:wrap;gap:6px}
-.links a{font-size:12.5px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--ink);background:var(--chip)}
-.links a:hover{border-color:var(--accent);color:var(--accent)}
-.empty{color:var(--ink2);padding:20px 0;display:none}
+.iconbtn{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:14px}
+
+/* layout */
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:calc(100vh - 56px)}
+nav.side{background:var(--side);border-right:1px solid var(--line);padding:14px 10px 40px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.nav-home,.nav-item{display:flex;gap:8px;align-items:flex-start;text-decoration:none;color:var(--ink);font-size:14px;line-height:1.45;padding:6px 8px;border-radius:8px}
+.nav-home:hover,.nav-item:hover{background:var(--chip)}
+.nav-item.on,.nav-home.on{background:var(--accent-bg);color:var(--accent);font-weight:600}
+.nav-mod{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:16px 8px 4px;display:flex;align-items:center;gap:7px;font-weight:600}
+.nav-mod i{width:8px;height:8px;border-radius:3px;display:inline-block}
+.ntag{font-family:var(--mono);font-size:10.5px;background:var(--chip);border-radius:5px;padding:1px 5px;flex:none;margin-top:2px;color:var(--ink2)}
+.nav-item.on .ntag{background:var(--panel);color:var(--accent)}
+main{padding:28px 20px 80px;min-width:0}
+.content{max-width:860px;margin:0 auto}
+
+/* home */
+.hero h1{font-size:clamp(30px,5vw,44px);line-height:1.1;margin:4px 0 10px;letter-spacing:-.02em}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+.lede{color:var(--ink2);margin:0 0 20px;max-width:62ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:0 0 26px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;line-height:1.4}
+.stat b{display:block;font-size:26px;font-family:var(--mono)}
+.stat span{color:var(--ink2);font-size:13px}
+.hmod{margin-top:26px}
+.hmod h2{font-size:19px;margin:0;display:flex;align-items:center;gap:9px}
+.hmod h2 i{width:11px;height:11px;border-radius:4px;display:inline-block}
+.hmod p{margin:0 0 10px;color:var(--ink2);font-size:14px}
+.cards{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:720px){.cards{grid-template-columns:1fr 1fr}}
+a.card{display:block;text-decoration:none;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;padding:12px 14px;line-height:1.5;transition:border-color .15s,transform .15s}
+a.card:hover{border-color:var(--c);transform:translateY(-1px)}
+.card .ct{font-weight:600;display:flex;gap:8px;align-items:flex-start}
+.card .cs{color:var(--ink2);font-size:13.5px;margin-top:3px}
+
+/* article */
+.crumb{font-size:13px;color:var(--ink2);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.crumb a{color:var(--ink2);text-decoration:none}
+.crumb a:hover{color:var(--accent)}
+.ptitle{font-size:clamp(25px,4vw,34px);line-height:1.25;margin:8px 0 6px;letter-spacing:-.01em}
+.psum{color:var(--ink2);margin:0 0 14px}
+.res{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.res a{font-size:13px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--ink);background:var(--panel)}
+.res a:hover{border-color:var(--accent);color:var(--accent)}
+.toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:24px;font-size:14px}
+.toc summary{cursor:pointer;font-weight:600}
+.toc ol{margin:8px 0 4px;padding-left:4px;line-height:1.6;list-style:none}
+.toc li.h3{margin-left:16px;font-size:13.5px}
+.toc li.h3::before{content:"· ";color:var(--ink2)}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+.md h2{font-size:23px;margin:38px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+.md h3{font-size:18.5px;margin:26px 0 8px}
+.md h4{font-size:16px;margin:20px 0 6px}
+.md p{margin:10px 0}
+.md ul,.md ol{padding-left:24px;margin:8px 0}
+.md li{margin:3px 0}
+.md blockquote{margin:14px 0;padding:8px 14px;border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 10px 10px 0;color:var(--ink)}
+.md blockquote p{margin:4px 0}
+.md code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:1px 5px;border-radius:5px}
+.md pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;line-height:1.5}
+.md pre code{background:none;padding:0;font-size:13px}
+.md hr{border:0;border-top:1px dashed var(--line);margin:26px 0}
+.md img{max-width:100%;border-radius:10px;border:1px solid var(--line);background:#fff}
+.tw{overflow-x:auto;margin:12px 0}
+.md table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.55}
+.md th,.md td{border:1px solid var(--line);padding:7px 10px;vertical-align:top}
+.md th{background:var(--chip);text-align:left}
+.md tr:nth-child(even) td{background:color-mix(in srgb,var(--chip) 40%,transparent)}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+mark{background:var(--hl);color:inherit;border-radius:3px}
+.pn{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:40px}
+.pn a{display:block;text-decoration:none;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;line-height:1.45}
+.pn a:hover{border-color:var(--accent)}
+.pn small{color:var(--ink2);display:block;font-size:12px}
+.pn .next{text-align:right;grid-column:2}
+
 /* tools */
-.tool{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:10px}
-.tool h3{margin:0 0 4px;font-size:16px}
-.tool p.h{margin:0 0 12px;color:var(--ink2);font-size:13.5px}
+.tools-head{margin:44px 0 6px;font-size:22px;display:flex;align-items:center;gap:8px}
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:12px;line-height:1.55}
+.tool h3{margin:0 0 4px;font-size:17px}
+.tool p.h{margin:0 0 12px;color:var(--ink2);font-size:14px}
+.tag{font-family:var(--mono);font-size:11px;font-weight:600;background:var(--chip);border-radius:6px;padding:2px 7px}
 .row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:12px}
-.row label{font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:8px}
+.row label{font-size:13.5px;color:var(--ink2);display:flex;align-items:center;gap:8px}
 .row input[type=range]{accent-color:var(--accent)}
 .val{font-family:var(--mono);font-weight:600;color:var(--ink)}
-.kgrid{display:grid;gap:3px;width:min(340px,100%)}
+.kgrid{display:grid;gap:3px;width:min(360px,100%)}
 .kgrid div{font-family:var(--mono);font-size:13px;text-align:center;padding:8px 0;border-radius:6px;color:#fff}
 .cols2{display:grid;gap:16px;grid-template-columns:1fr}
-@media(min-width:760px){.cols2{grid-template-columns:auto 1fr}}
+@media(min-width:720px){.cols2{grid-template-columns:auto 1fr}}
 .mono{font-family:var(--mono);font-size:13px}
 .tbl{overflow-x:auto}
 table.pt{border-collapse:collapse;width:100%;min-width:560px;font-family:var(--mono);font-size:12.5px}
 table.pt th,table.pt td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:center}
 table.pt th{color:var(--ink2);font-weight:600}
-table.pt tr.err td{background:color-mix(in srgb,var(--m5) 14%,transparent)}
-table.pt tr.cur td{outline:2px solid var(--accent);outline-offset:-2px}
+table.pt tr.err td{background:color-mix(in srgb,var(--m-quiz) 15%,transparent)}
+table.pt tr.cur td{box-shadow:inset 0 -2px 0 var(--accent)}
 .btns{display:flex;gap:6px;flex-wrap:wrap}
-.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn{font-size:13px;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
 select{font:inherit;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
-.note{background:var(--code);border-radius:10px;padding:10px 12px;font-size:13.5px;margin-top:10px}
-footer{margin-top:40px;color:var(--ink2);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+.note{background:var(--code);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+iframe.roc{width:100%;height:1500px;border:1px solid var(--line);border-radius:12px;background:#e6ebf1}
+
+/* search */
+.sres{display:flex;flex-direction:column;gap:10px}
+.sres a{display:block;text-decoration:none;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;line-height:1.55}
+.sres a:hover{border-color:var(--accent)}
+.sres small{color:var(--ink2);font-size:13.5px;display:block;margin-top:3px}
+
+footer{margin-top:50px;color:var(--ink2);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  nav.side{position:fixed;top:56px;left:0;bottom:0;width:min(300px,86vw);height:auto;z-index:15;transform:translateX(-102%);transition:transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+  body.navopen nav.side{transform:none}
+  .menubtn{display:inline-block}
+  .brand small{display:none}
+  main{padding:20px 16px 70px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div>
-      <div class="eyebrow">Master · Term 1 · Data Preparation for ML &amp; AI</div>
-      <h1>MSC DPML 2026</h1>
-      <div class="who">กัญญ์วรา ถาวโรฤทธิ์ · 695020018-8 · <a href="https://github.com/Kanvara001/MSC_DPML_2026">GitHub repo</a></div>
-    </div>
-    <button class="themebtn" id="theme" type="button" aria-label="สลับธีม">◐ ธีม</button>
-  </header>
-
-  <div class="stats" id="stats"></div>
-
-  <div class="toolbar">
-    <input class="search" id="q" type="search" placeholder="ค้นหาหัวข้อ เช่น PCA, Gaussian, perceptron, leakage, AUC…" aria-label="ค้นหาเนื้อหา">
-    <div class="filters" id="filters"></div>
-  </div>
-
-  <main id="content"></main>
-  <p class="empty" id="empty">ไม่พบหัวข้อที่ตรงกับคำค้น</p>
-
-  <section class="module" id="tools">
-    <div class="mhead"><span class="mdot" style="background:var(--m5)"></span><div><h2>เครื่องมือ interactive</h2><div class="mdesc">ลองเปลี่ยนค่าแล้วดูผลทันที</div></div></div>
-
-    <div class="tool">
-      <h3>Evaluation Metrics &amp; ROC / AUC</h3>
-      <p class="h">เลื่อน threshold, prevalence และ separation แล้วดู TP/TN/FP/FN, confusion matrix, ROC curve และ metric ทุกตัวเปลี่ยนตาม</p>
-      <div class="links"><a href="course/interactive/evaluation-metrics-roc-auc.html">เปิดหน้า Evaluation Metrics →</a></div>
-    </div>
-
-    <div class="tool">
-      <h3>Gaussian Kernel Builder <span class="tag">Quiz 1</span></h3>
-      <p class="h">G(x,y) = e<sup>−(x²+y²)/2σ²</sup> สเกลให้มุม kernel เป็น 1 แล้วปัดเป็นจำนวนเต็ม แล้ว normalize ด้วยผลรวม (kernel มาตรฐาน 1/273 ใน Quiz 1 ใช้สเกลอื่น ค่าจึงต่างกันเล็กน้อย)</p>
-      <div class="row">
-        <label>ขนาด <select id="ksize"><option>3</option><option selected>5</option><option>7</option></select></label>
-        <label>σ <input type="range" id="ksig" min="0.5" max="3" step="0.1" value="1"> <span class="val" id="ksigv">1.0</span></label>
-      </div>
-      <div class="cols2">
-        <div class="kgrid" id="kgrid"></div>
-        <div class="mono" id="kinfo"></div>
-      </div>
-    </div>
-
-    <div class="tool">
-      <h3>Perceptron Step-through <span class="tag">Quiz 2</span></h3>
-      <p class="h">w<sub>i</sub> ← w<sub>i</sub> + α(t − o)x<sub>i</sub> · bias x<sub>0</sub> = 1 · ทีละแถว แถวสีแดงคือแถวที่ทายผิดและมีการปรับ weight</p>
-      <div class="row">
-        <label>ฟังก์ชัน <select id="pfn">
-          <option value="quiz2">(X1 ∧ X2) ∨ X3 — Quiz 2</option>
-          <option value="and">AND</option>
-          <option value="or">OR</option>
-          <option value="xor">XOR (แบ่งเส้นตรงไม่ได้)</option>
-        </select></label>
-        <label>α <input type="range" id="palpha" min="0.1" max="1" step="0.1" value="0.5"> <span class="val" id="palphav">0.5</span></label>
-        <label>threshold <input type="range" id="pthr" min="0" max="1" step="0.1" value="0.5"> <span class="val" id="pthrv">0.5</span></label>
-      </div>
-      <div class="btns" style="margin-bottom:10px">
-        <button class="btn pri" id="pstep" type="button">ทีละแถว ▸</button>
-        <button class="btn" id="pepoch" type="button">ทีละ epoch ▸▸</button>
-        <button class="btn" id="prun" type="button">รันจนจบ</button>
-        <button class="btn" id="preset" type="button">เริ่มใหม่</button>
-      </div>
-      <div class="tbl"><table class="pt" id="ptable"></table></div>
-      <div class="note" id="pnote"></div>
-    </div>
-  </section>
-
-  <footer>
-    เนื้อหาสรุปจากสไลด์และเอกสารประกอบการเรียนรายวิชา DPML 2026 ·
-    ไฟล์ Markdown เปิดบน GitHub, ไฟล์ HTML/PDF เปิดในหน้านี้
-  </footer>
+<header class="topbar">
+  <button class="menubtn" id="menubtn" type="button" aria-label="เมนู">☰</button>
+  <a class="brand" href="#/">MSC DPML 2026<small>Data Preparation for ML &amp; AI</small></a>
+  <input class="search" id="q" type="search" placeholder="ค้นหาในเนื้อหาทั้งหมด…" aria-label="ค้นหาในเนื้อหา">
+  <button class="iconbtn" id="theme" type="button" aria-label="สลับธีมสว่าง/มืด">◐</button>
+</header>
+<div class="layout">
+  <nav class="side" id="side" aria-label="สารบัญรายวิชา"></nav>
+  <main><div class="content" id="view"></div></main>
 </div>
 
 <script>
 (function(){
   'use strict';
-  var GH = 'https://github.com/Kanvara001/MSC_DPML_2026/blob/main/';
-  function md(p){ return GH + p; }
-
-  var MODULES = [
-    { id:'m0', name:'ภาพรวมรายวิชา', desc:'เกณฑ์คะแนนและแผนกิจกรรม', color:'var(--m6)', items:[
-      { tag:'00', title:'เกณฑ์คะแนนและแผนรายวิชา', sum:'สัดส่วนคะแนน เกณฑ์เกรด และกิจกรรม Research Paper',
-        pts:['Research Project 30% · Homework 10% · Quiz 10%','Midterm 20% · Final 20% · Github 10%','A ≥ 80 … F < 50'],
-        links:[['สรุป (md)', md('course/00_grading-and-schedule.md')]] }
-    ]},
-    { id:'m1', name:'พื้นฐาน AI / ML', desc:'ข้อมูล โมเดล และ LLM', color:'var(--m1)', items:[
-      { tag:'L1', title:'AI และ Machine Learning เบื้องต้น', sum:'ข้อมูลและโมเดล, row = data point/sample',
-        pts:['ความต่างของ AI, ML, Deep Learning','ข้อมูลแบบตาราง: row, feature, label','ภาพรวมการสร้างโมเดล'],
-        links:[['สรุป (md)', md('course/lectures/lecture_01_intro-ml.md')]] },
-      { tag:'L2', title:'Large Language Model', sum:'Discriminative vs Generative, 5 ขั้นตอนการพัฒนา LLM, RAG',
-        pts:['Discriminative vs Generative model','ขั้นตอนพัฒนา LLM','Retrieval-Augmented Generation (RAG)'],
-        links:[['สรุป (md)', md('course/lectures/lecture_02_llm.md')]] }
-    ]},
-    { id:'m2', name:'Data Preparation', desc:'คุณภาพข้อมูล การ split leakage และ preprocessing', color:'var(--m2)', items:[
-      { tag:'L3', title:'Session 1: A number you can defend', sum:'Data quality, profiling, splitting, leakage, evaluation hygiene',
-        pts:['Data-centric vs model-centric','Task-first design: task, unit of analysis, metric, deployment','Leakage และการ split ที่ถูกต้อง'],
-        links:[['สรุป (md)', md('course/lectures/lecture_03_data-prep-session1.md')],['เอกสาร HTML', 'course/materials/data-preparation/index.html'],['ฉบับย่อ', 'course/materials/data-preparation/index-condensed.html']] },
-      { tag:'L4', title:'Data Preprocessing (Han ch.3)', sum:'Data cleaning, integration, reduction, PCA',
-        pts:['6 มิติของ data quality','Missing data และ noisy data (binning, regression, clustering)','Redundancy: correlation / covariance','Imbalanced data: under/over-sampling, SMOTE','PCA: eigenvector ของ covariance matrix'],
-        links:[['สรุป (md)', md('course/lectures/lecture_04_data-preprocessing.md')],['สไลด์ (PDF)', 'course/slides/03_data-preprocessing_annotated.pdf']] },
-      { tag:'T', title:'SMOTE และ Imbalanced Data', sum:'ผลเปรียบเทียบ SMOTE และสรุป Data section ของงานวิจัย SMOTE',
-        pts:['SMOTE สร้างตัวอย่าง minority ด้วยการ interpolate เชิงเส้น','การใช้ benchmark dataset ในงานวิจัย SMOTE และปัญหาการรายงานผล'],
-        links:[['Performance (HTML)', 'course/topics/smote/performance.html'],['สรุป SMOTE25 (PDF)', 'course/topics/smote/smote25_data-section-summary.pdf']] }
-    ]},
-    { id:'m3', name:'Image Data', desc:'การเกิดภาพดิจิทัล และ preprocessing ภาพ', color:'var(--m3)', items:[
-      { tag:'L5', title:'Class 1: How a Digital Image is Formed', sum:'กล้อง เซนเซอร์ ภาพการแพทย์ sampling aliasing สี resize/normalize',
-        pts:['Pinhole vs lens camera, CCD vs CMOS','X-ray, Ultrasound, CT (HU), MRI','Sampling, quantization, aliasing, Nyquist','In-camera pipeline: white balance, demosaic, gamma','Resize = resampling: เลือก interpolation ให้ถูก'],
-        links:[['สรุป (md)', md('course/lectures/lecture_05_image-formation.md')],['สไลด์ (PDF 31 MB)', 'course/slides/image-data_class1_how-a-digital-image-is-formed.pdf']] },
-      { tag:'L6', title:'Class 2: Preprocessing Before & During Training', sum:'Filtering, CLAHE, normalization, the rule, transfer learning, augmentation',
-        pts:['Gaussian vs box filter, median filter','Histogram equalization และ CLAHE','Fit สถิติบน training split เท่านั้น','ImageNet mean/std คือสัญญาของ backbone','Augmentation และ pipeline: torchvision v2, Albumentations, MONAI'],
-        links:[['สรุป (md)', md('course/lectures/lecture_06_image-preprocessing-training.md')],['สไลด์ (PDF 19 MB)', 'course/slides/image-data_class2_preprocessing-before-and-during-training.pdf']] }
-    ]},
-    { id:'m4', name:'Classification & Neural Network', desc:'Decision tree, Naive Bayes, evaluation, perceptron', color:'var(--m4)', items:[
-      { tag:'L7', title:'Classification: Basic Concepts', sum:'Decision tree (information gain), Naive Bayes, linear classifier, confusion matrix',
-        pts:['Entropy และ Information Gain (ID3/C4.5)','แบบฝึกหัด Flu: Gain(Temp > 37.5) = 0.5488','Naive Bayes และ Laplacian correction','Logistic regression, generative vs discriminative','Accuracy, precision, recall, specificity, F1, ROC/AUC'],
-        links:[['สรุป (md)', md('course/lectures/lecture_07_classification-basic.md')],['สไลด์ (PDF)', 'course/slides/08_classification-basic_annotated.pdf'],['ROC / AUC interactive', 'course/interactive/evaluation-metrics-roc-auc.html']] },
-      { tag:'T', title:'Decision Tree (หัวข้อเสริม)', sum:'สไลด์และบทบรรยาย Decision Tree',
-        pts:['การสร้างต้นไม้ การเลือก attribute และการตัดกิ่ง'],
-        links:[['Interactive (HTML)', 'course/topics/decision-tree/Decision_tree.html'],['สไลด์ (HTML)', 'course/topics/decision-tree/Decision_tree_slides.html'],['บทบรรยาย (PDF)', 'course/topics/decision-tree/Decision_tree_lecture-notes.pdf']] },
-      { tag:'L8', title:'Neural Network: Perceptron & Delta Rule', sum:'Perceptron learning rule, AND vs XOR, gradient descent',
-        pts:['Net sum, bias, activation function','w ← w + α(t − o)x','AND แบ่งเส้นตรงได้, XOR แบ่งไม่ได้','Delta rule: ลด E = ½Σ(t − o)²'],
-        links:[['สรุป (md)', md('course/lectures/lecture_08_neural-network.md')],['เอกสาร (PDF)', 'course/slides/neural-network_perceptron_annotated.pdf'],['ลองเล่น perceptron', '#tools']] }
-    ]},
-    { id:'m5', name:'Quiz', desc:'ไฟล์ที่ส่งและวิธีทำ', color:'var(--m5)', items:[
-      { tag:'Q1', title:'Quiz 1: Gaussian Kernel 5×5 (σ = 1)', sum:'คำนวณ kernel, ปัดเป็นจำนวนเต็ม และ normalize ด้วย 273',
-        pts:['G(x,y) = e^(−(x²+y²)/2σ²)','ผลรวม = 273 → หารทั้ง kernel'],
-        links:[['วิธีทำ (md)', md('quizzes/quiz_01.md')],['ไฟล์ที่ส่ง (PDF)', 'quizzes/quiz_01_gaussian-kernel.pdf'],['Kernel builder', '#tools']] },
-      { tag:'Q2', title:'Quiz 2: Perceptron (X1 ∧ X2) ∨ X3', sum:'สอน perceptron 4 epoch แล้วทดสอบ คำนวณ accuracy/precision/recall/specificity',
-        pts:['α = 0.5, weight เริ่มต้น 0.1','weight สุดท้าย (0.1, 1.1, −0.4, 0.6)'],
-        links:[['วิธีทำ (md)', md('quizzes/quiz_02.md')],['ไฟล์ที่ส่ง (PDF)', 'quizzes/quiz_02_perceptron.pdf'],['Step-through', '#tools']] }
-    ]},
-    { id:'m6', name:'Research Project', desc:'AI Detection: Deepfake (FFDBackbone)', color:'var(--m6)', items:[
-      { tag:'RP', title:'ทำซ้ำ FFDBackbone — Face Forgery Detection', sum:'Guo et al., IEEE TPAMI 2026 · ทำซ้ำตาม CRISP-DM บน Kaggle',
-        pts:['FF++ c23 AUC 96.57 (paper 99.36)','Celeb-DF AUC 84.97 (paper 90.46)','Ablation, significance test, few-shot, DF40'],
-        links:[['README', md('research-project/deepfake-ffdbackbone/README.md')],['สไลด์นำเสนอ (HTML)', 'research-project/deepfake-ffdbackbone/slides/ffdbackbone-crispdm-deck.html'],['Progress log', md('research-project/deepfake-ffdbackbone/docs/PROGRESS_LOG.md')]] }
-    ]}
-  ];
-
+  var C = window.COURSE || { modules:[], pages:[] };
+  var view = document.getElementById('view');
+  var MODCOLOR = function(id){ return 'var(--m-' + id + ')'; };
   function el(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function short(t){ return t.replace(/^(Lecture|Quiz)\s*\d+\s*:\s*/i,''); }
+  function pageById(id){ for (var i=0;i<C.pages.length;i++) if (C.pages[i].id===id) return C.pages[i]; return null; }
+  function modById(id){ for (var i=0;i<C.modules.length;i++) if (C.modules[i].id===id) return C.modules[i]; return null; }
 
   /* ---------- theme ---------- */
   var root = document.documentElement;
@@ -252,125 +206,257 @@ footer{margin-top:40px;color:var(--ink2);font-size:13px;border-top:1px solid var
     root.setAttribute('data-theme', next);
     try { localStorage.setItem('dpml-theme', next); } catch(e) {}
   });
+  el('menubtn').addEventListener('click', function(){ document.body.classList.toggle('navopen'); });
 
-  /* ---------- stats ---------- */
-  var nLec = 0, nAll = 0;
-  MODULES.forEach(function(m){ m.items.forEach(function(it){ nAll++; if (/^L\d/.test(it.tag)) nLec++; }); });
-  el('stats').innerHTML = [[nLec,'บทเรียนที่สรุป'],[2,'Quiz'],[3,'เครื่องมือ interactive'],[nAll,'หัวข้อทั้งหมด']]
-    .map(function(s){ return '<div class="stat"><b>'+s[0]+'</b><span>'+s[1]+'</span></div>'; }).join('');
+  /* ---------- markdown + math ---------- */
+  function renderMd(md){
+    var math = [];
+    function keep(tex, display){ math.push([tex, display]); return '@@MATH' + (math.length-1) + '@@'; }
+    md = md.replace(/\$\$([\s\S]+?)\$\$/g, function(_, t){ return keep(t, true); })
+           .replace(/(^|[^\\$])\$([^\$\n]+?)\$/g, function(_, pre, t){ return pre + keep(t, false); });
+    var html = window.marked ? marked.parse(md) : '<pre>' + esc(md) + '</pre>';
+    return html.replace(/@@MATH(\d+)@@/g, function(_, i){
+      var m = math[+i];
+      if (window.katex) { try { return katex.renderToString(m[0], { displayMode:m[1], throwOnError:false }); } catch(e) {} }
+      return '<code>' + esc(m[0]) + '</code>';
+    });
+  }
+  function decorate(box){
+    Array.prototype.forEach.call(box.querySelectorAll('table'), function(t){
+      var w = document.createElement('div'); w.className = 'tw'; t.parentNode.insertBefore(w, t); w.appendChild(t);
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('a[href]'), function(a){
+      if (/^https?:/.test(a.getAttribute('href'))) { a.target = '_blank'; a.rel = 'noopener'; }
+    });
+    var heads = box.querySelectorAll('h2,h3');
+    Array.prototype.forEach.call(heads, function(h, i){ h.id = 'sec-' + i; });
+    return heads;
+  }
 
-  /* ---------- catalogue ---------- */
-  var state = { q:'', mod:'all' };
-  el('filters').innerHTML = '<button class="fbtn on" data-m="all" type="button">ทั้งหมด</button>' +
-    MODULES.map(function(m){ return '<button class="fbtn" data-m="'+m.id+'" type="button">'+esc(m.name)+'</button>'; }).join('');
-
-  function render(){
-    var q = state.q.trim().toLowerCase(), shown = 0, h = '';
-    MODULES.forEach(function(m){
-      if (state.mod !== 'all' && state.mod !== m.id) return;
-      var items = m.items.filter(function(it){
-        if (!q) return true;
-        return (it.title+' '+it.sum+' '+it.pts.join(' ')+' '+m.name).toLowerCase().indexOf(q) >= 0;
+  /* ---------- sidebar ---------- */
+  function drawNav(active){
+    var h = '<a class="nav-home' + (active==='home'?' on':'') + '" href="#/">🏠 หน้าแรก</a>';
+    C.modules.forEach(function(m){
+      h += '<div class="nav-mod"><i style="background:' + MODCOLOR(m.id) + '"></i>' + esc(m.name) + '</div>';
+      C.pages.forEach(function(p){
+        if (p.module !== m.id) return;
+        h += '<a class="nav-item' + (active===p.id?' on':'') + '" href="#/' + p.id + '"><span class="ntag">' + esc(p.tag) + '</span><span>' + esc(short(p.title)) + '</span></a>';
       });
-      if (!items.length) return;
-      shown += items.length;
-      h += '<section class="module"><div class="mhead"><span class="mdot" style="background:'+m.color+'"></span><div><h2>'+esc(m.name)+'</h2><div class="mdesc">'+esc(m.desc)+'</div></div></div><div class="grid">';
-      items.forEach(function(it){
-        h += '<details class="card" style="--c:'+m.color+'"'+(q?' open':'')+'><summary><span class="tag">'+esc(it.tag)+'</span><div><div class="ct">'+esc(it.title)+'</div><div class="cs">'+esc(it.sum)+'</div></div><span class="chev">›</span></summary>' +
-             '<div class="body"><ul>'+it.pts.map(function(p){return '<li>'+esc(p)+'</li>';}).join('')+'</ul><div class="links">' +
-             it.links.map(function(l){ var ext = /^https?:/.test(l[1]); return '<a href="'+esc(l[1])+'"'+(ext?' target="_blank" rel="noopener"':'')+'>'+esc(l[0])+'</a>'; }).join('') +
-             '</div></div></details>';
+    });
+    h += '<div class="nav-mod"><i style="background:var(--accent)"></i>เครื่องมือ</div>' +
+         '<a class="nav-item' + (active==='tools'?' on':'') + '" href="#/tools"><span class="ntag">▶</span><span>เครื่องมือ interactive ทั้งหมด</span></a>';
+    el('side').innerHTML = h;
+  }
+
+  /* ---------- views ---------- */
+  function home(){
+    var nLec = C.pages.filter(function(p){ return /^L\d/.test(p.tag); }).length;
+    var nQuiz = C.pages.filter(function(p){ return p.module === 'quiz'; }).length;
+    var h = '<section class="hero"><div class="eyebrow">Master · Term 1 · 2026</div><h1>MSC DPML 2026</h1>' +
+      '<p class="lede">สรุปเนื้อหารายวิชา <b>Data Preparation for Machine Learning and AI</b> ฉบับเต็ม อ่านได้ในหน้านี้ทั้งหมด พร้อม Quiz เครื่องมือ interactive และ Research Project<br>' +
+      'กัญญ์วรา ถาวโรฤทธิ์ · 695020018-8 · <a href="https://github.com/Kanvara001/MSC_DPML_2026" target="_blank" rel="noopener">GitHub repo</a></p></section>' +
+      '<div class="stats">' + [[nLec,'บทเรียน'],[nQuiz,'Quiz'],[3,'เครื่องมือ interactive'],[C.pages.length,'หน้าเนื้อหา']]
+        .map(function(s){ return '<div class="stat"><b>' + s[0] + '</b><span>' + s[1] + '</span></div>'; }).join('') + '</div>';
+    C.modules.forEach(function(m){
+      var ps = C.pages.filter(function(p){ return p.module === m.id; });
+      h += '<section class="hmod"><h2><i style="background:' + MODCOLOR(m.id) + '"></i>' + esc(m.name) + '</h2><p>' + esc(m.desc) + '</p><div class="cards">';
+      ps.forEach(function(p){
+        h += '<a class="card" style="--c:' + MODCOLOR(m.id) + '" href="#/' + p.id + '"><div class="ct"><span class="tag">' + esc(p.tag) + '</span><span>' + esc(short(p.title)) + '</span></div><div class="cs">' + esc(p.summary) + '</div></a>';
       });
       h += '</div></section>';
     });
-    el('content').innerHTML = h;
-    el('empty').style.display = shown ? 'none' : 'block';
+    h += '<section class="hmod"><h2><i style="background:var(--accent)"></i>เครื่องมือ interactive</h2><p>ลองเปลี่ยนค่าแล้วดูผลทันที</p><div class="cards">' +
+      '<a class="card" style="--c:var(--accent)" href="#/tools"><div class="ct"><span class="tag">▶</span><span>ROC / AUC, Gaussian kernel, Perceptron</span></div><div class="cs">รวมเครื่องมือทั้ง 3 ตัวในหน้าเดียว (แต่ละตัวอยู่ท้ายบทเรียนที่เกี่ยวข้องด้วย)</div></a></div></section>';
+    h += '<footer>เนื้อหาสรุปจากสไลด์และเอกสารประกอบการเรียนรายวิชา DPML 2026</footer>';
+    view.innerHTML = h;
+    drawNav('home');
   }
-  el('q').addEventListener('input', function(e){ state.q = e.target.value; render(); });
-  el('filters').addEventListener('click', function(e){
-    var b = e.target.closest('.fbtn'); if (!b) return;
-    state.mod = b.getAttribute('data-m');
-    Array.prototype.forEach.call(el('filters').children, function(x){ x.classList.toggle('on', x === b); });
-    render();
-  });
-  render();
 
-  /* ---------- Gaussian kernel ---------- */
-  function kernel(){
-    var n = parseInt(el('ksize').value,10), s = parseFloat(el('ksig').value), r = (n-1)/2;
-    el('ksigv').textContent = s.toFixed(1);
-    var g = [], i, j, corner = Math.exp(-(2*r*r)/(2*s*s)), mx = 0, sum = 0;
-    for (i=-r;i<=r;i++){ for (j=-r;j<=r;j++){ var v = Math.round(Math.exp(-(i*i+j*j)/(2*s*s))/corner); g.push(v); sum += v; if (v>mx) mx=v; } }
-    var grid = el('kgrid'); grid.style.gridTemplateColumns = 'repeat('+n+',1fr)';
-    grid.innerHTML = g.map(function(v){
-      var a = 0.25 + 0.75*Math.log(1+v)/Math.log(1+mx);
-      return '<div style="background:color-mix(in srgb,var(--accent) '+Math.round(a*100)+'%,#8a96a8)">'+v+'</div>';
+  function article(p){
+    var m = modById(p.module);
+    var idx = C.pages.indexOf(p), prev = C.pages[idx-1], next = C.pages[idx+1];
+    var h = '<div class="crumb"><a href="#/">หน้าแรก</a> › <span style="color:' + MODCOLOR(p.module) + '">' + esc(m ? m.name : '') + '</span></div>' +
+      '<h1 class="ptitle">' + esc(p.title) + '</h1><p class="psum">' + esc(p.summary) + '</p><div class="res">' +
+      p.links.map(function(l){ return '<a href="' + esc(l.href) + '" target="_blank" rel="noopener">📄 ' + esc(l.label) + '</a>'; }).join('') +
+      (p.tools.length ? '<a href="#" data-jump="tools">▶ ลองเล่นท้ายบท</a>' : '') +
+      '<a href="' + esc(p.source) + '" target="_blank" rel="noopener">ไฟล์ Markdown บน GitHub</a></div>' +
+      '<details class="toc" open><summary>สารบัญในบทนี้</summary><ol id="toc"></ol></details>' +
+      '<article class="md" id="md">' + renderMd(p.md) + '</article>';
+    if (p.tools.length) h += '<h2 class="tools-head" id="tools-anchor">▶ ลองเล่น</h2>' + p.tools.map(toolHtml).join('');
+    h += '<nav class="pn">' + (prev ? '<a href="#/' + prev.id + '"><small>‹ ก่อนหน้า</small>' + esc(short(prev.title)) + '</a>' : '<span></span>') +
+         (next ? '<a class="next" href="#/' + next.id + '"><small>ถัดไป ›</small>' + esc(short(next.title)) + '</a>' : '') + '</nav>';
+    view.innerHTML = h;
+    var heads = decorate(el('md'));
+    el('toc').innerHTML = Array.prototype.map.call(heads, function(hd){
+      return '<li class="' + hd.tagName.toLowerCase() + '"><a href="#" data-jump="' + hd.id + '">' + esc(hd.textContent) + '</a></li>';
     }).join('');
-    el('kinfo').innerHTML = 'ผลรวม = <b>'+sum+'</b><br>kernel = (1/'+sum+') × matrix<br>ค่ากลาง / ค่ามุม = '+(1/corner).toFixed(1) +
-      '<br><br>σ มากขึ้น → kernel แบนลง → blur มากขึ้น';
+    if (!heads.length) el('toc').parentNode.style.display = 'none';
+    p.tools.forEach(mountTool);
+    drawNav(p.id);
   }
-  el('ksize').addEventListener('change', kernel);
-  el('ksig').addEventListener('input', kernel);
-  kernel();
 
-  /* ---------- perceptron ---------- */
-  var DATA = {
-    quiz2:{ n:3, rows:[[1,1,0,1],[0,1,0,0],[0,0,1,1],[1,1,1,1]] },
-    and:{ n:2, rows:[[0,0,0],[0,1,0],[1,0,0],[1,1,1]] },
-    or:{ n:2, rows:[[0,0,0],[0,1,1],[1,0,1],[1,1,1]] },
-    xor:{ n:2, rows:[[0,0,0],[0,1,1],[1,0,1],[1,1,0]] }
-  };
-  var P;
-  function r2(v){ return Math.round(v*100)/100; }
-  function preset(){
-    var d = DATA[el('pfn').value];
-    P = { d:d, w:new Array(d.n+1).fill(0.1), i:0, epoch:1, errs:0, log:[], done:false, alpha:parseFloat(el('palpha').value), thr:parseFloat(el('pthr').value) };
-    el('palphav').textContent = P.alpha.toFixed(1); el('pthrv').textContent = P.thr.toFixed(1);
-    pdraw();
+  function toolsPage(){
+    view.innerHTML = '<div class="crumb"><a href="#/">หน้าแรก</a> › เครื่องมือ</div><h1 class="ptitle">เครื่องมือ interactive</h1>' +
+      '<p class="psum">ลองเปลี่ยนค่าแล้วดูผลทันที แต่ละเครื่องมือผูกกับบทเรียนและ Quiz ที่เกี่ยวข้อง</p>' +
+      ['roc','gauss','perceptron'].map(toolHtml).join('');
+    ['roc','gauss','perceptron'].forEach(mountTool);
+    drawNav('tools');
   }
-  function pstep(){
-    if (P.done) return;
-    var row = P.d.rows[P.i], x = [1].concat(row.slice(0,P.d.n)), t = row[P.d.n];
-    var s = 0; x.forEach(function(xi,k){ s += xi*P.w[k]; }); s = r2(s);
-    var o = s > P.thr ? 1 : 0, e = t - o;
-    P.w = P.w.map(function(wi,k){ return r2(wi + P.alpha*e*x[k]); });
-    if (e) P.errs++;
-    P.log.push({ ep:P.epoch, x:row.slice(0,P.d.n), t:t, s:s, o:o, e:e, w:P.w.slice() });
-    P.i++;
-    if (P.i >= P.d.rows.length){
-      if (P.errs === 0) P.done = 'ok';
-      else if (P.epoch >= 30) P.done = 'stop';
-      else { P.i = 0; P.epoch++; P.errs = 0; }
-    }
-  }
-  function pdraw(){
-    var n = P.d.n, h = '<tr><th>epoch</th>';
-    for (var k=1;k<=n;k++) h += '<th>X'+k+'</th>';
-    h += '<th>T</th><th>Σ</th><th>o</th><th>α(t−o)</th>';
-    for (k=0;k<=n;k++) h += '<th>w'+k+'</th>';
-    h += '</tr>';
-    var rows = P.log.slice(-16);
-    if (P.log.length > 16) h += '<tr><td colspan="'+(2*n+6)+'">… แสดง 16 แถวล่าสุด จากทั้งหมด '+P.log.length+' แถว</td></tr>';
-    rows.forEach(function(r,idx){
-      h += '<tr class="'+(r.e?'err':'')+(idx===rows.length-1?' cur':'')+'"><td>'+r.ep+'</td>'+r.x.map(function(v){return '<td>'+v+'</td>';}).join('') +
-           '<td>'+r.t+'</td><td>'+r.s+'</td><td>'+r.o+'</td><td>'+r2(P.alpha*r.e)+'</td>'+r.w.map(function(v){return '<td>'+v+'</td>';}).join('')+'</tr>';
+
+  function plain(md){ return md.replace(/```[\s\S]*?```/g,' ').replace(/[#>*_`|$\\]/g,' ').replace(/\]\([^)]*\)/g,']').replace(/\s+/g,' '); }
+  function searchPage(q){
+    var ql = q.toLowerCase(), res = [];
+    C.pages.forEach(function(p){
+      var txt = plain(p.md), hay = (p.title + ' ' + p.summary + ' ' + txt).toLowerCase(), i = hay.indexOf(ql);
+      if (i < 0) return;
+      var count = hay.split(ql).length - 1, j = txt.toLowerCase().indexOf(ql), snip = '';
+      if (j >= 0) {
+        var s = Math.max(0, j - 60), raw = txt.slice(s, j + ql.length + 90);
+        snip = (s ? '…' : '') + esc(raw).replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'ig'), function(x){ return '<mark>' + x + '</mark>'; }) + '…';
+      } else snip = esc(p.summary);
+      res.push({ p:p, n:count, snip:snip });
     });
-    el('ptable').innerHTML = h;
-    var wtxt = '('+P.w.join(', ')+')';
-    el('pnote').innerHTML = P.done === 'ok'
-      ? '✓ ลู่เข้าใน epoch '+P.epoch+' (ไม่มี error ทั้ง epoch) · weight สุดท้าย <b>'+wtxt+'</b>'
-      : P.done === 'stop'
-      ? '✗ ครบ 30 epoch ยังไม่ลู่เข้า — ข้อมูลแบ่งด้วยเส้นตรงไม่ได้ (เช่น XOR) ต้องใช้ multilayer network'
-      : 'weight เริ่มต้น 0.1 ทุกตัว · ตอนนี้ epoch '+P.epoch+' แถวที่ '+(P.i+1)+' · weight ปัจจุบัน '+wtxt;
+    res.sort(function(a,b){ return b.n - a.n; });
+    view.innerHTML = '<div class="crumb"><a href="#/">หน้าแรก</a> › ค้นหา</div><h1 class="ptitle">ผลการค้นหา “' + esc(q) + '”</h1>' +
+      '<p class="psum">พบใน ' + res.length + ' หน้า</p><div class="sres">' +
+      res.map(function(r){ return '<a href="#/' + r.p.id + '"><b><span class="tag">' + esc(r.p.tag) + '</span> ' + esc(short(r.p.title)) + '</b> <span class="mono" style="color:var(--ink2)">· ' + r.n + ' ครั้ง</span><small>' + r.snip + '</small></a>'; }).join('') +
+      '</div>';
+    drawNav('');
   }
-  el('pstep').addEventListener('click', function(){ pstep(); pdraw(); });
-  el('pepoch').addEventListener('click', function(){ var e = P.epoch; while(!P.done && P.epoch === e) pstep(); pdraw(); });
-  el('prun').addEventListener('click', function(){ while(!P.done) pstep(); pdraw(); });
-  el('preset').addEventListener('click', preset);
-  el('pfn').addEventListener('change', preset);
-  el('palpha').addEventListener('input', preset);
-  el('pthr').addEventListener('input', preset);
-  preset();
+
+  /* ---------- tools ---------- */
+  var TOOLS = {
+    roc: function(){ return '<div class="tool"><h3>Evaluation Metrics &amp; ROC / AUC <span class="tag">L7</span></h3>' +
+      '<p class="h">เลื่อน threshold, prevalence และ separation แล้วดู TP/TN/FP/FN, confusion matrix, ROC curve และ metric ทุกตัวเปลี่ยนตาม · <a href="course/interactive/evaluation-metrics-roc-auc.html" target="_blank" rel="noopener">เปิดเต็มหน้า ↗</a></p>' +
+      '<iframe class="roc" id="rocframe" src="course/interactive/evaluation-metrics-roc-auc.html" title="Evaluation metrics and ROC/AUC" loading="lazy"></iframe></div>'; },
+    gauss: function(){ return '<div class="tool"><h3>Gaussian Kernel Builder <span class="tag">L6 · Q1</span></h3>' +
+      '<p class="h">G(x,y) = e<sup>−(x²+y²)/2σ²</sup> สเกลให้มุม kernel เป็น 1 ปัดเป็นจำนวนเต็ม แล้ว normalize ด้วยผลรวม (kernel มาตรฐาน 1/273 ใน Quiz 1 ใช้สเกลอื่น ค่าจึงต่างกันเล็กน้อย)</p>' +
+      '<div class="row"><label>ขนาด <select id="ksize"><option>3</option><option selected>5</option><option>7</option></select></label>' +
+      '<label>σ <input type="range" id="ksig" min="0.5" max="3" step="0.1" value="1"> <span class="val" id="ksigv">1.0</span></label></div>' +
+      '<div class="cols2"><div class="kgrid" id="kgrid"></div><div class="mono" id="kinfo"></div></div></div>'; },
+    perceptron: function(){ return '<div class="tool"><h3>Perceptron Step-through <span class="tag">L8 · Q2</span></h3>' +
+      '<p class="h">w<sub>i</sub> ← w<sub>i</sub> + α(t − o)x<sub>i</sub> · bias x<sub>0</sub> = 1 · weight เริ่มต้น 0.1 · แถวสีแดงคือแถวที่ทายผิดและมีการปรับ weight</p>' +
+      '<div class="row"><label>ฟังก์ชัน <select id="pfn"><option value="quiz2">(X1 ∧ X2) ∨ X3 — Quiz 2</option><option value="and">AND</option><option value="or">OR</option><option value="xor">XOR (แบ่งเส้นตรงไม่ได้)</option></select></label>' +
+      '<label>α <input type="range" id="palpha" min="0.1" max="1" step="0.1" value="0.5"> <span class="val" id="palphav">0.5</span></label>' +
+      '<label>threshold <input type="range" id="pthr" min="0" max="1" step="0.1" value="0.5"> <span class="val" id="pthrv">0.5</span></label></div>' +
+      '<div class="btns" style="margin-bottom:10px"><button class="btn pri" id="pstep" type="button">ทีละแถว ▸</button><button class="btn" id="pepoch" type="button">ทีละ epoch ▸▸</button>' +
+      '<button class="btn" id="prun" type="button">รันจนจบ</button><button class="btn" id="preset" type="button">เริ่มใหม่</button></div>' +
+      '<div class="tbl"><table class="pt" id="ptable"></table></div><div class="note" id="pnote"></div></div>'; }
+  };
+  function toolHtml(id){ return TOOLS[id] ? TOOLS[id]() : ''; }
+  function mountTool(id){ if (id === 'gauss') mountGauss(); else if (id === 'perceptron') mountPerceptron(); else if (id === 'roc') mountRoc(); }
+
+  function mountRoc(){
+    var f = el('rocframe'); if (!f) return;
+    f.addEventListener('load', function(){
+      try { var d = f.contentDocument; if (d && d.body) f.style.height = (d.documentElement.scrollHeight + 20) + 'px'; } catch(e) {}
+    });
+  }
+
+  function mountGauss(){
+    function draw(){
+      var n = parseInt(el('ksize').value,10), s = parseFloat(el('ksig').value), r = (n-1)/2;
+      el('ksigv').textContent = s.toFixed(1);
+      var g = [], i, j, corner = Math.exp(-(2*r*r)/(2*s*s)), mx = 0, sum = 0;
+      for (i=-r;i<=r;i++) for (j=-r;j<=r;j++){ var v = Math.round(Math.exp(-(i*i+j*j)/(2*s*s))/corner); g.push(v); sum += v; if (v>mx) mx=v; }
+      var grid = el('kgrid'); grid.style.gridTemplateColumns = 'repeat('+n+',1fr)';
+      grid.innerHTML = g.map(function(v){
+        var a = 0.25 + 0.75*Math.log(1+v)/Math.log(1+mx);
+        return '<div style="background:color-mix(in srgb,var(--accent) '+Math.round(a*100)+'%,#8a96a8)">'+v+'</div>';
+      }).join('');
+      el('kinfo').innerHTML = 'ผลรวม = <b>'+sum+'</b><br>kernel = (1/'+sum+') × matrix<br>ค่ากลาง / ค่ามุม = '+(1/corner).toFixed(1)+'<br><br>σ มากขึ้น → kernel แบนลง → blur มากขึ้น';
+    }
+    el('ksize').addEventListener('change', draw);
+    el('ksig').addEventListener('input', draw);
+    draw();
+  }
+
+  function mountPerceptron(){
+    var DATA = {
+      quiz2:{ n:3, rows:[[1,1,0,1],[0,1,0,0],[0,0,1,1],[1,1,1,1]] },
+      and:{ n:2, rows:[[0,0,0],[0,1,0],[1,0,0],[1,1,1]] },
+      or:{ n:2, rows:[[0,0,0],[0,1,1],[1,0,1],[1,1,1]] },
+      xor:{ n:2, rows:[[0,0,0],[0,1,1],[1,0,1],[1,1,0]] }
+    };
+    var P;
+    function r2(v){ return Math.round(v*100)/100; }
+    function reset(){
+      var d = DATA[el('pfn').value];
+      P = { d:d, w:new Array(d.n+1).fill(0.1), i:0, epoch:1, errs:0, log:[], done:false, alpha:parseFloat(el('palpha').value), thr:parseFloat(el('pthr').value) };
+      el('palphav').textContent = P.alpha.toFixed(1); el('pthrv').textContent = P.thr.toFixed(1);
+      draw();
+    }
+    function step(){
+      if (P.done) return;
+      var row = P.d.rows[P.i], x = [1].concat(row.slice(0,P.d.n)), t = row[P.d.n], s = 0;
+      x.forEach(function(xi,k){ s += xi*P.w[k]; }); s = r2(s);
+      var o = s > P.thr ? 1 : 0, e = t - o;
+      P.w = P.w.map(function(wi,k){ return r2(wi + P.alpha*e*x[k]); });
+      if (e) P.errs++;
+      P.log.push({ ep:P.epoch, x:row.slice(0,P.d.n), t:t, s:s, o:o, e:e, w:P.w.slice() });
+      P.i++;
+      if (P.i >= P.d.rows.length){
+        if (P.errs === 0) P.done = 'ok';
+        else if (P.epoch >= 30) P.done = 'stop';
+        else { P.i = 0; P.epoch++; P.errs = 0; }
+      }
+    }
+    function draw(){
+      var n = P.d.n, k, h = '<tr><th>epoch</th>';
+      for (k=1;k<=n;k++) h += '<th>X'+k+'</th>';
+      h += '<th>T</th><th>Σ</th><th>o</th><th>α(t−o)</th>';
+      for (k=0;k<=n;k++) h += '<th>w'+k+'</th>';
+      h += '</tr>';
+      var rows = P.log.slice(-16);
+      if (P.log.length > 16) h += '<tr><td colspan="'+(2*n+6)+'">… แสดง 16 แถวล่าสุด จากทั้งหมด '+P.log.length+' แถว</td></tr>';
+      rows.forEach(function(r,idx){
+        h += '<tr class="'+(r.e?'err':'')+(idx===rows.length-1?' cur':'')+'"><td>'+r.ep+'</td>'+r.x.map(function(v){return '<td>'+v+'</td>';}).join('') +
+             '<td>'+r.t+'</td><td>'+r.s+'</td><td>'+r.o+'</td><td>'+r2(P.alpha*r.e)+'</td>'+r.w.map(function(v){return '<td>'+v+'</td>';}).join('')+'</tr>';
+      });
+      el('ptable').innerHTML = h;
+      var wtxt = '('+P.w.join(', ')+')';
+      el('pnote').innerHTML = P.done === 'ok' ? '✓ ลู่เข้าใน epoch '+P.epoch+' (ไม่มี error ทั้ง epoch) · weight สุดท้าย <b>'+wtxt+'</b>'
+        : P.done === 'stop' ? '✗ ครบ 30 epoch ยังไม่ลู่เข้า — ข้อมูลแบ่งด้วยเส้นตรงไม่ได้ (เช่น XOR) ต้องใช้ multilayer network'
+        : 'กด “ทีละแถว” เพื่อเริ่ม · ตอนนี้ epoch '+P.epoch+' แถวที่ '+(P.i+1)+' · weight ปัจจุบัน '+wtxt;
+    }
+    el('pstep').addEventListener('click', function(){ step(); draw(); });
+    el('pepoch').addEventListener('click', function(){ var e = P.epoch; while(!P.done && P.epoch === e) step(); draw(); });
+    el('prun').addEventListener('click', function(){ while(!P.done) step(); draw(); });
+    el('preset').addEventListener('click', reset);
+    el('pfn').addEventListener('change', reset);
+    el('palpha').addEventListener('input', reset);
+    el('pthr').addEventListener('input', reset);
+    reset();
+  }
+
+  /* ---------- in-page jumps (TOC) ---------- */
+  view.addEventListener('click', function(e){
+    var a = e.target.closest('[data-jump]'); if (!a) return;
+    e.preventDefault();
+    var id = a.getAttribute('data-jump'), target = id === 'tools' ? el('tools-anchor') : el(id);
+    if (target) target.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  /* ---------- router ---------- */
+  var searchTimer;
+  el('q').addEventListener('input', function(e){
+    clearTimeout(searchTimer);
+    var q = e.target.value.trim();
+    searchTimer = setTimeout(function(){ location.hash = q ? '#/search/' + encodeURIComponent(q) : '#/'; }, 250);
+  });
+  function route(){
+    document.body.classList.remove('navopen');
+    var hsh = location.hash.replace(/^#\/?/, '');
+    var isSearch = hsh.indexOf('search/') === 0;
+    if (!isSearch && document.activeElement !== el('q')) el('q').value = '';
+    if (isSearch) { var q = decodeURIComponent(hsh.slice(7)); if (el('q').value.trim() !== q) el('q').value = q; searchPage(q); }
+    else if (hsh === 'tools') toolsPage();
+    else if (pageById(hsh)) article(pageById(hsh));
+    else home();
+    if (hsh.indexOf('search/') !== 0) window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
 })();
 </script>
 </body>

@@ -3,7 +3,7 @@
 **Data Preparation for Machine Learning and AI** · Master, Term 1
 กัญญ์วรา ถาวโรฤทธิ์ · 695020018-8
 
-> 🌐 **หน้ารวมเนื้อหาแบบ interactive:** [index.html](index.html) — ค้นหา/กรองหัวข้อ, ROC/AUC, Gaussian kernel builder, perceptron step-through
+> 🌐 **หน้ารวมเนื้อหาแบบ interactive:** [index.html](index.html) — อ่านทุกบทฉบับเต็ม ค้นหาทั้งเนื้อหา และลองเล่น ROC/AUC, Gaussian kernel, perceptron ท้ายบทที่เกี่ยวข้อง
 > (เปิดผ่าน GitHub Pages: https://kanvara001.github.io/MSC_DPML_2026/)
 
 ## เริ่มอ่านตรงไหน
@@ -39,7 +39,8 @@
 
 ```
 MSC_DPML_2026/
-├── index.html           หน้ารวมเนื้อหาแบบ interactive
+├── index.html           หน้ารวมเนื้อหาแบบ interactive (อ่านบทเรียนฉบับเต็มได้ในหน้าเดียว)
+├── site/                build.py สร้าง content.js จากไฟล์ Markdown (รันใหม่ทุกครั้งที่แก้เนื้อหา)
 ├── course/
 │   ├── lectures/        สรุปบทเรียน (Markdown)
 │   ├── slides/          สไลด์ / เอกสารประกอบ (PDF)
